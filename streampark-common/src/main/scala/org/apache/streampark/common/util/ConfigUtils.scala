@@ -77,7 +77,7 @@ object ConfigUtils {
    * @param alias
    * @return
    */
-  def getJdbcConf(parameter: JavaMap[String, String], alias: String = ""): Properties = {
+  def getJdbcProperties(parameter: JavaMap[String, String], alias: String = ""): Properties = {
     val prefix = alias match {
       case "" | null => KEY_JDBC_PREFIX
       case other => s"$KEY_JDBC_PREFIX$other".replaceFirst("\\.+$|$", ".")

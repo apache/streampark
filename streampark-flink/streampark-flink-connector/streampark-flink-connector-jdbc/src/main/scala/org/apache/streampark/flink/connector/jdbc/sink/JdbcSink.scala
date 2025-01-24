@@ -72,7 +72,7 @@ class JdbcSink(
    * @return
    */
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
-    val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, alias)
+    val prop = ConfigUtils.getJdbcProperties(ctx.parameter.toMap, alias)
     val semantic = Semantic.of(prop.getProperty(KEY_SEMANTIC, Semantic.NONE.name()))
     val sink = semantic match {
       case Semantic.EXACTLY_ONCE =>
