@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.packer.docker
 
 import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.AssertUtils
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.core.{DefaultDockerClientConfig, DockerClientConfig, HackDockerClient}
@@ -61,7 +61,7 @@ object DockerRetriever {
   /** set docker-host for kata */
   def setDockerHost(): Unit = {
     val dockerhost: String = InternalConfigHolder.get(CommonConfig.DOCKER_HOST)
-    if (Utils.notEmpty(dockerhost)) {
+    if (AssertUtils.isNotEmpty(dockerhost)) {
       val dockerHostUri: URI = new URI(dockerhost)
       dockerHttpClientBuilder.dockerHost(dockerHostUri)
     }

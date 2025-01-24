@@ -27,6 +27,7 @@ import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
@@ -1510,7 +1511,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Transactional(rollbackFor = {Exception.class})
   public void start(Application appParam, boolean auto) throws Exception {
     final Application application = getById(appParam.getId());
-    Utils.notNull(application);
+    AssertUtils.notNull(application);
     if (!application.isCanBeStart()) {
       throw new ApiAlertException("[StreamPark] The application cannot be started repeatedly.");
     }
@@ -1605,7 +1606,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     } else if (application.isFlinkSqlJob()) {
       FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-      Utils.notNull(flinkSql);
+      AssertUtils.notNull(flinkSql);
       // 1) dist_userJar
       String sqlDistJar = serviceHelper.getSqlClientJar(flinkEnv);
       // 2) appConfig
@@ -1632,7 +1633,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
-    Utils.notNull(buildPipeline);
+    AssertUtils.notNull(buildPipeline);
 
     BuildResult buildResult = buildPipeline.getBuildResult();
     if (ExecutionMode.YARN_APPLICATION.equals(executionMode)) {

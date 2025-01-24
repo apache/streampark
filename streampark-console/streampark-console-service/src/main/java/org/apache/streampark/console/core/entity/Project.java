@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
@@ -228,7 +229,7 @@ public class Project implements Serializable {
       try {
         Process process = Runtime.getRuntime().exec(mvn + " --version");
         process.waitFor();
-        Utils.required(process.exitValue() == 0);
+        AssertUtils.required(process.exitValue() == 0);
         useWrapper = false;
       } catch (Exception ignored) {
         log.warn("try using user-installed maven failed, now use maven-wrapper.");

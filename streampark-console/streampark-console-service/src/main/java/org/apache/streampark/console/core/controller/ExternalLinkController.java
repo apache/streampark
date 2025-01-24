@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.ExternalLink;
 import org.apache.streampark.console.core.service.ExternalLinkService;
@@ -70,7 +70,7 @@ public class ExternalLinkController {
   @PostMapping("/update")
   @RequiresPermissions("externalLink:update")
   public RestResponse update(@Valid ExternalLink externalLink) {
-    Utils.notNull(externalLink.getId(), "The link id cannot be null");
+    AssertUtils.notNull(externalLink.getId(), "The link id cannot be null");
     externalLinkService.update(externalLink);
     return RestResponse.success();
   }

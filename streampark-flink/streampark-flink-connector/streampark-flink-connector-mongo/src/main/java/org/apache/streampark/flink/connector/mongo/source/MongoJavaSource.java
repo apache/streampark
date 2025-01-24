@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.mongo.source;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.flink.connector.function.RunningFunction;
 import org.apache.streampark.flink.connector.mongo.function.MongoQueryFunction;
 import org.apache.streampark.flink.connector.mongo.function.MongoResultFunction;
@@ -43,9 +43,9 @@ public class MongoJavaSource<T> {
       MongoResultFunction<T> resultFunction,
       RunningFunction runningFunc) {
 
-    Utils.notNull(collectionName, "collectionName must not be null");
-    Utils.notNull(queryFunction, "queryFunction must not be null");
-    Utils.notNull(resultFunction, "resultFunction must not be null");
+    AssertUtils.notNull(collectionName, "collectionName must not be null");
+    AssertUtils.notNull(queryFunction, "queryFunction must not be null");
+    AssertUtils.notNull(resultFunction, "resultFunction must not be null");
     MongoSourceFunction<T> sourceFunction =
         new MongoSourceFunction<>(
             collectionName, property, queryFunction, resultFunction, runningFunc, null);

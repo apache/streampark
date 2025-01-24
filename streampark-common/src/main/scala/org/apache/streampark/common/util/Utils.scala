@@ -18,11 +18,11 @@ package org.apache.streampark.common.util
 
 import org.apache.commons.lang3.StringUtils
 
-import java.io.{BufferedInputStream, File, FileInputStream, IOException, PrintWriter, StringWriter}
+import java.io._
 import java.lang.{Boolean => JavaBool, Byte => JavaByte, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
 import java.net.URL
 import java.time.Duration
-import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
+import java.util.{jar, Properties, UUID}
 import java.util.concurrent.locks.LockSupport
 import java.util.jar.{JarFile, JarInputStream}
 
@@ -33,43 +33,6 @@ import scala.util.{Failure, Success, Try}
 object Utils extends Logger {
 
   private[this] lazy val OS = System.getProperty("os.name").toLowerCase
-
-  def notNull(obj: Any, message: String): Unit = {
-    if (obj == null) {
-      throw new NullPointerException(message)
-    }
-  }
-
-  def notNull(obj: Any): Unit = {
-    notNull(obj, "this argument must not be null")
-  }
-
-  def notEmpty(elem: Any): Boolean = {
-    elem match {
-      case null => false
-      case x if x.isInstanceOf[Array[_]] => elem.asInstanceOf[Array[_]].nonEmpty
-      case x if x.isInstanceOf[CharSequence] => elem.toString.trim.nonEmpty
-      case x if x.isInstanceOf[Traversable[_]] => x.asInstanceOf[Traversable[_]].nonEmpty
-      case x if x.isInstanceOf[Iterable[_]] => x.asInstanceOf[Iterable[_]].nonEmpty
-      case x if x.isInstanceOf[JavaCollection[_]] => !x.asInstanceOf[JavaCollection[_]].isEmpty
-      case x if x.isInstanceOf[JavaMap[_, _]] => !x.asInstanceOf[JavaMap[_, _]].isEmpty
-      case _ => true
-    }
-  }
-
-  def isEmpty(elem: Any): Boolean = !notEmpty(elem)
-
-  def required(expression: Boolean): Unit = {
-    if (!expression) {
-      throw new IllegalArgumentException
-    }
-  }
-
-  def required(expression: Boolean, errorMessage: Any): Unit = {
-    if (!expression) {
-      throw new IllegalArgumentException(s"requirement failed: ${errorMessage.toString}")
-    }
-  }
 
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 

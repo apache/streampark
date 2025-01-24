@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
@@ -123,8 +124,8 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
   private void clearExpire(Savepoint entity) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
     Application application = applicationService.getById(entity.getAppId());
-    Utils.notNull(flinkEnv);
-    Utils.notNull(application);
+    AssertUtils.notNull(flinkEnv);
+    AssertUtils.notNull(application);
 
     String numRetainedKey = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key();
     String numRetainedFromDynamicProp =
@@ -277,7 +278,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
       // 3.1) At the remote mode, request the flink webui interface to get the savepoint path
       if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-        Utils.notNull(
+        AssertUtils.notNull(
             cluster,
             String.format(
                 "The clusterId=%s cannot be find, maybe the clusterId is wrong or "
@@ -440,7 +441,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
     Map<String, Object> properties = new HashMap<>();
 
     if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
-      Utils.notNull(
+      AssertUtils.notNull(
           cluster,
           String.format(
               "The clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
@@ -461,7 +462,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         return application.getJobName();
       case KUBERNETES_NATIVE_SESSION:
       case YARN_SESSION:
-        Utils.notNull(
+        AssertUtils.notNull(
             cluster,
             String.format(
                 "The %s clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",

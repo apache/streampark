@@ -134,7 +134,7 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
     private val shadedPackage = "org.apache.streampark.shaded"
 
     override def configureByResource(url: URL): Unit = {
-      Utils.notNull(url, "URL argument cannot be null")
+      AssertUtils.notNull(url, "URL argument cannot be null")
       val path = url.getPath
       if (path.endsWith("xml")) {
         val configurator = new JoranConfigurator()

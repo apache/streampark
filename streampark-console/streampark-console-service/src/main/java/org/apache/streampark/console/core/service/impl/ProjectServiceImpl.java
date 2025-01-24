@@ -20,9 +20,9 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ThreadUtils;
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
@@ -122,7 +122,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Transactional(rollbackFor = {Exception.class})
   public boolean update(Project projectParam) {
     Project project = getById(projectParam.getId());
-    Utils.notNull(project);
+    AssertUtils.notNull(project);
     ApiAlertException.throwIfFalse(
         project.getTeamId().equals(projectParam.getTeamId()),
         "Team can't be changed, update project failed.");
@@ -166,7 +166,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Transactional(rollbackFor = {Exception.class})
   public boolean delete(Long id) {
     Project project = getById(id);
-    Utils.notNull(project);
+    AssertUtils.notNull(project);
     LambdaQueryWrapper<Application> queryWrapper =
         new LambdaQueryWrapper<Application>().eq(Application::getProjectId, id);
     long count = applicationService.count(queryWrapper);
@@ -246,7 +246,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public List<String> modules(Long id) {
     Project project = getById(id);
-    Utils.notNull(project);
+    AssertUtils.notNull(project);
     BuildState buildState = BuildState.of(project.getBuildState());
     if (BuildState.SUCCESSFUL.equals(buildState)) {
       File appHome = project.getDistHome();
@@ -373,7 +373,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       }
       List<Map<String, Object>> list = new ArrayList<>();
       File[] files = unzipFile.listFiles(x -> "conf".equals(x.getName()));
-      Utils.notNull(files);
+      AssertUtils.notNull(files);
       for (File item : files) {
         eachFile(item, list, true);
       }

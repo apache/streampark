@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.jdbc.source
 
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.ConfigUtils
 import org.apache.streampark.flink.connector.jdbc.internal.JdbcSourceFunction
 import org.apache.streampark.flink.core.scala.StreamingContext
 
@@ -31,14 +31,15 @@ import scala.collection.Map
 
 object JdbcSource {
 
-  def apply(@(transient @param) property: Properties = new Properties())(implicit
-      ctx: StreamingContext): JdbcSource = new JdbcSource(ctx, property)
+  def apply(alias: String = "", properties: Properties = new Properties())(implicit
+      ctx: StreamingContext): JdbcSource = new JdbcSource(ctx, alias, properties) {}
 
 }
 
 class JdbcSource(
     @(transient @param) val ctx: StreamingContext,
-    property: Properties = new Properties()) {
+    alias: String,
+    property: Properties) {
 
   /**
    * @param sqlFun
@@ -50,8 +51,11 @@ class JdbcSource(
   def getDataStream[R: TypeInformation](
       sqlFun: R => String,
       fun: Iterable[Map[String, _]] => Iterable[R],
-      running: Unit => Boolean)(implicit jdbc: Properties = new Properties()): DataStream[R] = {
-    Utils.copyProperties(property, jdbc)
+      running: Unit => Boolean): DataStream[R] = {
+    val jdbc = ConfigUtils.getJdbcProperties(ctx.parameter.toMap, alias)
+    if (property != null) {
+      jdbc.putAll(property)
+    }
     val mysqlFun = new JdbcSourceFunction[R](jdbc, sqlFun, fun, running)
     ctx.addSource(mysqlFun)
   }

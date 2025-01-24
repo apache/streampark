@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -173,8 +173,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 () ->
                     new ApiAlertException(
                         String.format("The member [id=%s] not found", member.getId())));
-    Utils.required(oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
-    Utils.required(oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
+    AssertUtils.required(
+        oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
+    AssertUtils.required(
+        oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
     Optional.ofNullable(roleService.getById(member.getRoleId()))
         .orElseThrow(
             () ->

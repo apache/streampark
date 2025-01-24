@@ -17,8 +17,8 @@
 
 package org.apache.streampark.common.fs
 
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.common.util.Utils.{isAnyBank, notEmpty}
+import org.apache.streampark.common.util.{AssertUtils, Logger}
+import org.apache.streampark.common.util.Utils.isAnyBank
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.{FileUtils, IOUtils}
@@ -41,7 +41,7 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   override def delete(path: String): Unit = {
-    if (notEmpty(path)) {
+    if (AssertUtils.isNotEmpty(path)) {
       val file = new File(path)
       if (file.exists()) {
         FileUtils.forceDelete(file)

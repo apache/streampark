@@ -280,7 +280,7 @@ object PropertiesUtils extends Logger {
       val map = mutable.Map[String, String]()
       val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
       simple.split("\\s?-D") match {
-        case d if Utils.notEmpty(d) =>
+        case d if AssertUtils.isNotEmpty(d) =>
           d.foreach(
             x => {
               if (x.nonEmpty) {

@@ -21,6 +21,7 @@ import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
@@ -169,7 +170,7 @@ public class AppBuildPipeServiceImpl
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
     if (app.isFlinkSqlJob()) {
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
-      Utils.notNull(flinkSql);
+      AssertUtils.notNull(flinkSql);
       app.setDependency(flinkSql.getDependency());
     }
 

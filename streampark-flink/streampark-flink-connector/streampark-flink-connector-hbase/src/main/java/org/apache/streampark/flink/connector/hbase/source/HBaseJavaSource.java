@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.hbase.source;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.flink.connector.function.RunningFunction;
 import org.apache.streampark.flink.connector.hbase.function.HBaseQueryFunction;
 import org.apache.streampark.flink.connector.hbase.function.HBaseResultFunction;
@@ -42,8 +42,8 @@ public class HBaseJavaSource<T> {
       HBaseResultFunction<T> resultFunction,
       RunningFunction runningFunc) {
 
-    Utils.notNull(queryFunction, "queryFunction must not be null");
-    Utils.notNull(resultFunction, "resultFunction must not be null");
+    AssertUtils.notNull(queryFunction, "queryFunction must not be null");
+    AssertUtils.notNull(resultFunction, "resultFunction must not be null");
     HBaseSourceFunction<T> sourceFunction =
         new HBaseSourceFunction<>(property, queryFunction, resultFunction, runningFunc, null);
     return context.getJavaEnv().addSource(sourceFunction);

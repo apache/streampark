@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -79,7 +79,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   public IPage<User> page(User user, RestRequest request) {
     Page<User> page = MybatisPager.getPage(request);
     IPage<User> resPage = this.baseMapper.findUserDetail(page, user);
-    Utils.notNull(resPage);
+    AssertUtils.notNull(resPage);
     if (resPage.getTotal() == 0) {
       resPage.setRecords(Collections.emptyList());
     }
@@ -196,7 +196,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public void setLastTeam(Long teamId, Long userId) {
     User user = getById(userId);
-    Utils.notNull(user);
+    AssertUtils.notNull(user);
     user.setLastTeamId(teamId);
     this.baseMapper.updateById(user);
   }
@@ -204,7 +204,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public void clearLastTeam(Long userId, Long teamId) {
     User user = getById(userId);
-    Utils.notNull(user);
+    AssertUtils.notNull(user);
     if (!teamId.equals(user.getLastTeamId())) {
       return;
     }

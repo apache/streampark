@@ -92,8 +92,8 @@ object FileUtils {
 
   def getPathFromEnv(env: String): String = {
     val path = System.getenv(env)
-    require(
-      Utils.notEmpty(path),
+    AssertUtils.required(
+      AssertUtils.isNotEmpty(path),
       s"[StreamPark] FileUtils.getPathFromEnv: $env is not set on system env")
     val file = new File(path)
     require(file.exists(), s"[StreamPark] FileUtils.getPathFromEnv: $env is not exist!")

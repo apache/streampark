@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.connector.jdbc.source;
 
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ConfigUtils;
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.flink.connector.function.RunningFunction;
 import org.apache.streampark.flink.connector.function.SQLQueryFunction;
 import org.apache.streampark.flink.connector.function.SQLResultFunction;
@@ -54,8 +54,8 @@ public class JdbcJavaSource<T> {
       SQLResultFunction<T> resultFunction,
       RunningFunction runningFunc) {
 
-    Utils.notNull(queryFunction, "queryFunction must not be null");
-    Utils.notNull(resultFunction, "resultFunction must not be null");
+    AssertUtils.notNull(queryFunction, "queryFunction must not be null");
+    AssertUtils.notNull(resultFunction, "resultFunction must not be null");
     if (this.jdbc == null) {
       this.jdbc = ConfigUtils.getJdbcProperties(context.parameter().toMap(), alias);
     }
