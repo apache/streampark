@@ -17,12 +17,20 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
+import org.apache.hc.core5.util.Timeout
+
+import java.time.Duration
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.atomic.AtomicBoolean
-
 import scala.language.implicitConversions
 
 trait FlinkWatcher extends AutoCloseable {
+
+  // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
+  lazy val FLINK_CLIENT_TIMEOUT_SEC: Timeout = Timeout.ofMilliseconds(Duration.ofSeconds(60).toMillis).toTimeout
+
+  // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
+  lazy val FLINK_REST_AWAIT_TIMEOUT_SEC: Timeout = Timeout.ofMilliseconds(30000L)
 
   private[this] val started: AtomicBoolean = new AtomicBoolean(false)
 

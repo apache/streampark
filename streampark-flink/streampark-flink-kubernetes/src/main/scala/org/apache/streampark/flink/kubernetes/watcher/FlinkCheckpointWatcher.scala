@@ -17,23 +17,20 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
+import org.apache.hc.client5.http.fluent.Request
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, KubernetesRetriever, MetricWatcherConfig}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent
 import org.apache.streampark.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
-
-import org.apache.hc.client5.http.fluent.Request
-import org.json4s.{DefaultFormats, JNull}
+import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, MetricWatcherConfig}
 import org.json4s.JsonAST.JNothing
 import org.json4s.jackson.JsonMethods.parse
-
-import javax.annotation.concurrent.ThreadSafe
+import org.json4s.{DefaultFormats, JNull}
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{ScheduledFuture, TimeUnit}
-
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
+import javax.annotation.concurrent.ThreadSafe
 import scala.concurrent.duration.DurationLong
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
@@ -119,8 +116,8 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
         Checkpoint.as(
           Request
             .get(s"$flinkJmRestUrl/jobs/${trackId.jobId}/checkpoints")
-            .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-            .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
+            .connectTimeout(FLINK_REST_AWAIT_TIMEOUT_SEC)
+            .responseTimeout(FLINK_CLIENT_TIMEOUT_SEC)
             .execute
             .returnContent
             .asString(StandardCharsets.UTF_8)) match {

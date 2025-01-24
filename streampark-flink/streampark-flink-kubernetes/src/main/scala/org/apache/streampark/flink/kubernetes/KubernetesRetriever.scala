@@ -17,12 +17,6 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.util.{DateUtils, Logger, Utils}
-import org.apache.streampark.common.util.Utils.using
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
-import org.apache.streampark.flink.kubernetes.ingress.IngressController
-import org.apache.streampark.flink.kubernetes.model.ClusterKey
-
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
 import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.{ClusterClientFactory, DefaultClusterClientServiceLoader}
@@ -30,22 +24,17 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, RestOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
-import org.apache.hc.core5.util.Timeout
+import org.apache.streampark.common.util.Utils.using
+import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.streampark.flink.kubernetes.ingress.IngressController
+import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import javax.annotation.Nullable
-
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 object KubernetesRetriever extends Logger {
-
-  // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
-  val FLINK_CLIENT_TIMEOUT_SEC: Timeout =
-    Timeout.ofMilliseconds(ClientOptions.CLIENT_TIMEOUT.defaultValue().toMillis)
-
-  // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
-  val FLINK_REST_AWAIT_TIMEOUT_SEC: Timeout =
-    Timeout.ofMilliseconds(RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue())
 
   private val DEPLOYMENT_LOST_TIME = collection.mutable.Map[String, Long]()
 

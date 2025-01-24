@@ -291,8 +291,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     JobDetails.as(
       Request
         .get(s"$restUrl/jobs/overview")
-        .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-        .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
+        .connectTimeout(FLINK_REST_AWAIT_TIMEOUT_SEC)
+        .responseTimeout(FLINK_CLIENT_TIMEOUT_SEC)
         .execute
         .returnContent()
         .asString(StandardCharsets.UTF_8)
