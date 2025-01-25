@@ -24,7 +24,7 @@ import scala.collection.JavaConversions._
 import scala.collection.immutable.{Map => ScalaMap}
 import scala.util.Try
 
-object ConfigUtils {
+private[streampark] object ConfigUtils {
 
   def getConf(parameter: JavaMap[String, String], prefix: String = "", addfix: String = "")(implicit
       alias: String = ""): Properties = {

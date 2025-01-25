@@ -168,7 +168,8 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   override def initializeState(context: FunctionInitializationContext): Unit = {
     // Recover from checkpoint...
     logInfo("HBaseSource snapshotState initialize")
-    state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
+    state = FlinkUtils
+      .getUnionListState[R](context, getRuntimeContext.getExecutionConfig, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
       case Success(q) => last = q
       case _ =>

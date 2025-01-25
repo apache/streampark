@@ -49,6 +49,12 @@ public class JdbcJavaSource<T> {
     return this;
   }
 
+    public DataStreamSource<T> getDataStream(
+        SQLQueryFunction<T> queryFunction,
+        SQLResultFunction<T> resultFunction) {
+        return getDataStream(queryFunction, resultFunction, null);
+    }
+
   public DataStreamSource<T> getDataStream(
       SQLQueryFunction<T> queryFunction,
       SQLResultFunction<T> resultFunction,
@@ -59,8 +65,13 @@ public class JdbcJavaSource<T> {
     if (this.jdbc == null) {
       this.jdbc = ConfigUtils.getJdbcProperties(context.parameter().toMap(), alias);
     }
-    JdbcSourceFunction<T> sourceFunction =
-        new JdbcSourceFunction<>(jdbc, queryFunction, resultFunction, runningFunc, null);
+    JdbcSourceFunction<T> sourceFunction = new JdbcSourceFunction<>(
+            jdbc,
+            queryFunction,
+            resultFunction,
+            runningFunc,
+            null
+        );
     return context.getJavaEnv().addSource(sourceFunction);
   }
 }

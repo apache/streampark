@@ -17,8 +17,10 @@
 
 package org.apache.streampark.flink.util
 
+import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.runtime.state.FunctionInitializationContext
 import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
 import org.apache.flink.util.TimeUtils
@@ -31,9 +33,14 @@ object FlinkUtils {
 
   def getUnionListState[R: TypeInformation](
       context: FunctionInitializationContext,
+      execConfig: ExecutionConfig,
       descriptorName: String): ListState[R] = {
+
     context.getOperatorStateStore.getUnionListState(
-      new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
+      new ListStateDescriptor(
+        descriptorName,
+        new KryoSerializer[R](implicitly[TypeInformation[R]].getTypeClass, execConfig))
+    )
   }
 
   def getFlinkDistJar(flinkHome: String): String = {

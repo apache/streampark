@@ -46,13 +46,16 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
 
   @volatile private[this] var running = true
   private[this] var scalaRunningFunc: Unit => Boolean = (_) => true
-  private[this] var javaRunningFunc: RunningFunction = _
+  private[this] var javaRunningFunc: RunningFunction = new RunningFunction {
+    override def running(): lang.Boolean = true
+  }
 
   private[this] var scalaSqlFunc: R => String = _
   private[this] var scalaResultFunc: Function[Iterable[Map[String, _]], Iterable[R]] = _
   private[this] var javaSqlFunc: SQLQueryFunction[R] = _
   private[this] var javaResultFunc: SQLResultFunction[R] = _
-  @transient private var state: ListState[R] = _
+  @transient private var unionOffsetStates: ListState[R] = null
+
   private val OFFSETS_STATE_NAME: String = "jdbc-source-query-states"
   private[this] var last: R = _
 
@@ -66,7 +69,9 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
     this(ApiType.scala, jdbc)
     this.scalaSqlFunc = sqlFunc
     this.scalaResultFunc = resultFunc
-    this.scalaRunningFunc = if (runningFunc == null) _ => true else runningFunc
+    if (runningFunc != null) {
+      this.scalaRunningFunc = runningFunc
+    }
   }
 
   // for JAVA
@@ -79,12 +84,9 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
     this(ApiType.java, jdbc)
     this.javaSqlFunc = javaSqlFunc
     this.javaResultFunc = javaResultFunc
-    this.javaRunningFunc =
-      if (runningFunc != null) runningFunc
-      else
-        new RunningFunction {
-          override def running(): lang.Boolean = true
-        }
+    if (runningFunc != null) {
+      this.javaRunningFunc = runningFunc
+    }
   }
 
   @throws[Exception]
@@ -125,9 +127,9 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     if (running) {
-      state.clear()
+      unionOffsetStates.clear()
       if (last != null) {
-        state.add(last)
+        unionOffsetStates.add(last)
       }
     } else {
       logError("JdbcSource snapshotState called on closed source")
@@ -136,8 +138,9 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
     logInfo("JdbcSource snapshotState initialize")
-    state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
-    Try(state.get.head) match {
+    unionOffsetStates = FlinkUtils
+      .getUnionListState[R](context, getRuntimeContext.getExecutionConfig, OFFSETS_STATE_NAME)
+    Try(unionOffsetStates.get.head) match {
       case Success(q) => last = q
       case _ =>
     }
@@ -146,4 +149,5 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   override def notifyCheckpointComplete(checkpointId: Long): Unit = {
     logInfo(s"JdbcSource checkpointComplete: $checkpointId")
   }
+
 }

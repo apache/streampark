@@ -51,11 +51,13 @@ class MongoSourceFunction[R: TypeInformation](
   with Logger {
 
   @volatile private[this] var running = true
-  private[this] var scalaRunningFunc: Unit => Boolean = _
-  private[this] var javaRunningFunc: RunningFunction = _
+  private[this] var scalaRunningFunc: Unit => Boolean = (_) => true
+  private[this] var javaRunningFunc: RunningFunction = new RunningFunction {
+    override def running(): lang.Boolean = true
+  }
 
   var client: MongoClient = _
-  var mongoCollection: MongoCollection[Document] = _
+  private var mongoCollection: MongoCollection[Document] = _
 
   private[this] var scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document] = _
   private[this] var scalaResultFunc: MongoCursor[Document] => List[R] = _
@@ -78,7 +80,9 @@ class MongoSourceFunction[R: TypeInformation](
     this(ApiType.scala, prop, collectionName)
     this.scalaQueryFunc = scalaQueryFunc
     this.scalaResultFunc = scalaResultFunc
-    this.scalaRunningFunc = if (runningFunc == null) _ => true else runningFunc
+    if (runningFunc != null) {
+      this.scalaRunningFunc = runningFunc
+    }
   }
 
   // for JAVA
@@ -92,12 +96,9 @@ class MongoSourceFunction[R: TypeInformation](
     this(ApiType.java, prop, collectionName)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
-    this.javaRunningFunc =
-      if (runningFunc != null) runningFunc
-      else
-        new RunningFunction {
-          override def running(): lang.Boolean = true
-        }
+    if (runningFunc != null) {
+      this.javaRunningFunc = runningFunc
+    }
   }
 
   override def cancel(): Unit = this.running = false
@@ -146,6 +147,7 @@ class MongoSourceFunction[R: TypeInformation](
   }
 
   override def close(): Unit = {
+    this.running = false
     client.close()
   }
 
@@ -163,8 +165,9 @@ class MongoSourceFunction[R: TypeInformation](
   override def initializeState(context: FunctionInitializationContext): Unit = {
     // restore from checkpoint
     logInfo("MongoSource snapshotState initialize")
-    state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
-    Try(state.get.head) match {
+    state = FlinkUtils
+      .getUnionListState[R](context, getRuntimeContext.getExecutionConfig, OFFSETS_STATE_NAME)
+    Try(state.get().head) match {
       case Success(q) => last = q
       case _ =>
     }

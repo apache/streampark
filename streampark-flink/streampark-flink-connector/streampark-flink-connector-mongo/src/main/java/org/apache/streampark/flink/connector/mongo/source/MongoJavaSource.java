@@ -37,6 +37,13 @@ public class MongoJavaSource<T> {
     this.property = property;
   }
 
+    public DataStreamSource<T> getDataStream(
+        String collectionName,
+        MongoQueryFunction<T> queryFunction,
+        MongoResultFunction<T> resultFunction) {
+      return getDataStream(collectionName, queryFunction, resultFunction, null);
+    }
+
   public DataStreamSource<T> getDataStream(
       String collectionName,
       MongoQueryFunction<T> queryFunction,
@@ -46,9 +53,14 @@ public class MongoJavaSource<T> {
     AssertUtils.notNull(collectionName, "collectionName must not be null");
     AssertUtils.notNull(queryFunction, "queryFunction must not be null");
     AssertUtils.notNull(resultFunction, "resultFunction must not be null");
-    MongoSourceFunction<T> sourceFunction =
-        new MongoSourceFunction<>(
-            collectionName, property, queryFunction, resultFunction, runningFunc, null);
+    MongoSourceFunction<T> sourceFunction = new MongoSourceFunction<>(
+            collectionName,
+            property,
+            queryFunction,
+            resultFunction,
+            runningFunc,
+            null
+        );
     return context.getJavaEnv().addSource(sourceFunction);
   }
 }

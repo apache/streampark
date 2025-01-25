@@ -17,6 +17,8 @@
 
 package org.apache.streampark.flink.client.tool
 
+import org.apache.streampark.common.util.Logger
+
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration.{Configuration, CoreOptions}
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
@@ -25,7 +27,6 @@ import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.apache.hc.core5.util.Timeout
-import org.apache.streampark.common.util.Logger
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
@@ -33,13 +34,15 @@ import org.json4s.jackson.Serialization
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.time.Duration
+
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 object FlinkSessionSubmitHelper extends Logger {
 
   // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
-  private lazy val FLINK_CLIENT_TIMEOUT_SEC: Timeout = Timeout.ofMilliseconds(Duration.ofSeconds(60).toMillis).toTimeout
+  private lazy val FLINK_CLIENT_TIMEOUT_SEC: Timeout =
+    Timeout.ofMilliseconds(Duration.ofSeconds(60).toMillis).toTimeout
 
   // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
   private lazy val FLINK_REST_AWAIT_TIMEOUT_SEC: Timeout = Timeout.ofMilliseconds(30000L)

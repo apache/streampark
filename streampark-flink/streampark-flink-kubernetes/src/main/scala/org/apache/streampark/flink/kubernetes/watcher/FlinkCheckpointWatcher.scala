@@ -17,20 +17,23 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
-import org.apache.hc.client5.http.fluent.Request
 import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, MetricWatcherConfig}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent
 import org.apache.streampark.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
-import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, MetricWatcherConfig}
+
+import org.apache.hc.client5.http.fluent.Request
+import org.json4s.{DefaultFormats, JNull}
 import org.json4s.JsonAST.JNothing
 import org.json4s.jackson.JsonMethods.parse
-import org.json4s.{DefaultFormats, JNull}
+
+import javax.annotation.concurrent.ThreadSafe
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{ScheduledFuture, TimeUnit}
-import javax.annotation.concurrent.ThreadSafe
-import scala.concurrent.duration.DurationLong
+
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
+import scala.concurrent.duration.DurationLong
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
