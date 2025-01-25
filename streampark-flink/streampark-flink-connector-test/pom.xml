@@ -23,7 +23,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.streampark</groupId>
-        <artifactId>streampark-flink-connector</artifactId>
+        <artifactId>streampark-flink</artifactId>
         <version>2.1.6</version>
     </parent>
     <artifactId>streampark-flink-connector-test</artifactId>
