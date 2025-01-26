@@ -38,7 +38,7 @@ public class MySQLJavaApp {
     StreamingContext context = new StreamingContext(envConfig);
 
     // 读取MySQL数据源
-    new JdbcJavaSource<Order>(context, Order.class)
+    new JdbcJavaSource<>(context, Order.class)
         .getDataStream(
             (SQLQueryFunction<Order>)
                 lastOne -> {
