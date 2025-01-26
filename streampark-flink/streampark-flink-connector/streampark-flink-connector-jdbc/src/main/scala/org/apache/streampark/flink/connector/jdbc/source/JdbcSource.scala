@@ -50,7 +50,7 @@ class JdbcSource(
   def getDataStream[R: TypeInformation](
       sqlFun: R => String,
       func: Iterable[Map[String, _]] => Iterable[R],
-      filter: R => Boolean): DataStream[R] = {
+      filter: R => Boolean = null): DataStream[R] = {
     val jdbc = ConfigUtils.getJdbcProperties(ctx.parameter.toMap, alias)
     if (property != null) {
       jdbc.putAll(property)

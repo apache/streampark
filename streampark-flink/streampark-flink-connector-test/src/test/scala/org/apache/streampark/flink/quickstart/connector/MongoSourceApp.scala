@@ -50,8 +50,7 @@ object MongoSourceApp extends FlinkStreaming {
             .append("updateTime", new BasicDBObject("$gte", DateUtils.parse(offset)))
           d.find(cond)
         },
-        _.toList.map(_.toJson()),
-        null
+        _.toList.map(_.toJson())
       )
       .print()
   }

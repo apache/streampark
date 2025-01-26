@@ -47,8 +47,7 @@ object HBaseSourceApp extends FlinkStreaming {
           new HBaseQuery("person", new Scan())
         }
       },
-      r => new String(r.getRow),
-      null
+      r => new String(r.getRow)
     )
 
     HBaseRequest(id)

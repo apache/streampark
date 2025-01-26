@@ -51,7 +51,7 @@ class HBaseSource(
   def getDataStream[R: TypeInformation](
       query: R => HBaseQuery,
       func: Result => R,
-      running: R => Boolean): DataStream[R] = {
+      running: R => Boolean = null): DataStream[R] = {
 
     if (query == null) {
       throw new NullPointerException("getDataStream error, SQLQueryFunction must not be null")
