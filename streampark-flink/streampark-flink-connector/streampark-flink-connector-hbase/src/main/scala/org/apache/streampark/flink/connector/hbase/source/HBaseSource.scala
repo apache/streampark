@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.hbase.source
 
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.ConfigUtils
 import org.apache.streampark.flink.connector.hbase.bean.HBaseQuery
 import org.apache.streampark.flink.connector.hbase.internal.HBaseSourceFunction
 import org.apache.streampark.flink.core.scala.StreamingContext
@@ -32,8 +32,8 @@ import scala.annotation.meta.param
 
 object HBaseSource {
 
-  def apply(@(transient @param) property: Properties = new Properties())(implicit
-      ctx: StreamingContext): HBaseSource = new HBaseSource(ctx, property)
+  def apply(@(transient @param) alias: String = "", properties: Properties = new Properties())(
+      implicit ctx: StreamingContext): HBaseSource = new HBaseSource(ctx, alias, properties)
 
 }
 
@@ -45,14 +45,25 @@ object HBaseSource {
  */
 class HBaseSource(
     @(transient @param) val ctx: StreamingContext,
-    property: Properties = new Properties()) {
+    alias: String,
+    property: Properties) {
 
   def getDataStream[R: TypeInformation](
       query: R => HBaseQuery,
       func: Result => R,
-      running: Unit => Boolean)(implicit prop: Properties = new Properties()): DataStream[R] = {
-    Utils.copyProperties(property, prop)
-    val hBaseFunc = new HBaseSourceFunction[R](prop, query, func, running)
+      running: Unit => Boolean): DataStream[R] = {
+
+    if (query == null) {
+      throw new NullPointerException("getDataStream error, SQLQueryFunction must not be null")
+    }
+    if (func == null) {
+      throw new NullPointerException("getDataStream error, SQLResultFunction must not be null")
+    }
+    val jdbc = ConfigUtils.getHBaseConfig(ctx.parameter.toMap)
+    if (property != null) {
+      jdbc.putAll(property)
+    }
+    val hBaseFunc = new HBaseSourceFunction[R](jdbc, query, func, running)
     ctx.addSource(hBaseFunc)
   }
 

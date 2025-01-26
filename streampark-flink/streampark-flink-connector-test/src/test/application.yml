@@ -25,7 +25,7 @@ flink:
     pipeline.name: streampark-quickstartApp
     yarn.application.queue:
     taskmanager.numberOfTaskSlots: 1
-    parallelism.default: 2
+    parallelism.default: 1
     jobmanager.memory:
       flink.size:
       heap.size:
@@ -51,7 +51,7 @@ flink:
     execution:
       checkpointing:
         mode: EXACTLY_ONCE
-        interval: 30s
+        interval: 10s
         timeout: 10min
         unaligned: false
         externalized-checkpoint-retention: RETAIN_ON_CANCELLATION

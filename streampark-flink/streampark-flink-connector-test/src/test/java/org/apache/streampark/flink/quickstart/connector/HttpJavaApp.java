@@ -20,18 +20,17 @@ import org.apache.streampark.flink.connector.http.sink.HttpSink;
 import org.apache.streampark.flink.core.StreamEnvConfig;
 import org.apache.streampark.flink.core.scala.StreamingContext;
 import org.apache.streampark.flink.quickstart.connector.bean.Entity;
+
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
-/**
- * @author wudi
- **/
+/** @author wudi */
 public class HttpJavaApp {
 
-    public static void main(String[] args) {
-        StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
-        StreamingContext context = new StreamingContext(envConfig);
-        DataStreamSource<Entity> source = context.getJavaEnv().addSource(new MyDataSource());
-        new HttpSink(context).get(source.map(x -> String.format("http://www.qq.com?id=%d", x.userId)));
-        context.start();
-    }
+  public static void main(String[] args) {
+    StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
+    StreamingContext context = new StreamingContext(envConfig);
+    DataStreamSource<Entity> source = context.getJavaEnv().addSource(new MyDataSource());
+    new HttpSink(context).get(source.map(x -> String.format("http://www.qq.com?id=%d", x.userId)));
+    context.start();
+  }
 }

@@ -17,10 +17,10 @@
 package org.apache.streampark.flink.quickstart.connector
 
 import org.apache.streampark.flink.quickstart.connector.bean.Entity
+
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 
 import scala.util.Random
-
 
 class MyDataSource extends SourceFunction[Entity] {
 

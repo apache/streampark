@@ -93,7 +93,7 @@ public class AlertController {
 
   @DeleteMapping("/delete")
   public RestResponse deleteAlertConfig(
-      @RequestParam("id") @NotNull(message = "config id must be not null") Long id) {
+      @RequestParam("id") @NotNull(message = "config id must not be null") Long id) {
     boolean result = alertConfigService.deleteById(id);
     return RestResponse.success(result);
   }

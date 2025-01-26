@@ -22,9 +22,9 @@ import java.io.Serializable;
 
 @Data
 public class LogBean implements Serializable {
-    private String platenum;
-    private String cardType;
-    private Long inTime;
-    private Long outTime;
-    private String controlid;
+  private String platenum;
+  private String cardType;
+  private Long inTime;
+  private Long outTime;
+  private String controlid;
 }

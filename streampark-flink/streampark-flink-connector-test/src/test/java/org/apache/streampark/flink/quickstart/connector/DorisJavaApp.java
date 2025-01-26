@@ -17,28 +17,28 @@
 package org.apache.streampark.flink.quickstart.connector;
 
 import org.apache.streampark.flink.connector.doris.sink.DorisSink;
-import org.apache.streampark.flink.connector.kafka.source.KafkaJavaSource;
 import org.apache.streampark.flink.connector.kafka.bean.KafkaRecord;
+import org.apache.streampark.flink.connector.kafka.source.KafkaJavaSource;
 import org.apache.streampark.flink.core.StreamEnvConfig;
 import org.apache.streampark.flink.core.scala.StreamingContext;
+
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 
-/**
- * @author wudi
- **/
+/** @author wudi */
 public class DorisJavaApp {
 
-    public static void main(String[] args) {
-        StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
-        StreamingContext context = new StreamingContext(envConfig);
-        DataStream<String> source = new KafkaJavaSource<String>(context)
-                .getDataStream()
-                .map((MapFunction<KafkaRecord<String>, String>) KafkaRecord::value)
-                .returns(String.class);
+  public static void main(String[] args) {
+    StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
+    StreamingContext context = new StreamingContext(envConfig);
+    DataStream<String> source =
+        new KafkaJavaSource<String>(context)
+            .getDataStream()
+            .map((MapFunction<KafkaRecord<String>, String>) KafkaRecord::value)
+            .returns(String.class);
 
-        new DorisSink<String>(context).sink(source);
+    new DorisSink<String>(context).sink(source);
 
-        context.start();
-    }
+    context.start();
+  }
 }

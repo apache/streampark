@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.connector.jdbc.source;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ConfigUtils;
 import org.apache.streampark.flink.connector.function.RunningFunction;
 import org.apache.streampark.flink.connector.function.SQLQueryFunction;
@@ -25,6 +24,7 @@ import org.apache.streampark.flink.connector.function.SQLResultFunction;
 import org.apache.streampark.flink.connector.jdbc.internal.JdbcSourceFunction;
 import org.apache.streampark.flink.core.scala.StreamingContext;
 
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
 import java.util.Properties;
@@ -32,11 +32,20 @@ import java.util.Properties;
 public class JdbcJavaSource<T> {
 
   private final StreamingContext context;
+  private final TypeInformation<T> typeInformation;
+
   private Properties jdbc;
   private String alias = null;
 
-  public JdbcJavaSource(StreamingContext context) {
+  public JdbcJavaSource(StreamingContext context, Class<T> typeInfo) {
+    if (typeInfo == null) {
+      throw new NullPointerException("typeInfo must not be null");
+    }
+    if (context == null) {
+      throw new NullPointerException("context must not be null");
+    }
     this.context = context;
+    this.typeInformation = TypeInformation.of(typeInfo);
   }
 
   public JdbcJavaSource<T> jdbc(Properties jdbc) {
@@ -49,29 +58,31 @@ public class JdbcJavaSource<T> {
     return this;
   }
 
-    public DataStreamSource<T> getDataStream(
-        SQLQueryFunction<T> queryFunction,
-        SQLResultFunction<T> resultFunction) {
-        return getDataStream(queryFunction, resultFunction, null);
-    }
+  public DataStreamSource<T> getDataStream(
+      SQLQueryFunction<T> queryFunction, SQLResultFunction<T> resultFunction) {
+    return getDataStream(queryFunction, resultFunction, null);
+  }
 
   public DataStreamSource<T> getDataStream(
       SQLQueryFunction<T> queryFunction,
       SQLResultFunction<T> resultFunction,
       RunningFunction runningFunc) {
 
-    AssertUtils.notNull(queryFunction, "queryFunction must not be null");
-    AssertUtils.notNull(resultFunction, "resultFunction must not be null");
+    if (queryFunction == null) {
+      throw new NullPointerException(
+          "JdbcJavaSource getDataStream error: SQLQueryFunction must not be null");
+    }
+    if (resultFunction == null) {
+      throw new NullPointerException(
+          "JdbcJavaSource getDataStream error: SQLResultFunction must not be null");
+    }
+
     if (this.jdbc == null) {
       this.jdbc = ConfigUtils.getJdbcProperties(context.parameter().toMap(), alias);
     }
-    JdbcSourceFunction<T> sourceFunction = new JdbcSourceFunction<>(
-            jdbc,
-            queryFunction,
-            resultFunction,
-            runningFunc,
-            null
-        );
+
+    JdbcSourceFunction<T> sourceFunction =
+        new JdbcSourceFunction<>(jdbc, queryFunction, resultFunction, runningFunc, typeInformation);
     return context.getJavaEnv().addSource(sourceFunction);
   }
 }

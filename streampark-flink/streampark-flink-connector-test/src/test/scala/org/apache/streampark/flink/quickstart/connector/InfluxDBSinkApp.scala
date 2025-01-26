@@ -19,14 +19,13 @@ package org.apache.streampark.flink.quickstart.connector
 import org.apache.streampark.flink.connector.influx.bean.InfluxEntity
 import org.apache.streampark.flink.connector.influx.sink.InfluxSink
 import org.apache.streampark.flink.core.scala.FlinkStreaming
+
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 
 import scala.util.Random
 
-/**
- * 侧输出流
- */
+/** 侧输出流 */
 object InfluxDBSinkApp extends FlinkStreaming {
 
   implicit val entityType: TypeInformation[Weather] = TypeInformation.of(classOf[Weather])
@@ -34,14 +33,17 @@ object InfluxDBSinkApp extends FlinkStreaming {
   override def handle(): Unit = {
     val source = context.addSource(new WeatherSource())
 
-    //weather,altitude=1000,area=北 temperature=11,humidity=-4
+    // weather,altitude=1000,area=北 temperature=11,humidity=-4
 
     implicit val entity: InfluxEntity[Weather] = new InfluxEntity[Weather](
       "mydb",
       "test",
       "autogen",
       (x: Weather) => Map("altitude" -> x.altitude.toString, "area" -> x.area),
-      (x: Weather) => Map("temperature" -> x.temperature.asInstanceOf[Object], "humidity" -> x.humidity.asInstanceOf[Object])
+      (x: Weather) =>
+        Map(
+          "temperature" -> x.temperature.asInstanceOf[Object],
+          "humidity" -> x.humidity.asInstanceOf[Object])
     )
 
     InfluxSink().sink(source, "mydb")
@@ -50,17 +52,8 @@ object InfluxDBSinkApp extends FlinkStreaming {
 
 }
 
-/**
- *
- * 温度 temperature
- * 湿度 humidity
- * 地区 area
- * 海拔 altitude
- */
-case class Weather(temperature: Long,
-                   humidity: Long,
-                   area: String,
-                   altitude: Long)
+/** 温度 temperature 湿度 humidity 地区 area 海拔 altitude */
+case class Weather(temperature: Long, humidity: Long, area: String, altitude: Long)
 
 class WeatherSource extends SourceFunction[Weather] {
 
@@ -82,4 +75,3 @@ class WeatherSource extends SourceFunction[Weather] {
   }
 
 }
-

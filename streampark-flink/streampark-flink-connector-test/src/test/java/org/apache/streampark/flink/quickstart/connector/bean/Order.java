@@ -18,10 +18,12 @@ package org.apache.streampark.flink.quickstart.connector.bean;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class Order {
-    private String orderId;
-    private String marketId;
-    private Double price;
-    private Long timestamp;
+public class Order implements Serializable {
+  private String orderId;
+  private String marketId;
+  private Double price;
+  private Long timestamp;
 }

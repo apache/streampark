@@ -18,14 +18,12 @@ package org.apache.streampark.flink.quickstart.connector.bean;
 
 import lombok.Data;
 
-/**
- * @author benjobs
- */
+/** @author benjobs */
 @Data
 public class Behavior {
-    private String user_id;
-    private Long item_id;
-    private Long category_id;
-    private String behavior;
-    private Long ts;
+  private String user_id;
+  private Long item_id;
+  private Long category_id;
+  private String behavior;
+  private Long ts;
 }

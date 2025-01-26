@@ -16,7 +16,6 @@
  */
 package org.apache.streampark.flink.quickstart.connector;
 
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.streampark.flink.connector.function.SQLQueryFunction;
 import org.apache.streampark.flink.connector.function.SQLResultFunction;
 import org.apache.streampark.flink.connector.jdbc.source.JdbcJavaSource;
@@ -24,47 +23,51 @@ import org.apache.streampark.flink.core.StreamEnvConfig;
 import org.apache.streampark.flink.core.scala.StreamingContext;
 import org.apache.streampark.flink.quickstart.connector.bean.Order;
 
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MySQLJavaApp {
 
-    public static void main(String[] args) {
+  public static void main(String[] args) {
 
-        StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
+    StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
 
-        StreamingContext context = new StreamingContext(envConfig);
+    StreamingContext context = new StreamingContext(envConfig);
 
-        //读取MySQL数据源
-        new JdbcJavaSource<Order>(context)
-                .getDataStream(
-                        (SQLQueryFunction<Order>) lastOne -> {
-                            //5秒抽取一次
-                            Thread.sleep(3000);
-                            Serializable lastOffset = lastOne == null ? "2020-10-10 23:00:00" : lastOne.getTimestamp();
-                            return String.format(
-                                    "select * from t_order " +
-                                            "where timestamp > '%s' " +
-                                            "order by timestamp asc ",
-                                    lastOffset
-                            );
-                        },
-                        (SQLResultFunction<Order>) map -> {
-                            List<Order> result = new ArrayList<>();
-                            map.forEach(item -> {
-                                Order order = new Order();
-                                order.setOrderId(item.get("order_id").toString());
-                                order.setMarketId(item.get("market_id").toString());
-                                order.setTimestamp(Long.parseLong(item.get("timestamp").toString()));
-                                result.add(order);
-                            });
-                            return result;
-                        })
-                .returns(TypeInformation.of(Order.class))
-                .print("jdbc source: >>>>>");
+    // 读取MySQL数据源
+    new JdbcJavaSource<Order>(context, Order.class)
+        .getDataStream(
+            (SQLQueryFunction<Order>)
+                lastOne -> {
+                  // 5秒抽取一次
+                  Thread.sleep(3000);
+                  Serializable lastOffset =
+                      lastOne == null ? "2020-10-10 23:00:00" : lastOne.getTimestamp();
+                  return String.format(
+                      "select * from t_order "
+                          + "where timestamp > '%s' "
+                          + "order by timestamp asc ",
+                      lastOffset);
+                },
+            (SQLResultFunction<Order>)
+                map -> {
+                  List<Order> result = new ArrayList<>();
+                  map.forEach(
+                      item -> {
+                        Order order = new Order();
+                        order.setOrderId(item.get("order_id").toString());
+                        order.setMarketId(item.get("market_id").toString());
+                        order.setTimestamp(Long.parseLong(item.get("timestamp").toString()));
+                        result.add(order);
+                      });
+                  return result;
+                })
+        .returns(TypeInformation.of(Order.class))
+        .print("jdbc source: >>>>>");
 
-        context.start();
-
-    }
+    context.start();
+  }
 }

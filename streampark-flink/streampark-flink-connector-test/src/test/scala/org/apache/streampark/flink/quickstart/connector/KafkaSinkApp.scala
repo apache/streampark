@@ -1,5 +1,5 @@
 /*
-  * Licensed to the Apache Software Foundation (ASF) under one or more
+ * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
@@ -18,11 +18,11 @@ package org.apache.streampark.flink.quickstart.connector
 
 import org.apache.streampark.flink.connector.kafka.sink.KafkaSink
 import org.apache.streampark.flink.core.scala.FlinkStreaming
+
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 
 import scala.util.Random
-
 
 object KafkaSinkApp extends FlinkStreaming {
 
@@ -38,12 +38,7 @@ object KafkaSinkApp extends FlinkStreaming {
 
 }
 
-
-case class Behavior(user_id: String,
-                    item_id: Long,
-                    category_id: Long,
-                    behavior: String,
-                    ts: Long) {
+case class Behavior(user_id: String, item_id: Long, category_id: Long, behavior: String, ts: Long) {
   override def toString: String = {
     s"""
        |{
@@ -56,7 +51,6 @@ case class Behavior(user_id: String,
        |""".stripMargin
   }
 }
-
 
 class BehaviorSource extends SourceFunction[Behavior] {
   private[this] var isRunning = true
@@ -74,11 +68,10 @@ class BehaviorSource extends SourceFunction[Behavior] {
       val item_id = random.nextInt(100)
       val category_id = random.nextInt(20)
       val behavior = seq(random.nextInt(5))
-      val order = Behavior(user_id.toString, item_id, category_id, behavior, System.currentTimeMillis())
+      val order =
+        Behavior(user_id.toString, item_id, category_id, behavior, System.currentTimeMillis())
       ctx.collect(order)
     }
   }
 
 }
-
-

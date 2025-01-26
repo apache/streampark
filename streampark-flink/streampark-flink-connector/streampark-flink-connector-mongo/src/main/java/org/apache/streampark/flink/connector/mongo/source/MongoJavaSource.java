@@ -17,32 +17,44 @@
 
 package org.apache.streampark.flink.connector.mongo.source;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.flink.connector.function.RunningFunction;
 import org.apache.streampark.flink.connector.mongo.function.MongoQueryFunction;
 import org.apache.streampark.flink.connector.mongo.function.MongoResultFunction;
 import org.apache.streampark.flink.connector.mongo.internal.MongoSourceFunction;
 import org.apache.streampark.flink.core.scala.StreamingContext;
 
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
 import java.util.Properties;
 
 public class MongoJavaSource<T> {
   private final StreamingContext context;
-  private final Properties property;
+  private Properties property;
+  private String alias;
+  private final TypeInformation<T> typeInformation;
 
-  public MongoJavaSource(StreamingContext context, Properties property) {
+  public MongoJavaSource(StreamingContext context, Class<T> typeInfo) {
     this.context = context;
-    this.property = property;
+    this.typeInformation = TypeInformation.of(typeInfo);
   }
 
-    public DataStreamSource<T> getDataStream(
-        String collectionName,
-        MongoQueryFunction<T> queryFunction,
-        MongoResultFunction<T> resultFunction) {
-      return getDataStream(collectionName, queryFunction, resultFunction, null);
-    }
+  public MongoJavaSource<T> property(Properties property) {
+    this.property = property;
+    return this;
+  }
+
+  public MongoJavaSource<T> alias(String alias) {
+    this.alias = alias;
+    return this;
+  }
+
+  public DataStreamSource<T> getDataStream(
+      String collectionName,
+      MongoQueryFunction<T> queryFunction,
+      MongoResultFunction<T> resultFunction) {
+    return getDataStream(collectionName, queryFunction, resultFunction, null);
+  }
 
   public DataStreamSource<T> getDataStream(
       String collectionName,
@@ -50,17 +62,21 @@ public class MongoJavaSource<T> {
       MongoResultFunction<T> resultFunction,
       RunningFunction runningFunc) {
 
-    AssertUtils.notNull(collectionName, "collectionName must not be null");
-    AssertUtils.notNull(queryFunction, "queryFunction must not be null");
-    AssertUtils.notNull(resultFunction, "resultFunction must not be null");
-    MongoSourceFunction<T> sourceFunction = new MongoSourceFunction<>(
-            collectionName,
-            property,
-            queryFunction,
-            resultFunction,
-            runningFunc,
-            null
-        );
+    if (collectionName == null) {
+      throw new NullPointerException("MongoJavaSource error: collectionName must not be null");
+    }
+
+    if (queryFunction == null) {
+      throw new NullPointerException("MongoJavaSource error: mongoQueryFunction must not be null");
+    }
+
+    if (resultFunction == null) {
+      throw new NullPointerException("MongoJavaSource error: mongoResultFunction must not be null");
+    }
+
+    MongoSourceFunction<T> sourceFunction =
+        new MongoSourceFunction<>(
+            collectionName, property, queryFunction, resultFunction, runningFunc, typeInformation);
     return context.getJavaEnv().addSource(sourceFunction);
   }
 }

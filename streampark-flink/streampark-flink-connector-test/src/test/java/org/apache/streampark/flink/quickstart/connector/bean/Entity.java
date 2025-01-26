@@ -16,20 +16,15 @@
  */
 package org.apache.streampark.flink.quickstart.connector.bean;
 
-
-/**
- * @author benjobs
- */
-
+/** @author benjobs */
 public class Entity {
 
-    public Long userId;
-    public Long orderId;
-    public Long siteId;
-    public Long cityId;
-    public Integer orderStatus;
-    public Double price;
-    public Integer quantity;
-    public Long timestamp;
-
+  public Long userId;
+  public Long orderId;
+  public Long siteId;
+  public Long cityId;
+  public Integer orderStatus;
+  public Double price;
+  public Integer quantity;
+  public Long timestamp;
 }
