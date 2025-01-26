@@ -45,10 +45,10 @@ class MongoSource(
       collection: String,
       queryFun: (R, MongoCollection[Document]) => FindIterable[Document],
       resultFun: MongoCursor[Document] => List[R],
-      running: Unit => Boolean)(implicit prop: Properties = new Properties()): DataStream[R] = {
+      filter: R => Boolean)(implicit prop: Properties = new Properties()): DataStream[R] = {
 
     Utils.copyProperties(property, prop)
-    val mongoFun = new MongoSourceFunction[R](collection, prop, queryFun, resultFun, running)
+    val mongoFun = new MongoSourceFunction[R](collection, prop, queryFun, resultFun, filter)
     ctx.addSource(mongoFun)
   }
 

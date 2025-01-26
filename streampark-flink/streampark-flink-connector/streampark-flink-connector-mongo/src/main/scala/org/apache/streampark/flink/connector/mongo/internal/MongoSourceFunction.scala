@@ -20,7 +20,7 @@ package org.apache.streampark.flink.connector.mongo.internal
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.{Logger, MongoConfig}
-import org.apache.streampark.flink.connector.function.RunningFunction
+import org.apache.streampark.flink.connector.function.FilterFunction
 import org.apache.streampark.flink.connector.mongo.function.{MongoQueryFunction, MongoResultFunction}
 import org.apache.streampark.flink.util.FlinkUtils
 
@@ -51,9 +51,9 @@ class MongoSourceFunction[R: TypeInformation](
   with Logger {
 
   @volatile private[this] var running = true
-  private[this] var scalaRunningFunc: Unit => Boolean = (_) => true
-  private[this] var javaRunningFunc: RunningFunction = new RunningFunction {
-    override def running(): lang.Boolean = true
+  private[this] var scalaFilterFunc: R => Boolean = (_: R) => true
+  private[this] var javaFilterFunc: FilterFunction[R] = new FilterFunction[R] {
+    override def filter(r: R): lang.Boolean = true
   }
 
   var client: MongoClient = _
@@ -75,13 +75,13 @@ class MongoSourceFunction[R: TypeInformation](
       prop: Properties,
       scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document],
       scalaResultFunc: MongoCursor[Document] => List[R],
-      runningFunc: Unit => Boolean) = {
+      filter: R => Boolean) = {
 
     this(ApiType.scala, prop, collectionName)
     this.scalaQueryFunc = scalaQueryFunc
     this.scalaResultFunc = scalaResultFunc
-    if (runningFunc != null) {
-      this.scalaRunningFunc = runningFunc
+    if (filter != null) {
+      this.scalaFilterFunc = filter
     }
   }
 
@@ -91,13 +91,13 @@ class MongoSourceFunction[R: TypeInformation](
       prop: Properties,
       queryFunc: MongoQueryFunction[R],
       resultFunc: MongoResultFunction[R],
-      runningFunc: RunningFunction) {
+      filter: FilterFunction[R]) {
 
     this(ApiType.java, prop, collectionName)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
-    if (runningFunc != null) {
-      this.javaRunningFunc = runningFunc
+    if (filter != null) {
+      this.javaFilterFunc = filter
     }
   }
 
@@ -115,31 +115,31 @@ class MongoSourceFunction[R: TypeInformation](
     while (this.running) {
       apiType match {
         case ApiType.scala =>
-          if (scalaRunningFunc()) {
-            ctx.getCheckpointLock.synchronized {
-              val find = scalaQueryFunc(last, mongoCollection)
-              if (find != null) {
-                scalaResultFunc(find.iterator).foreach(
-                  x => {
+          ctx.getCheckpointLock.synchronized {
+            val find = scalaQueryFunc(last, mongoCollection)
+            if (find != null) {
+              scalaResultFunc(find.iterator).foreach(
+                x => {
+                  if (scalaFilterFunc(x)) {
                     last = x
                     ctx.collectWithTimestamp(last, System.currentTimeMillis())
-                  })
-              }
+                  }
+                })
             }
           }
         case ApiType.java =>
-          if (javaRunningFunc.running()) {
-            ctx.getCheckpointLock.synchronized {
-              val find = javaQueryFunc.query(last, mongoCollection)
-              if (find != null) {
-                javaResultFunc
-                  .result(find.iterator)
-                  .foreach(
-                    x => {
+          ctx.getCheckpointLock.synchronized {
+            val find = javaQueryFunc.query(last, mongoCollection)
+            if (find != null) {
+              javaResultFunc
+                .result(find.iterator)
+                .foreach(
+                  x => {
+                    if (javaFilterFunc.filter(x)) {
                       last = x
                       ctx.collectWithTimestamp(last, System.currentTimeMillis())
-                    })
-              }
+                    }
+                  })
             }
           }
       }
@@ -164,7 +164,7 @@ class MongoSourceFunction[R: TypeInformation](
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
     // restore from checkpoint
-    logInfo("MongoSource snapshotState initialize")
+    logDebug("MongoSource snapshotState initialize")
     state = FlinkUtils
       .getUnionListState[R](context, getRuntimeContext.getExecutionConfig, OFFSETS_STATE_NAME)
     Try(state.get().head) match {
@@ -174,7 +174,7 @@ class MongoSourceFunction[R: TypeInformation](
   }
 
   override def notifyCheckpointComplete(checkpointId: Long): Unit = {
-    logInfo(s"MongoSource checkpointComplete: $checkpointId")
+    logDebug(s"MongoSource checkpointComplete: $checkpointId")
   }
 
 }

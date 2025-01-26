@@ -18,14 +18,15 @@
 package org.apache.streampark.flink.connector.function;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @FunctionalInterface
-public interface SQLQueryFunction<T> extends Serializable {
+public interface ResultFunction<T> extends Serializable {
   /**
-   * Get the SQL to query
+   * The result of the search is returned as a Map, and the user can convert it into an object.
    *
-   * @param last: last one
-   * @return String: sql
+   * @param map: sqlQuery result
+   * @return Iterable: Iterable
    */
-  String query(T last) throws Exception;
+  Iterable<T> result(Iterable<Map<String, ?>> map);
 }

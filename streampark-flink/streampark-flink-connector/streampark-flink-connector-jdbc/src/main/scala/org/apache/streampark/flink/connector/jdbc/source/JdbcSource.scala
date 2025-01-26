@@ -33,7 +33,6 @@ object JdbcSource {
 
   def apply(alias: String = "", properties: Properties = new Properties())(implicit
       ctx: StreamingContext): JdbcSource = new JdbcSource(ctx, alias, properties) {}
-
 }
 
 class JdbcSource(
@@ -50,13 +49,13 @@ class JdbcSource(
    */
   def getDataStream[R: TypeInformation](
       sqlFun: R => String,
-      fun: Iterable[Map[String, _]] => Iterable[R],
-      running: Unit => Boolean): DataStream[R] = {
+      func: Iterable[Map[String, _]] => Iterable[R],
+      filter: R => Boolean): DataStream[R] = {
     val jdbc = ConfigUtils.getJdbcProperties(ctx.parameter.toMap, alias)
     if (property != null) {
       jdbc.putAll(property)
     }
-    val mysqlFun = new JdbcSourceFunction[R](jdbc, sqlFun, fun, running)
+    val mysqlFun = new JdbcSourceFunction[R](jdbc, sqlFun, func, filter)
     ctx.addSource(mysqlFun)
   }
 

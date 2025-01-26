@@ -20,12 +20,12 @@ package org.apache.streampark.flink.connector.function;
 import java.io.Serializable;
 
 @FunctionalInterface
-public interface RunningFunction extends Serializable {
-
+public interface QueryFunction<T> extends Serializable {
   /**
-   * Is it running...
+   * Get the SQL to query
    *
-   * @return Boolean: isRunning
+   * @param last: last one
+   * @return String: sql
    */
-  Boolean running();
+  String query(T last) throws Exception;
 }

@@ -16,8 +16,8 @@
  */
 package org.apache.streampark.flink.quickstart.connector;
 
-import org.apache.streampark.flink.connector.function.SQLQueryFunction;
-import org.apache.streampark.flink.connector.function.SQLResultFunction;
+import org.apache.streampark.flink.connector.function.QueryFunction;
+import org.apache.streampark.flink.connector.function.ResultFunction;
 import org.apache.streampark.flink.connector.jdbc.source.JdbcJavaSource;
 import org.apache.streampark.flink.core.StreamEnvConfig;
 import org.apache.streampark.flink.core.scala.StreamingContext;
@@ -40,7 +40,7 @@ public class MySQLJavaApp {
     // 读取MySQL数据源
     new JdbcJavaSource<>(context, Order.class)
         .getDataStream(
-            (SQLQueryFunction<Order>)
+            (QueryFunction<Order>)
                 lastOne -> {
                   // 5秒抽取一次
                   Thread.sleep(3000);
@@ -52,7 +52,7 @@ public class MySQLJavaApp {
                           + "order by timestamp asc ",
                       lastOffset);
                 },
-            (SQLResultFunction<Order>)
+            (ResultFunction<Order>)
                 map -> {
                   List<Order> result = new ArrayList<>();
                   map.forEach(

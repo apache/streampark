@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.connector.hbase.source;
 
 import org.apache.streampark.common.util.ConfigUtils;
-import org.apache.streampark.flink.connector.function.RunningFunction;
+import org.apache.streampark.flink.connector.function.FilterFunction;
 import org.apache.streampark.flink.connector.hbase.function.HBaseQueryFunction;
 import org.apache.streampark.flink.connector.hbase.function.HBaseResultFunction;
 import org.apache.streampark.flink.connector.hbase.internal.HBaseSourceFunction;
@@ -64,7 +64,7 @@ public class HBaseJavaSource<T> {
   public DataStreamSource<T> getDataStream(
       HBaseQueryFunction<T> queryFunction,
       HBaseResultFunction<T> resultFunction,
-      RunningFunction runningFunc) {
+      FilterFunction<T> filterFunction) {
 
     if (queryFunction == null) {
       throw new NullPointerException("HBaseJavaSource error: query function cannot be null");
@@ -79,7 +79,7 @@ public class HBaseJavaSource<T> {
 
     HBaseSourceFunction<T> sourceFunction =
         new HBaseSourceFunction<>(
-            property, queryFunction, resultFunction, runningFunc, typeInformation);
+            property, queryFunction, resultFunction, filterFunction, typeInformation);
     return context.getJavaEnv().addSource(sourceFunction);
   }
 }

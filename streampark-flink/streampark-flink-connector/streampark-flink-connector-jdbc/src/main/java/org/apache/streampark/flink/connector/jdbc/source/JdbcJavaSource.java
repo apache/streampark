@@ -18,9 +18,9 @@
 package org.apache.streampark.flink.connector.jdbc.source;
 
 import org.apache.streampark.common.util.ConfigUtils;
-import org.apache.streampark.flink.connector.function.RunningFunction;
-import org.apache.streampark.flink.connector.function.SQLQueryFunction;
-import org.apache.streampark.flink.connector.function.SQLResultFunction;
+import org.apache.streampark.flink.connector.function.FilterFunction;
+import org.apache.streampark.flink.connector.function.QueryFunction;
+import org.apache.streampark.flink.connector.function.ResultFunction;
 import org.apache.streampark.flink.connector.jdbc.internal.JdbcSourceFunction;
 import org.apache.streampark.flink.core.scala.StreamingContext;
 
@@ -59,22 +59,20 @@ public class JdbcJavaSource<T> {
   }
 
   public DataStreamSource<T> getDataStream(
-      SQLQueryFunction<T> queryFunction, SQLResultFunction<T> resultFunction) {
+      QueryFunction<T> queryFunction, ResultFunction<T> resultFunction) {
     return getDataStream(queryFunction, resultFunction, null);
   }
 
   public DataStreamSource<T> getDataStream(
-      SQLQueryFunction<T> queryFunction,
-      SQLResultFunction<T> resultFunction,
-      RunningFunction runningFunc) {
+      QueryFunction<T> queryFunction, ResultFunction<T> resultFunction, FilterFunction<T> filter) {
 
     if (queryFunction == null) {
       throw new NullPointerException(
-          "JdbcJavaSource getDataStream error: SQLQueryFunction must not be null");
+          "JdbcJavaSource getDataStream error: QueryFunction must not be null");
     }
     if (resultFunction == null) {
       throw new NullPointerException(
-          "JdbcJavaSource getDataStream error: SQLResultFunction must not be null");
+          "JdbcJavaSource getDataStream error: ResultFunction must not be null");
     }
 
     if (this.jdbc == null) {
@@ -82,7 +80,7 @@ public class JdbcJavaSource<T> {
     }
 
     JdbcSourceFunction<T> sourceFunction =
-        new JdbcSourceFunction<>(jdbc, queryFunction, resultFunction, runningFunc, typeInformation);
+        new JdbcSourceFunction<T>(jdbc, queryFunction, resultFunction, filter, typeInformation);
     return context.getJavaEnv().addSource(sourceFunction);
   }
 }

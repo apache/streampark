@@ -20,7 +20,7 @@ package org.apache.streampark.flink.connector.jdbc.internal
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.{JdbcUtils, Logger}
-import org.apache.streampark.flink.connector.function.{RunningFunction, SQLQueryFunction, SQLResultFunction}
+import org.apache.streampark.flink.connector.function.{FilterFunction, QueryFunction, ResultFunction}
 import org.apache.streampark.flink.util.FlinkUtils
 
 import org.apache.flink.api.common.state.ListState
@@ -45,15 +45,16 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   with Logger {
 
   @volatile private[this] var running = true
-  private[this] var scalaRunningFunc: Unit => Boolean = (_) => true
-  private[this] var javaRunningFunc: RunningFunction = new RunningFunction {
-    override def running(): lang.Boolean = true
+
+  private[this] var scalaQueryFunc: R => String = _
+  private[this] var scalaResultFunc: Function[Iterable[Map[String, _]], Iterable[R]] = _
+  private[this] var javaQueryFunc: QueryFunction[R] = _
+  private[this] var javaResultFunc: ResultFunction[R] = _
+  private[this] var scalaFilterFunc: R => Boolean = (_: R) => true
+  private[this] var javaFilterFunc: FilterFunction[R] = new FilterFunction[R] {
+    override def filter(r: R): lang.Boolean = true
   }
 
-  private[this] var scalaSqlFunc: R => String = _
-  private[this] var scalaResultFunc: Function[Iterable[Map[String, _]], Iterable[R]] = _
-  private[this] var javaSqlFunc: SQLQueryFunction[R] = _
-  private[this] var javaResultFunc: SQLResultFunction[R] = _
   @transient private var unionOffsetStates: ListState[R] = null
 
   private val OFFSETS_STATE_NAME: String = "jdbc-source-query-states"
@@ -64,28 +65,28 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
       jdbc: Properties,
       sqlFunc: R => String,
       resultFunc: Iterable[Map[String, _]] => Iterable[R],
-      runningFunc: Unit => Boolean) = {
+      filterFunc: R => Boolean) = {
 
     this(ApiType.scala, jdbc)
-    this.scalaSqlFunc = sqlFunc
+    this.scalaQueryFunc = sqlFunc
     this.scalaResultFunc = resultFunc
-    if (runningFunc != null) {
-      this.scalaRunningFunc = runningFunc
+    if (filterFunc != null) {
+      this.scalaFilterFunc = filterFunc
     }
   }
 
   // for JAVA
   def this(
       jdbc: Properties,
-      javaSqlFunc: SQLQueryFunction[R],
-      javaResultFunc: SQLResultFunction[R],
-      runningFunc: RunningFunction) {
+      javaQueryFunc: QueryFunction[R],
+      javaResultFunc: ResultFunction[R],
+      filterFunc: FilterFunction[R]) {
 
     this(ApiType.java, jdbc)
-    this.javaSqlFunc = javaSqlFunc
+    this.javaQueryFunc = javaQueryFunc
     this.javaResultFunc = javaResultFunc
-    if (runningFunc != null) {
-      this.javaRunningFunc = runningFunc
+    if (filterFunc != null) {
+      this.javaFilterFunc = filterFunc
     }
   }
 
@@ -94,30 +95,30 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
     while (this.running) {
       apiType match {
         case ApiType.scala =>
-          if (scalaRunningFunc()) {
-            ctx.getCheckpointLock.synchronized {
-              val sql = scalaSqlFunc(last)
-              val result: List[Map[String, _]] = JdbcUtils.select(sql)(jdbc)
-              scalaResultFunc(result).foreach(
-                x => {
+          ctx.getCheckpointLock.synchronized {
+            val sql = scalaQueryFunc(last)
+            val result: List[Map[String, _]] = JdbcUtils.select(sql)(jdbc)
+            scalaResultFunc(result).foreach(
+              x => {
+                if (scalaFilterFunc(x)) {
                   last = x
                   ctx.collectWithTimestamp(last, System.currentTimeMillis())
-                })
-            }
+                }
+              })
           }
         case ApiType.java =>
-          if (javaRunningFunc.running()) {
-            ctx.getCheckpointLock.synchronized {
-              val sql = javaSqlFunc.query(last)
-              val result: List[Map[String, _]] = JdbcUtils.select(sql)(jdbc)
-              javaResultFunc
-                .result(result.map(_.asJava))
-                .foreach(
-                  x => {
+          ctx.getCheckpointLock.synchronized {
+            val sql = javaQueryFunc.query(last)
+            val result: List[Map[String, _]] = JdbcUtils.select(sql)(jdbc)
+            javaResultFunc
+              .result(result.map(_.asJava))
+              .foreach(
+                x => {
+                  if (javaFilterFunc.filter(x)) {
                     last = x
                     ctx.collectWithTimestamp(last, System.currentTimeMillis())
-                  })
-            }
+                  }
+                })
           }
       }
     }
@@ -137,7 +138,7 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   }
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
-    logInfo("JdbcSource snapshotState initialize")
+    logDebug("JdbcSource snapshotState initialize")
     unionOffsetStates = FlinkUtils
       .getUnionListState[R](context, getRuntimeContext.getExecutionConfig, OFFSETS_STATE_NAME)
     Try(unionOffsetStates.get.head) match {
@@ -147,7 +148,7 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   }
 
   override def notifyCheckpointComplete(checkpointId: Long): Unit = {
-    logInfo(s"JdbcSource checkpointComplete: $checkpointId")
+    logDebug(s"JdbcSource checkpointComplete: $checkpointId")
   }
 
 }

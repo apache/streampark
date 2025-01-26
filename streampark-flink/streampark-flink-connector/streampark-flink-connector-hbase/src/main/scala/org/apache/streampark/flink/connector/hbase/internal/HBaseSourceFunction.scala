@@ -20,7 +20,7 @@ package org.apache.streampark.flink.connector.hbase.internal
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.connector.function.RunningFunction
+import org.apache.streampark.flink.connector.function.FilterFunction
 import org.apache.streampark.flink.connector.hbase.bean.HBaseQuery
 import org.apache.streampark.flink.connector.hbase.function.{HBaseQueryFunction, HBaseResultFunction}
 import org.apache.streampark.flink.util.FlinkUtils
@@ -47,8 +47,12 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   with Logger {
 
   @volatile private[this] var running = true
-  private[this] var scalaRunningFunc: Unit => Boolean = _
-  private[this] var javaRunningFunc: RunningFunction = _
+  private[this] var scalaFilterFunc: R => Boolean = (_: R) => true
+  private[this] var javaFilterFunc: FilterFunction[R] = new FilterFunction[R] {
+
+    /** filter function */
+    override def filter(t: R): lang.Boolean = true
+  }
 
   @transient private[this] var table: Table = _
 
@@ -69,13 +73,14 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
       prop: Properties,
       queryFunc: R => HBaseQuery,
       resultFunc: Result => R,
-      runningFunc: Unit => Boolean) = {
+      filter: R => Boolean) = {
 
     this(ApiType.scala, prop)
     this.scalaQueryFunc = queryFunc
     this.scalaResultFunc = resultFunc
-    this.scalaRunningFunc = if (runningFunc == null) _ => true else runningFunc
-
+    if (filter != null) {
+      this.scalaFilterFunc = filter
+    }
   }
 
   // for JAVA
@@ -83,18 +88,14 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
       prop: Properties,
       queryFunc: HBaseQueryFunction[R],
       resultFunc: HBaseResultFunction[R],
-      runningFunc: RunningFunction) {
+      filter: FilterFunction[R]) {
 
     this(ApiType.java, prop)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
-    this.javaRunningFunc =
-      if (runningFunc != null) runningFunc
-      else
-        new RunningFunction {
-          override def running(): lang.Boolean = true
-        }
-
+    if (filter != null) {
+      this.javaFilterFunc = filter
+    }
   }
 
   @throws[Exception]
@@ -106,40 +107,42 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
     while (this.running) {
       apiType match {
         case ApiType.scala =>
-          if (scalaRunningFunc()) {
-            ctx.getCheckpointLock.synchronized {
-              // Returns the query object of the last (or recovered from checkpoint) query to the user, and the user constructs the conditions for the next query based on this.
-              query = scalaQueryFunc(last)
-              require(
-                query != null && query.getTable != null,
-                "[StreamPark] HBaseSource query and query's param table must not be null ")
-              table = query.getTable(prop)
-              table
-                .getScanner(query)
-                .foreach(
-                  x => {
-                    last = scalaResultFunc(x)
-                    ctx.collectWithTimestamp(last, System.currentTimeMillis())
-                  })
-            }
+          ctx.getCheckpointLock.synchronized {
+            // Returns the query object of the last (or recovered from checkpoint) query to the user, and the user constructs the conditions for the next query based on this.
+            query = scalaQueryFunc(last)
+            require(
+              query != null && query.getTable != null,
+              "[StreamPark] HBaseSource query and query's param table must not be null ")
+            table = query.getTable(prop)
+            table
+              .getScanner(query)
+              .foreach(
+                x => {
+                  val r = scalaResultFunc(x)
+                  if (scalaFilterFunc(r)) {
+                    last = r
+                    ctx.collectWithTimestamp(r, System.currentTimeMillis())
+                  }
+                })
           }
         case ApiType.java =>
-          if (javaRunningFunc.running()) {
-            ctx.getCheckpointLock.synchronized {
-              // Returns the query object of the last (or recovered from checkpoint) query to the user, and the user constructs the conditions for the next query based on this.
-              query = javaQueryFunc.query(last)
-              require(
-                query != null && query.getTable != null,
-                "[StreamPark] HBaseSource query and query's param table must not be null ")
-              table = query.getTable(prop)
-              table
-                .getScanner(query)
-                .foreach(
-                  x => {
-                    last = javaResultFunc.result(x)
-                    ctx.collectWithTimestamp(last, System.currentTimeMillis())
-                  })
-            }
+          ctx.getCheckpointLock.synchronized {
+            // Returns the query object of the last (or recovered from checkpoint) query to the user, and the user constructs the conditions for the next query based on this.
+            query = javaQueryFunc.query(last)
+            require(
+              query != null && query.getTable != null,
+              "[StreamPark] HBaseSource query and query's param table must not be null ")
+            table = query.getTable(prop)
+            table
+              .getScanner(query)
+              .foreach(
+                x => {
+                  val r = javaResultFunc.result(x)
+                  if (javaFilterFunc.filter(r)) {
+                    last = r
+                    ctx.collectWithTimestamp(r, System.currentTimeMillis())
+                  }
+                })
           }
       }
     }

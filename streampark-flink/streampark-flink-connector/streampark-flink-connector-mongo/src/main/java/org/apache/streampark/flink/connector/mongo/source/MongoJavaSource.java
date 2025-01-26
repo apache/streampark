@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.connector.mongo.source;
 
-import org.apache.streampark.flink.connector.function.RunningFunction;
+import org.apache.streampark.flink.connector.function.FilterFunction;
 import org.apache.streampark.flink.connector.mongo.function.MongoQueryFunction;
 import org.apache.streampark.flink.connector.mongo.function.MongoResultFunction;
 import org.apache.streampark.flink.connector.mongo.internal.MongoSourceFunction;
@@ -60,7 +60,7 @@ public class MongoJavaSource<T> {
       String collectionName,
       MongoQueryFunction<T> queryFunction,
       MongoResultFunction<T> resultFunction,
-      RunningFunction runningFunc) {
+      FilterFunction runningFunc) {
 
     if (collectionName == null) {
       throw new NullPointerException("MongoJavaSource error: collectionName must not be null");
