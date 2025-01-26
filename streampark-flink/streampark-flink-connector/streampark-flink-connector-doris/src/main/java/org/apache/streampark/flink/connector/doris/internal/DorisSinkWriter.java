@@ -59,7 +59,6 @@ public class DorisSinkWriter implements Serializable {
   private transient Counter totalFlushFailedTimes;
 
   private final Map<String, DorisSinkBufferEntry> bufferMap = new ConcurrentHashMap<>();
-  private final Long timeout = 3000L;
   private volatile boolean closed = false;
   private volatile boolean flushThreadAlive = false;
   private volatile Throwable flushException;
@@ -239,7 +238,8 @@ public class DorisSinkWriter implements Serializable {
   }
 
   private boolean asyncFlush() throws Exception {
-    final DorisSinkBufferEntry flushData = flushQueue.poll(timeout, TimeUnit.MILLISECONDS);
+    long timeOut = 3000L;
+    final DorisSinkBufferEntry flushData = flushQueue.poll(timeOut, TimeUnit.MILLISECONDS);
     if (flushData == null || flushData.getBatchCount() == 0) {
       return true;
     }
@@ -311,13 +311,13 @@ public class DorisSinkWriter implements Serializable {
   private void checkFlushException() {
     if (flushException != null) {
       StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-      for (int i = 0; i < stack.length; i++) {
+      for (StackTraceElement stackTraceElement : stack) {
         LOG.info(
-            stack[i].getClassName()
+            stackTraceElement.getClassName()
                 + "."
-                + stack[i].getMethodName()
+                + stackTraceElement.getMethodName()
                 + " line:"
-                + stack[i].getLineNumber());
+                + stackTraceElement.getLineNumber());
       }
       throw new RuntimeException("Writing records to doris failed.", flushException);
     }

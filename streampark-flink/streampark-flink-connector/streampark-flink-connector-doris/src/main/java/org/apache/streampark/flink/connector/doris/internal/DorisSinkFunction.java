@@ -39,6 +39,7 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 
@@ -46,18 +47,17 @@ import java.util.Properties;
 public class DorisSinkFunction<T> extends RichSinkFunction<T> implements CheckpointedFunction {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DorisSinkFunction.class);
-  private final Properties properties;
   private final DorisSinkWriter dorisSinkWriter;
   private final DorisConfig dorisConfig;
   // state only works with `EXACTLY_ONCE`
-  private transient ListState<Map<String, DorisSinkBufferEntry>> checkpointedState;
+  private transient ListState<Map<String, DorisSinkBufferEntry>> checkpointState;
   private transient Counter totalInvokeRowsTime;
   private transient Counter totalInvokeRows;
   private static final String COUNTER_INVOKE_ROWS_COST_TIME = "totalInvokeRowsTimeNs";
   private static final String COUNTER_INVOKE_ROWS = "totalInvokeRows";
 
   public DorisSinkFunction(StreamingContext context) {
-    this.properties = context.parameter().getProperties();
+    Properties properties = context.parameter().getProperties();
     this.dorisConfig = new DorisConfig(properties);
     this.dorisSinkWriter = new DorisSinkWriter(dorisConfig);
   }
@@ -83,8 +83,8 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
           || null == data.getDataRows()) {
         LOGGER.warn(
             String.format(
-                " row data not fullfilled. {database: %s, table: %s, dataRows: %s}",
-                data.getDatabase(), data.getTable(), data.getDataRows()));
+                " row data not fulfilled. {database: %s, table: %s, dataRows: %s}",
+                data.getDatabase(), data.getTable(), Arrays.toString(data.getDataRows())));
         return;
       }
       dorisSinkWriter.writeRecords(data.getDatabase(), data.getTable(), data.getDataRows());
@@ -110,7 +110,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
   public void snapshotState(FunctionSnapshotContext context) throws Exception {
     if (Semantic.EXACTLY_ONCE.equals(Semantic.of(dorisConfig.semantic()))) {
       // save state
-      checkpointedState.add(dorisSinkWriter.getBufferedBatchMap());
+      checkpointState.add(dorisSinkWriter.getBufferedBatchMap());
       flushPreviousState();
     }
   }
@@ -122,16 +122,16 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
           new ListStateDescriptor<>(
               "buffered-rows",
               TypeInformation.of(new TypeHint<Map<String, DorisSinkBufferEntry>>() {}));
-      checkpointedState = context.getOperatorStateStore().getListState(descriptor);
+      checkpointState = context.getOperatorStateStore().getListState(descriptor);
     }
   }
 
   private void flushPreviousState() throws Exception {
     // flush the batch saved at the previous checkpoint
-    for (Map<String, DorisSinkBufferEntry> state : checkpointedState.get()) {
+    for (Map<String, DorisSinkBufferEntry> state : checkpointState.get()) {
       dorisSinkWriter.setBufferedBatchMap(state);
       dorisSinkWriter.flush(null, true);
     }
-    checkpointedState.clear();
+    checkpointState.clear();
   }
 }

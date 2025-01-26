@@ -24,12 +24,22 @@ public class DorisDelimiterParser {
   private static final String HEX_STRING = "0123456789ABCDEF";
 
   public static String parse(String sp) throws RuntimeException {
-    if (sp == null || sp.length() == 0) {
+    if (sp == null || sp.isEmpty()) {
       throw new RuntimeException("Delimiter can't be empty");
     }
     if (!sp.toUpperCase().startsWith("\\X")) {
       return sp;
     }
+    String hexStr = getString(sp);
+    // transform to separator
+    StringWriter writer = new StringWriter();
+    for (byte b : hexStrToBytes(hexStr)) {
+      writer.append((char) b);
+    }
+    return writer.toString();
+  }
+
+  private static String getString(String sp) {
     String hexStr = sp.substring(2);
     // check hex str
     if (hexStr.isEmpty()) {
@@ -43,12 +53,7 @@ public class DorisDelimiterParser {
         throw new RuntimeException("Failed to parse delimiter: `Hex str format error`");
       }
     }
-    // transform to separator
-    StringWriter writer = new StringWriter();
-    for (byte b : hexStrToBytes(hexStr)) {
-      writer.append((char) b);
-    }
-    return writer.toString();
+    return hexStr;
   }
 
   private static byte[] hexStrToBytes(String hexStr) {
