@@ -32,7 +32,6 @@
         <module>streampark-flink-shims</module>
         <module>streampark-flink-core</module>
         <module>streampark-flink-connector</module>
-        <module>streampark-flink-connector-test</module>
         <module>streampark-flink-sqlclient</module>
         <module>streampark-flink-udf</module>
         <module>streampark-flink-client</module>
