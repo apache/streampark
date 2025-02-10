@@ -40,7 +40,7 @@ concurrency:
 
 jobs:
   license-header:
-    if: github.repository == 'apache/incubator-streampark'
+    if: github.repository == 'apache/streampark'
     name: License header
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -51,7 +51,7 @@ jobs:
       - name: Check license header
         uses: apache/skywalking-eyes/header@main
   code-style:
-    if: github.repository == 'apache/incubator-streampark'
+    if: github.repository == 'apache/streampark'
     name: Code style
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -64,7 +64,7 @@ jobs:
       - name: Check codestyle for scala 2.12
         run: ./mvnw -B -q -nsu -Pscala-2.12 checkstyle:check spotless:check
   dead-link:
-    if: github.repository == 'apache/incubator-streampark'
+    if: github.repository == 'apache/streampark'
     name: Dead links
     runs-on: ubuntu-latest
     timeout-minutes: 20

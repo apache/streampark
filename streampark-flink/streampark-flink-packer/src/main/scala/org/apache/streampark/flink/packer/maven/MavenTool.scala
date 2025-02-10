@@ -154,7 +154,7 @@ object MavenTool extends Logger {
         transformer += manifest
       }
       req.setResourceTransformers(transformer.toList)
-      // issue: https://github.com/apache/incubator-streampark/issues/2350
+      // issue: https://github.com/apache/streampark/issues/2350
       req.setFilters(List(new ShadedFilter))
       req.setRelocators(Lists.newArrayList())
       req

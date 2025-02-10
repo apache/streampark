@@ -7,7 +7,7 @@ remember to adjust the documentation.
 
   - If this is your first time, please read our contributor guidelines: [Submit Code](https://streampark.apache.org/community/submit_guide/submit_code).
 
-  - Make sure that the pull request corresponds to a [GITHUB issue](https://github.com/apache/incubator-streampark/issues).
+  - Make sure that the pull request corresponds to a [GITHUB issue](https://github.com/apache/streampark/issues).
 
   - Name the pull request in the form "[Feature] Title of the pull request", where *Feature* can be replaced by `Hotfix`, `Bug`, etc.
 

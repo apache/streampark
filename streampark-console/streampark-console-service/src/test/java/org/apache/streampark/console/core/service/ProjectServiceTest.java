@@ -36,7 +36,7 @@ public class ProjectServiceTest extends SpringTestBase {
 
   @BeforeEach
   void before() {
-    project.setUrl("git@github.com:apache/incubator-streampark.git");
+    project.setUrl("git@github.com:apache/streampark.git");
   }
 
   @Disabled("This test case can't be runnable due to external service is not available.")

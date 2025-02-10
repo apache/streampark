@@ -156,7 +156,7 @@
             "content": "GitHub"
           },
           "type": "primary",
-          "url": "https://github.com/apache/incubator-streampark"
+          "url": "https://github.com/apache/streampark"
         }
       ]
     }

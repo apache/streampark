@@ -70,7 +70,7 @@ export function requestErrorHandle(error: any) {
         width: width,
         html: '<pre class="api-exception">' + error.response.data.message + '</pre>',
         footer:
-          '<a href="https://github.com/apache/incubator-streampark/issues/new/choose">report issue ?</a>',
+          '<a href="https://github.com/apache/streampark/issues/new/choose">report issue ?</a>',
         focusConfirm: false,
       });
     } else {

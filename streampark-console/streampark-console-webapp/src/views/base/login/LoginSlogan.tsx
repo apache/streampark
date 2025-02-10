@@ -63,7 +63,7 @@ export default defineComponent({
           <div class="flex items-center mt-10">
             <a
               class="btn streampark-btn btn !flex items-center"
-              href="https://github.com/apache/incubator-streampark"
+              href="https://github.com/apache/streampark"
               target="_blank"
             >
               <Icon icon="ant-design:github-filled"></Icon>
@@ -82,11 +82,11 @@ export default defineComponent({
           <div class="mt-20px shields z-3 flex items-center">
             <Tag color="#477de9">Version: v{version}</Tag>
             <img
-              src="https://img.shields.io/github/stars/apache/incubator-streampark.svg?sanitize=true"
+              src="https://img.shields.io/github/stars/apache/streampark.svg?sanitize=true"
               class="wow fadeInUp"
             ></img>
             <img
-              src="https://img.shields.io/github/forks/apache/incubator-streampark.svg?sanitize=true"
+              src="https://img.shields.io/github/forks/apache/streampark.svg?sanitize=true"
               class="wow fadeInUp"
             ></img>
           </div>

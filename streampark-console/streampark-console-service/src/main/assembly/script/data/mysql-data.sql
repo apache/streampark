@@ -40,7 +40,7 @@ insert into `t_flink_effective` values (100000, 100000, 2, 100000, now());
 -- ----------------------------
 -- Records of t_flink_project
 -- ----------------------------
-insert into `t_flink_project` values (100000, 100000, 'streampark-quickstart', 'https://github.com/apache/incubator-streampark-quickstart', 'release-2.0.0', null, null, null, null, null, 1, 1, null, 'streampark-quickstart', -1, now(), now());
+insert into `t_flink_project` values (100000, 100000, 'streampark-quickstart', 'https://github.com/apache/streampark-quickstart', 'release-2.0.0', null, null, null, null, null, 1, 1, null, 'streampark-quickstart', -1, now(), now());
 
 -- ----------------------------
 -- Records of t_flink_sql

@@ -31,7 +31,7 @@ public class GitUtilsTest {
   @Test
   void testGitCloneByTag() throws GitAPIException {
     GitUtils.GitCloneRequest request = new GitUtils.GitCloneRequest();
-    request.setUrl("git@github.com:apache/incubator-streampark.git");
+    request.setUrl("git@github.com:apache/streampark.git");
     request.setTag("v1.2.3");
     request.setStoreDir(new File("/tmp"));
     GitUtils.clone(request);
@@ -41,7 +41,7 @@ public class GitUtilsTest {
   @Test
   void testGitCloneByBranch() throws GitAPIException {
     GitUtils.GitCloneRequest request = new GitUtils.GitCloneRequest();
-    request.setUrl("git@github.com:apache/incubator-streampark.git");
+    request.setUrl("git@github.com:apache/streampark.git");
     request.setBranch("2.1.4");
     request.setStoreDir(new File("/tmp"));
     GitUtils.clone(request);

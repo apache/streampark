@@ -49,15 +49,15 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/apache/incubator-streampark.git</connection>
-        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/incubator-streampark.git</developerConnection>
-        <url>scm:git:git@github.com:apache/incubator-streampark.git</url>
+        <connection>scm:git:git://github.com/apache/streampark.git</connection>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/streampark.git</developerConnection>
+        <url>scm:git:git@github.com:apache/streampark.git</url>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/apache/incubator-streampark/issues</url>
+        <url>https://github.com/apache/streampark/issues</url>
     </issueManagement>
 
     <mailingLists>

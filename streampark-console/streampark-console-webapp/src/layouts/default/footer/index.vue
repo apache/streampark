@@ -16,7 +16,7 @@
 -->
 <template>
   <Footer :class="prefixCls" v-if="getShowLayoutFooter" ref="footerRef">
-    <div :class="`${prefixCls}__copyright`" @click="openWindow('https://incubator.apache.org/')">
+    <div :class="`${prefixCls}__copyright`" @click="openWindow('https://streampark.apache.org/')">
       Copyright &copy; 2022-{{ new Date().getFullYear() }} The Apache Software Foundation. Apache
       StreamPark, StreamPark, and its feather logo are trademarks of The Apache Software Foundation
     </div>

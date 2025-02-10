@@ -205,7 +205,7 @@ object ConfigConst {
     println("                                       /_/                        \n\n")
     println("    Version:  2.1.6                                          ")
     println("    WebSite:  https://streampark.apache.org                           ")
-    println("    GitHub :  https://github.com/apache/incubator-streampark                    ")
+    println("    GitHub :  https://github.com/apache/streampark                    ")
     println(s"    Info   :  $info                                 ")
     println(s"    Time   :  ${LocalDateTime.now}              \n\n")
     // scalastyle:on println
