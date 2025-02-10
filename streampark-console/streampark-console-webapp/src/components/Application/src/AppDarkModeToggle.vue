@@ -63,9 +63,7 @@
       height: 18px;
       background-color: #fff;
       border-radius: 50%;
-      transition:
-        transform 0.5s,
-        background-color 0.5s;
+      transition: transform 0.5s, background-color 0.5s;
       will-change: transform;
     }
 

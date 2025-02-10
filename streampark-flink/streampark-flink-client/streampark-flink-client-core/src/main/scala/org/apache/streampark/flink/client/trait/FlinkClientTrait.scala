@@ -290,13 +290,13 @@ trait FlinkClientTrait extends Logger {
       submitRequest.jobType match {
         case FlinkJobType.PYFLINK =>
           if (submitRequest.libs.nonEmpty) {
-            // BUG: https://github.com/apache/incubator-streampark/issues/3761
+            // BUG: https://github.com/apache/streampark/issues/3761
             // builder.setUserClassPaths(Lists.newArrayList(submitRequest.libs: _*))
           }
         case _ =>
           builder
             .setJarFile(jarFile)
-        // BUG: https://github.com/apache/incubator-streampark/issues/3761
+        // BUG: https://github.com/apache/streampark/issues/3761
         // .setUserClassPaths(Lists.newArrayList(submitRequest.classPaths: _*))
       }
       builder

@@ -59,5 +59,5 @@
 [Details](${link})
 </#if>
 [Website](https://streampark.apache.org)
-[GitHub](https://github.com/apache/incubator-streampark)
+[GitHub](https://github.com/apache/streampark)
 

@@ -70,15 +70,15 @@
     </modules>
 
     <scm>
-        <connection>scm:git:git://github.com/apache/incubator-streampark.git</connection>
-        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/incubator-streampark.git</developerConnection>
+        <connection>scm:git:git://github.com/apache/streampark.git</connection>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/streampark.git</developerConnection>
         <tag>HEAD</tag>
-        <url>scm:git:git@github.com:apache/incubator-streampark.git</url>
+        <url>scm:git:git@github.com:apache/streampark.git</url>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/apache/incubator-streampark/issues</url>
+        <url>https://github.com/apache/streampark/issues</url>
     </issueManagement>
 
     <properties>

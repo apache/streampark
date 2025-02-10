@@ -33,7 +33,7 @@ concurrency:
 jobs:
   build_image:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'apache/incubator-streampark' }}
+    if: ${{ github.repository == 'apache/streampark' }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3

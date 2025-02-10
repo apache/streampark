@@ -30,11 +30,11 @@ body:
     attributes:
       label: Search before asking
       description: >
-        Please make sure to search in the [SPIP](https://github.com/apache/incubator-streampark/issues?q=is%3Aissue+label%3A%22SPIP%22+) first
+        Please make sure to search in the [SPIP](https://github.com/apache/streampark/issues?q=is%3Aissue+label%3A%22SPIP%22+) first
         to see whether the same SPIP was created already.
       options:
         - label: >
-            I had searched in the [SPIP](https://github.com/apache/incubator-streampark/issues?q=is%3Aissue+label%3A%22SPIP%22+) and found no
+            I had searched in the [SPIP](https://github.com/apache/streampark/issues?q=is%3Aissue+label%3A%22SPIP%22+) and found no
             similar SPIP.
           required: true
 

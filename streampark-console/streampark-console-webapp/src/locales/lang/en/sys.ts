@@ -41,8 +41,7 @@ export default {
       "Sorry, you can't access. May be because you don't have permissions or the Sign In is invalid",
     error404: 'Sorry, resource not found',
     error501: '<a href="https://streampark.apache.org/">View the official documentation?</a>',
-    error502:
-      '<a href="https://github.com/apache/incubator-streampark/issues/new/choose">report issue ?</a>',
+    error502: '<a href="https://github.com/apache/streampark/issues/new/choose">report issue ?</a>',
     errorMsg: 'System error,Please contact the administrator',
   },
   app: {

@@ -50,7 +50,7 @@ public class StartedUpRunner implements ApplicationRunner {
             System.out.println("                                       /_/                        \n\n");
             System.out.println("    Version:  2.2.0                                                   ");
             System.out.println("    WebSite:  https://streampark.apache.org                           ");
-            System.out.println("    GitHub :  https://github.com/apache/incubator-streampark          ");
+            System.out.println("    GitHub :  https://github.com/apache/streampark          ");
             System.out.println("    Info   :  streampark-console start successful                     ");
             System.out.println("    Local  :  http://localhost:" + port);
             System.out.println("    Time   :  " + LocalDateTime.now() + "\n\n");

@@ -57,7 +57,7 @@ jobs:
       - name: Check license header
         uses: apache/skywalking-eyes/header@main
   code-style:
-    if: github.repository == 'apache/incubator-streampark'
+    if: github.repository == 'apache/streampark'
     name: Code style
     runs-on: ubuntu-latest
     needs: license-header

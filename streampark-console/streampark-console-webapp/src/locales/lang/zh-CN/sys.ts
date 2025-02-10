@@ -39,8 +39,7 @@ export default {
     error403: '抱歉，您无法访问。可能是因为你没有权限或登录无效',
     error404: '抱歉，未找到资源',
     error501: '<a href="https://streampark.apache.org/">查看官方文档?</a>',
-    error502:
-      '<a href="https://github.com/apache/incubator-streampark/issues/new/choose">报告问题 ?</a>',
+    error502: '<a href="https://github.com/apache/streampark/issues/new/choose">报告问题 ?</a>',
     errorMsg: '系统错误，请联系管理员',
   },
   app: { logoutTip: '温馨提醒', logoutMessage: '是否确认退出系统?', menuLoading: '菜单加载中...' },

@@ -26,14 +26,14 @@
 
 <div align="center">
 
-[![Stars](https://img.shields.io/github/stars/apache/streampark?style=for-the-badge&label=stars)](https://github.com/apache/incubator-streampark/stargazers)
-[![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg?style=for-the-badge&label=release)](https://github.com/apache/incubator-streampark/releases)
+[![Stars](https://img.shields.io/github/stars/apache/streampark?style=for-the-badge&label=stars)](https://github.com/apache/streampark/stargazers)
+[![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg?style=for-the-badge&label=release)](https://github.com/apache/streampark/releases)
 [![Total Downloads](https://img.shields.io/github/downloads/apache/streampark/total.svg?style=for-the-badge&label=downloads)](https://streampark.apache.org/download)
 [![Twitter Follow](https://img.shields.io/twitter/follow/ASFStreamPark?label=follow&logo=x&style=for-the-badge)](https://twitter.com/ASFStreamPark)
 
 **[Website](https://streampark.apache.org)**&nbsp;&nbsp;|&nbsp;&nbsp;
 **[Official Docs](https://streampark.apache.org/docs/get-started/intro)**&nbsp;&nbsp;|&nbsp;&nbsp;
-**[FAQ](https://github.com/apache/incubator-streampark/issues/507)**
+**[FAQ](https://github.com/apache/streampark/issues/507)**
 
 ![](https://streampark.apache.org/image/dashboard-preview.png)
 
@@ -78,17 +78,17 @@ Download address for run-directly software package: https://streampark.apache.or
 
 ## 💋 Our users
 
-Various companies and organizations use Apache StreamPark™ for research, production and commercial products. Are you using this project? [Welcome to add your company](https://github.com/apache/incubator-streampark/issues/163)!
+Various companies and organizations use Apache StreamPark™ for research, production and commercial products. Are you using this project? [Welcome to add your company](https://github.com/apache/streampark/issues/163)!
 
 ![Our users](https://streampark.apache.org/image/users.png)
 
 ## 🤝 Contribution
 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/apache/incubator-streampark/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/apache/streampark/pulls)
 
 ### 🙋 Submit Pull Request and Issues
 
-You can submit any ideas as [pull requests](https://github.com/apache/incubator-streampark/pulls) or as [issues](https://github.com/apache/incubator-streampark/issues/new/choose).
+You can submit any ideas as [pull requests](https://github.com/apache/streampark/pulls) or as [issues](https://github.com/apache/streampark/issues/new/choose).
 
 > If you're new to posting issues, we ask that you read [*How To Ask Questions The Smart Way*](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
@@ -101,7 +101,7 @@ Mail List is the most recognized form of communication in Apache community. See 
 
 Thank you to all the people who already contributed to Apache StreamPark™!
 
-[![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/incubator-streampark/graphs/contributors)
+[![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/streampark/graphs/contributors)
 
 ## License
 

@@ -37,7 +37,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *                                     /_/
  *
  *   WebSite:  https://streampark.apache.org
- *   GitHub :  https://github.com/apache/incubator-streampark
+ *   GitHub :  https://github.com/apache/streampark
  *
  *   [StreamPark] Make stream processing easier ô~ô!
  *

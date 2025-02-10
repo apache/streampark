@@ -1,5 +1,5 @@
 // github repo url
-export const GITHUB_URL = 'https://github.com/apache/incubator-streampark';
+export const GITHUB_URL = 'https://github.com/apache/streampark';
 
 // doc
 export const DOC_URL = 'https://streampark.apache.org/docs/get-started/intro';

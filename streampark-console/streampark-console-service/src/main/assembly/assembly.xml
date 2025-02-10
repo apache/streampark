@@ -21,7 +21,7 @@
         <format>tar.gz</format>
     </formats>
     <includeBaseDirectory>true</includeBaseDirectory>
-    <baseDirectory>apache-streampark-${project.version}-incubating-bin</baseDirectory>
+    <baseDirectory>apache-streampark-${project.version}-bin</baseDirectory>
 
     <dependencySets>
         <dependencySet>
@@ -122,7 +122,6 @@
             <outputDirectory/>
             <includes>
                 <include>README.md</include>
-                <include>DISCLAIMER</include>
             </includes>
         </fileSet>
         <fileSet>

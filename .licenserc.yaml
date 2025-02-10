@@ -39,7 +39,6 @@ header:
     - '**/known-dependencies.txt'
     - '**/LICENSE'
     - '**/NOTICE'
-    - "DISCLAIMER"
     - '**/*.MD'
     - '**/*.ftl'
     - '**/*.tpl'

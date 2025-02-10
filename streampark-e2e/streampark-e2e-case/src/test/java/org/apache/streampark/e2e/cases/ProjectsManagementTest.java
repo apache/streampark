@@ -44,7 +44,7 @@ public class ProjectsManagementTest {
 
     private static final String editedProjectName = "e2e_test_project_edited";
 
-    private static final String url = "https://github.com/apache/incubator-streampark-quickstart";
+    private static final String url = "https://github.com/apache/streampark-quickstart";
 
     private static final String branch = "dev";
 
