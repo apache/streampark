@@ -12,6 +12,7 @@ aether-transport-http-1.1.0.jar
 aether-util-1.1.0.jar
 aircompressor-0.10.jar
 antlr4-runtime-4.8-1.jar
+apiguardian-api-1.1.2.jar
 aopalliance-repackaged-2.6.1.jar
 arrow-format-2.0.0.jar
 arrow-memory-core-2.0.0.jar
@@ -23,6 +24,7 @@ asm-commons-8.0.jar
 asm-tree-8.0.jar
 asm-util-8.0.jar
 aspectjweaver-1.9.7.jar
+avatica-core-1.22.0.jar
 audience-annotations-0.5.0.jar
 avro-1.8.2.jar
 avro-ipc-1.8.2.jar
@@ -31,6 +33,8 @@ bcpkix-jdk18on-1.76.jar
 bcprov-jdk18on-1.76.jar
 bcutil-jdk18on-1.76.jar
 buji-pac4j-5.0.1.jar
+calcite-core-1.32.0.jar
+calcite-linq4j-1.32.0.jar
 caffeine-2.8.6.jar
 checker-qual-3.5.0.jar
 chill-java-0.9.5.jar
@@ -68,6 +72,10 @@ enumeratum_2.12-1.6.1.jar
 failureaccess-1.0.1.jar
 flatbuffers-java-1.9.0.jar
 flink-annotations-1.18.1.jar
+flink-cdc-cli-3.2.1.jar
+flink-cdc-common-3.2.1.jar
+flink-cdc-composer-3.2.1.jar
+flink-cdc-runtime-3.2.1.jar
 flink-clients-1.18.1.jar
 flink-core-1.18.1.jar
 flink-hadoop-fs-1.18.1.jar
@@ -159,6 +167,7 @@ jna-5.13.0.jar
 jsr305-1.3.9.jar
 jsch-0.2.11.jar
 json-smart-2.4.10.jar
+json-path-2.7.0.jar
 json4s-ast_2.12-3.7.0-M11.jar
 json4s-core_2.12-3.7.0-M11.jar
 json4s-jackson_2.12-3.7.0-M11.jar
@@ -166,6 +175,7 @@ json4s-scalap_2.12-3.7.0-M11.jar
 jsp-api-2.1.jar
 jsqlparser-4.4.jar
 jul-to-slf4j-1.7.36.jar
+jts-core-1.19.0.jar
 kafka-clients-3.1.2.jar
 kerb-admin-1.0.1.jar
 kerb-client-1.0.1.jar
@@ -318,6 +328,7 @@ sisu-inject-bean-1.4.2.jar
 sisu-inject-plexus-1.4.2.jar
 slf4j-api-1.7.32.jar
 snakeyaml-2.0.jar
+snakeyaml-engine-2.6.jar
 spark-catalyst_2.12-3.1.2.jar
 spark-core_2.12-3.1.2.jar
 spark-kvstore_2.12-3.1.2.jar
