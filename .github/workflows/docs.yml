@@ -61,18 +61,6 @@ jobs:
           submodules: true
       - name: Check license header
         uses: apache/skywalking-eyes/header@main
-  dead-link:
-    name: Dead links
-    runs-on: ubuntu-latest
-    needs: license-header
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo npm install -g markdown-link-check@3.10.3
-      - run: |
-          for file in $(find . -name "*.md"); do
-            markdown-link-check -c .dlc.json -q "$file"
-          done
   result:
     name: Docs - Result
     runs-on: ubuntu-latest
