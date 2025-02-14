@@ -19,7 +19,7 @@
 Apache StreamPark
 ==========
 
-<img src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo" height="100px" align="right" />
+<img src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo" height="60px" align="right" />
 
 **StreamPark**: a streaming application development framework and cloud-native real-time computing platform.
 
