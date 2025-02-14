@@ -66,16 +66,15 @@ more:
 ./build.sh
 ```
 
-🗄 Details:how to [Development](https://streampark.apache.org/docs/development/development)
+🗄 how to [Development](https://streampark.apache.org/docs/development/development)
 
 ## ⬇️ Downloads
 
-Download address for run-directly software package: https://streampark.apache.org/download
+Please head to the [releases page](https://streampark.apache.org/download) to download a release of Apache StreamPark.
 
 ## 📚 Docs
 
-All Documentation   🔗[Docs](https://streampark.apache.org/docs/get-started)
-
+[Official Documentation](https://streampark.apache.org/docs/get-started)
 
 ## 💋 Our users
 
