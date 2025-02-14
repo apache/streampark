@@ -99,8 +99,6 @@ We welcome your suggestions, comments (including criticisms), comments and contr
 
 Thank you to all the people who already contributed to Apache StreamPark!
 
-[![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/streampark/graphs/contributors)
-
 ## 💬 Contact Us
 
 Contact us through the following mailing list.
