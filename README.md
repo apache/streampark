@@ -68,15 +68,21 @@ more:
 
 🗄 Details:how to [Development](https://streampark.apache.org/docs/development/development)
 
-## 🧑‍💻 Downloads
+## ⬇️ Downloads
 
 Download address for run-directly software package: https://streampark.apache.org/download
+
+## 📚 Docs
+
+All Documentation   🔗[Docs](https://streampark.apache.org/docs/get-started)
+
 
 ## 💋 Our users
 
 Various companies and organizations use Apache StreamPark for research, production and commercial products. Are you using this project? [Welcome to add your company](https://github.com/apache/streampark/issues/163)!
 
 ![Our users](https://streampark.apache.org/image/users.png)
+
 
 ## 🤝 Contribution
 
@@ -92,18 +98,20 @@ You can submit any ideas as [pull requests](https://github.com/apache/streampark
 
 We welcome your suggestions, comments (including criticisms), comments and contributions. See [How to Contribute](https://streampark.apache.org/community/submit_guide/submit_code) and [Code Submission Guide](https://streampark.apache.org/community/submit_guide/code_style_and_quality_guide)
 
-### 📤 Subscribe Mailing Lists
-Mail List is the most recognized form of communication in Apache community. See how to [Join the Mailing Lists](https://streampark.apache.org/community/contribution_guide/mailing_lists)
-
 Thank you to all the people who already contributed to Apache StreamPark!
 
 [![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/streampark/graphs/contributors)
 
-## License
+## 💬 Contact Us
 
-Licensed under the [Apache License, Version 2.0](LICENSE)
+Contact us through the following mailing list.
 
-## 💬 Social Media
+| Name                                                          | Mailing list                                                                                                                                                                               | 
+|:--------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [dev@streampark.apache.org](mailto:dev@streampark.apache.org) | [Subscribe](mailto:dev-subscribe@streampark.apache.org)、[Unsubscribe](mailto:dev-unsubscribe@streampark.apache.org) 、[Archives](http://mail-archives.apache.org/mod_mbox/streampark-dev/) |
+
+
+## 💿 Social Media
 
 - [X (Twitter)](https://twitter.com/ASFStreamPark)
 - [Zhihu](https://www.zhihu.com/people/streampark) (in Chinese)
@@ -111,3 +119,8 @@ Licensed under the [Apache License, Version 2.0](LICENSE)
 - WeChat Official Account (in Chinese, scan the QR code to follow)
 
 <img src="https://streampark.apache.org/image/wx_qr.png" alt="Join the Group" height="350px"><br>
+
+
+## 📜 License
+
+Licensed under the [Apache License, Version 2.0](LICENSE)
