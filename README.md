@@ -21,7 +21,7 @@ Apache StreamPark
 
 <img src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo" height="90px" align="right" />
 
-**StreamPark**: a stream processing development framework and real-time computing platform.
+**StreamPark**: a streaming application development framework and cloud-native real-time computing platform.
 
 [![GitHub stars](https://img.shields.io/github/stars/apache/streampark?style=for-the-badge&label=stars)](https://github.com/apache/streampark/stargazers)
 [![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg?style=for-the-badge&label=release)](https://github.com/apache/streampark/releases)
@@ -31,7 +31,7 @@ Apache StreamPark
 
 ## 📊 Overview
 
-**StreamPark** is a streaming application development framework and one-stop cloud-native real-time computing platform.
+**StreamPark** is a streaming application development framework and cloud-native real-time computing platform. Designed to simplify the development and management of streaming applications, StreamPark provides a development framework for constructing stream processing applications using Apache Flink and Apache Spark, along with a professional streaming application management platform. The platform encompasses application development, debugging, interactive querying, deployment, operation, maintenance, and more. Originally named StreamX, the project was renamed StreamPark in August 2022 and officially graduated as an Apache Top-Level Project (TLP) in January 2025.
 
 * Streaming Application Development Framework
     * StreamPark provides a Streaming application framework to simplify Apache Flink and Apache Spark application development, offering plug-and-play connectors to reduce the learning curve and development complexity.
