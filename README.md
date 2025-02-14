@@ -25,7 +25,7 @@ Apache StreamPark
 
 [![GitHub stars](https://img.shields.io/github/stars/apache/streampark?style=for-the-badge&label=stars)](https://github.com/apache/streampark/stargazers)
 [![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg?style=for-the-badge&label=release)](https://github.com/apache/streampark/releases)
-[![Official Website](<https://img.shields.io/badge/Official%20Website%20%E2%86%92-rgb(66,56,255)?style=for-the-badge>)](https://streampark.apache.org/)
+[![X Follow](https://img.shields.io/badge/2K%2B-follow?style=for-the-badge&logo=X&label=%40ASFStreamPark)](https://x.com/ASFStreamPark)
 
 ## 📊 Overview
 
