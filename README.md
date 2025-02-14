@@ -56,7 +56,7 @@ Apache StreamPark
 curl -L https://streampark.apache.org/quickstart.sh | sh
 ```
 
-[Quick Start](https://streampark.apache.org/quickstart.mp4)
+https://github.com/user-attachments/assets/dd7d5a89-bc28-4ccc-9ad5-258925fc4f34
 
 more:
 - [Start with Docker](docker/README.md)
