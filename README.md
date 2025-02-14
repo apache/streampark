@@ -55,6 +55,9 @@ Apache StreamPark
 ```shell
 curl -L https://streampark.apache.org/quickstart.sh | sh
 ```
+
+[Quick Start](https://streampark.apache.org/quickstart.mp4)
+
 more:
 - [Start with Docker](docker/README.md)
 - [Start with Kubernetes](helm/README.md)
