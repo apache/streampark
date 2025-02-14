@@ -27,9 +27,7 @@ Apache StreamPark
 [![Latest release](https://img.shields.io/github/v/release/apache/streampark.svg?style=for-the-badge&label=release)](https://github.com/apache/streampark/releases)
 [![X Follow](https://img.shields.io/badge/2K%2B-follow?style=for-the-badge&logo=X&label=%40ASFStreamPark)](https://x.com/ASFStreamPark)
 
-[![Official Website](<https://img.shields.io/badge/Official%20Website%20%E2%86%92-rgb(15,214,106)?style=for-the-badge>)](https://streampark.apache.org/)
-[![Download](<https://img.shields.io/badge/Download%20%E2%86%92-rgb(66,56,255)?style=for-the-badge>)](https://streampark.apache.org/download)
-
+[![Official Website](<https://img.shields.io/badge/Official%20Website%20%E2%86%92-rgb(66,56,255)?style=for-the-badge>)](https://streampark.apache.org/)
 
 ## 📊 Overview
 
@@ -44,13 +42,13 @@ Apache StreamPark
 * Multi-engine/multi-version support
     * Support multiple versions of Apache Flink and Apache Spark, allowing seamless migration between different engines.
 * Multi-environment Compatibility
-    * Compatible with various cluster environments, you can submit Flink and Spark jobs to standalone clusters, YARN (Hadoop 2.x/3.x), and Kubernetes.
+    * Compatible with various cluster environments, you can submit Flink and Spark applications to standalone clusters, YARN (Hadoop 2.x/3.x), and Kubernetes.
 * Rich Ecosystems Support
     * Compatible with mainstream open-source technologies (e.g., Apache Flink, Apache Spark, Apache Paimon, Apache Doris) and ML/AI ecosystems, ensuring flexible technology adoption.
 * Easy to use
     * StreamPark is designed to lower the learning curve and entry barrier. Only one service, deployment easy, allowing even beginners to get started within minutes.
 
-<img src="https://streampark.apache.org/image/dashboard.png"/>
+<img src="https://streampark.apache.org/image/dashboard-preview.png"/>
 
 ## 🚀 QuickStart
 
