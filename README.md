@@ -39,10 +39,10 @@ Apache StreamPark
     * StreamPark delivers a one-stop real-time computing platform with core capabilities including application development, deployment, management and monitoring, etc.
 * **Supports Batch & Streaming**
     * Supports both Apache Flink and Apache Spark, enabling seamless integration of streaming and batch processing, with multi-engine/multi-version support on a single platform.
-* **Multi-engine/multi-version support**
-    * Support multiple versions of Apache Flink and Apache Spark, allowing seamless migration between different engines.
+* **Supports multi-engine/multi-version**
+    * StreamPark supports multiple versions of Apache Flink and Apache Spark, enabling users to develop and manage applications for different versions of these streaming engines within a single framework.
 * **Multi-environment Compatibility**
-    * Compatible with various cluster environments, you can submit Flink and Spark applications to standalone clusters, YARN (Hadoop 2.x/3.x), and Kubernetes.
+    * Compatible with various cluster environments, users can submit Flink and Spark applications to standalone clusters, YARN (Hadoop 2.x/3.x), and Kubernetes.
 * **Rich Ecosystems**
     * Compatible with mainstream open-source technologies (e.g., Apache Flink, Apache Spark, Apache Paimon, Apache Doris) and ML/AI ecosystems, ensuring flexible technology adoption.
 * **Easy to use**
