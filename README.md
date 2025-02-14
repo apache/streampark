@@ -115,7 +115,7 @@ Contact us through the following mailing list.
 - [bilibili](https://space.bilibili.com/455330087) (in Chinese)
 - WeChat Official Account (in Chinese, scan the QR code to follow)
 
-<img src="https://streampark.apache.org/image/wx_qr.png" alt="Join the Group" height="350px"><br>
+<img src="https://streampark.apache.org/image/wx_qr.png" alt="Join the Group" height="300px"><br>
 
 
 ## 📜 License
