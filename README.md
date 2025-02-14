@@ -80,7 +80,7 @@ Please head to the [releases page](https://streampark.apache.org/download) to do
 
 Various companies and organizations use Apache StreamPark for research, production and commercial products. Are you using this project? [Welcome to add your company](https://github.com/apache/streampark/issues/163)!
 
-![Our users](https://streampark.apache.org/image/users.png)
+![Our users](https://streampark.apache.org/image/users.png?20250214)
 
 
 ## 🤝 Contribution
