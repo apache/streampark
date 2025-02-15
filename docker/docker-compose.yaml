@@ -18,7 +18,7 @@ version: '3.8'
 
 services:
   streampark:
-    image: apache/streampark:2.2.0  # Use the previously built image
+    image: apache/streampark:latest
     ports:
       - "10000:10000"  # Map port 10000 of the container to port 10000 of the host to allow access to the service on that port
     environment:

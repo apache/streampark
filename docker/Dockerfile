@@ -18,62 +18,47 @@ FROM ubuntu:22.04
 
 USER root
 
-# Install basic tools
-RUN apt update && apt install -y wget curl vim net-tools iputils-ping \
-    && apt install software-properties-common -y \
-    && add-apt-repository ppa:openjdk-r/ppa -y
-RUN apt update && apt install -y openjdk-8-jdk
-RUN JAVA_PATH=$(ls -l /usr/lib/jvm | grep java-8-openjdk | grep ^d | awk -F ' ' '{print $9}'); \
-    if [ -z "${JAVA_PATH}" ];then \
-        echo "JAVA_PATH not found: $JAVA_PATH"; \
-        exit 2; \
-    else \
-        ln -s /usr/lib/jvm/$JAVA_PATH/ /usr/lib/jvm/jdk8; \
-    fi
+# Install basic tools and dependencies
+RUN apt update && \
+    apt install -y wget curl vim net-tools iputils-ping software-properties-common ca-certificates gnupg && \
+    add-apt-repository ppa:openjdk-r/ppa -y && \
+    apt update && \
+    apt install -y openjdk-8-jdk && \
+    # Set up Java 8 symlink
+    JAVA_PATH=$(ls -d /usr/lib/jvm/java-8-openjdk-*) && \
+    ln -s "$JAVA_PATH" /usr/lib/jvm/jdk8 && \
+    # Clean up to reduce image size
+    apt clean && rm -rf /var/lib/apt/lists/*
+
 ENV JAVA_HOME=/usr/lib/jvm/jdk8
 
-
 # Install docker
-RUN \
-    # Add Docker's official GPG key:
-    apt update && \
-    apt install -y ca-certificates curl gnupg && \
-    install -m 0755 -d /etc/apt/keyrings && \
+RUN install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
-    # Add the repository to Apt sources:
-    echo \
-        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-        tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt update && \
-    # Install the Docker packages.
-    apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && \
+    apt clean && rm -rf /var/lib/apt/lists/* \
 
 
 # Install Tini
 ARG TARGETPLATFORM
-ENV TINI_VERSION v0.19.0
-RUN echo "TARGETPLATFORM: $TARGETPLATFORM"
-RUN \
-    if [ "$TARGETPLATFORM" = "linux/amd64" ];then \
-        TINI_PLATFORM=amd64; \
-        wget --no-check-certificate -O /usr/sbin/tini https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-$TINI_PLATFORM; \
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ];then \
-        TINI_PLATFORM=arm64; \
-        wget --no-check-certificate -O /usr/sbin/tini https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-$TINI_PLATFORM; \
-    else \
-        echo "unknown TARGETPLATFORM: $TARGETPLATFORM"; \
-        exit 2;  \
-    fi
-RUN chmod +x /usr/sbin/tini
+ENV TINI_VERSION=v0.19.0
 
+RUN case "$TARGETPLATFORM" in \
+        "linux/amd64") TINI_PLATFORM=amd64 ;; \
+        "linux/arm64") TINI_PLATFORM=arm64 ;; \
+        *) echo "Unknown TARGETPLATFORM: $TARGETPLATFORM" && exit 2 ;; \
+    esac && \
+    wget --no-check-certificate -O /usr/sbin/tini "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${TINI_PLATFORM}" && \
+    chmod +x /usr/sbin/tini
 
 # Install StreamPark
-COPY dist/apache-streampark*-*-bin.tar.gz /
-RUN tar -zxvf apache-streampark*-*-bin.tar.gz \
-    && mv apache-streampark*-*-bin streampark \
-    && rm -f apache-streampark*-*-bin.tar.gz
-
+COPY dist/apache-streampark*-*-bin.tar.gz /tmp/streampark.tar.gz
+RUN tar -zxvf /tmp/streampark.tar.gz -C /opt && \
+    mv /opt/apache-streampark*-*-bin /opt/streampark && \
+    rm -f /tmp/streampark.tar.gz
 
 ENTRYPOINT ["/usr/sbin/tini", "--", "/streampark/bin/streampark.sh", "start_docker"]
