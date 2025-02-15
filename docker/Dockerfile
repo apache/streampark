@@ -26,8 +26,7 @@ ARG JAVA_MAJOR_VERSION=8
 ARG TINI_VERSION=v0.19.0
 
 # Base system setup
-RUN set -euxo pipefail; \
-    apt-get update -qq && \
+RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
         software-properties-common \
         ca-certificates \
@@ -43,13 +42,11 @@ RUN set -euxo pipefail; \
     rm -rf /var/lib/apt/lists/*
 
 # Configure Java environment
-RUN set -euxo pipefail; \
-    ARCH=$(dpkg --print-architecture); \
+RUN ARCH=$(dpkg --print-architecture); \
     ln -sv "/usr/lib/jvm/java-${JAVA_MAJOR_VERSION}-openjdk-${ARCH}" "${JAVA_HOME}"
 
 # Install docker
-RUN set -euxo pipefail; \
-    mkdir -p /etc/apt/keyrings && \
+RUN mkdir -p /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
     gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
@@ -69,8 +66,7 @@ RUN set -euxo pipefail; \
 
 # Install Tini
 ARG TARGETPLATFORM
-RUN set -euxo pipefail; \
-    case "${TARGETPLATFORM}" in \
+RUN case "${TARGETPLATFORM}" in \
         "linux/amd64") ARCH=amd64 ;; \
         "linux/arm64") ARCH=arm64 ;; \
         *) echo "Unsupported platform: ${TARGETPLATFORM}"; exit 1 ;; \
