@@ -36,9 +36,11 @@ ENV JAVA_HOME=/usr/lib/jvm/jdk8
 RUN install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
+    # Add the repository to Apt sources:
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt update && \
+    # Install the Docker packages.
     apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && \
     apt clean && rm -rf /var/lib/apt/lists/* \
 
@@ -46,6 +48,8 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
 # Install Tini
 ARG TARGETPLATFORM
 ENV TINI_VERSION=v0.19.0
+
+RUN echo "TARGET PLATFORM: $TARGETPLATFORM"
 
 RUN case "$TARGETPLATFORM" in \
         "linux/amd64") TINI_PLATFORM=amd64 ;; \
