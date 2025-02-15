@@ -18,32 +18,33 @@ FROM ubuntu:22.04
 
 USER root
 
-# Install basic tools and dependencies
-RUN apt update && \
-    apt install -y wget curl vim net-tools iputils-ping software-properties-common ca-certificates gnupg && \
-    add-apt-repository ppa:openjdk-r/ppa -y && \
-    apt update && \
-    apt install -y openjdk-8-jdk && \
-    # Set up Java 8 symlink
+# Install basic tools
+RUN apt update && apt install -y wget curl vim net-tools iputils-ping \
+    && apt install software-properties-common -y \
+    && add-apt-repository ppa:openjdk-r/ppa -y
+
+RUN apt update && apt install -y openjdk-8-jdk && \
     JAVA_PATH=$(ls -d /usr/lib/jvm/java-8-openjdk-*) && \
-    ln -s "$JAVA_PATH" /usr/lib/jvm/jdk8 && \
-    # Clean up to reduce image size
-    apt clean && rm -rf /var/lib/apt/lists/*
+    ln -s "$JAVA_PATH" /usr/lib/jvm/jdk8
 
 ENV JAVA_HOME=/usr/lib/jvm/jdk8
 
 # Install docker
-RUN install -m 0755 -d /etc/apt/keyrings && \
+RUN \
+    # Add Docker's official GPG key:
+    apt update && \
+    apt install -y ca-certificates curl gnupg && \
+    install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
     # Add the repository to Apt sources:
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    echo \
+        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+        tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt update && \
     # Install the Docker packages.
-    apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && \
-    apt clean && rm -rf /var/lib/apt/lists/* \
-
+    apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # Install Tini
 ARG TARGETPLATFORM
