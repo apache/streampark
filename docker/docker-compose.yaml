@@ -18,32 +18,31 @@ version: '3.8'
 
 services:
   streampark:
-    image: apache/streampark:2.2.0
+    image: apache/streampark:2.2.0  # Use the previously built image
     ports:
-      - "10000:10000"
-      - "10030:10030"
+      - "10000:10000"  # Map port 10000 of the container to port 10000 of the host to allow access to the service on that port
     environment:
-      - TZ=Asia/Shanghai
-      - DATASOURCE_DIALECT=h2 # h2, mysql, pgsql
-#     If use mysql or pgsql, please set the following parameters
-#     - DATASOURCE_URL=jdbc:mysql://localhost:3306/streampark?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
-#     - DATASOURCE_URL=jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
-#     - DATASOURCE_USERNAME=root
-#     - DATASOURCE_PASSWORD=streampark
+      - TZ=Asia/Shanghai  # Container's timezone
+      - DATASOURCE_DIALECT=h2   # Set the datasource dialect, supports h2, mysql, pgsql, currently set to h2
+                                # If using MySQL or PostgresSQL, set the following parameters:
+                                # - DATASOURCE_URL=jdbc:mysql://localhost:3306/streampark?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+                                # - DATASOURCE_URL=jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
+                                # - DATASOURCE_USERNAME=root  # Database username
+                                # - DATASOURCE_PASSWORD=streampark  # Database password
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/hosts:/etc/hosts:ro
-      - ~/.kube:/root/.kube:ro
-    privileged: true
-    restart: always
+      - /var/run/docker.sock:/var/run/docker.sock  # Mount the host's Docker socket inside the container to allow interaction with Docker
+      - /etc/hosts:/etc/hosts:ro  # Mount the host's /etc/hosts file inside the container, read-only access
+      - ~/.kube:/root/.kube:ro    # Mount the host's kube configuration directory inside the container to access the Kubernetes cluster
+    privileged: true  # Grant the container higher privileges, typically for scenarios requiring interaction with host resources
+    restart: always   # Ensure the container always restarts after crashes or host reboots
     networks:
-      - streampark
-    healthcheck:
-      test: [ "CMD", "curl", "http://streampark:10000" ]
-      interval: 5s
-      timeout: 5s
-      retries: 120
+      - streampark    # Use a custom network named streampark
+    healthcheck:  # Set a health check
+      test: [ "CMD", "curl", "http://streampark:10000" ]  # Use curl to check if port 10000 of the container is accessible
+      interval: 5s  # Health check interval is 5 seconds
+      timeout: 5s  # Timeout for each health check is 5 seconds
+      retries: 120  # The container will be considered unhealthy after 120 failed health checks
 
 networks:
   streampark:
-    driver: bridge
+    driver: bridge  # Use the bridge network driver
