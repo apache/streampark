@@ -18,52 +18,72 @@ FROM ubuntu:22.04
 
 USER root
 
-# Install basic tools
-RUN apt update && apt install -y wget curl vim net-tools iputils-ping \
-    && apt install software-properties-common -y \
-    && add-apt-repository ppa:openjdk-r/ppa -y
+ENV LANG=C.UTF-8 \
+    JAVA_HOME=/usr/lib/jvm/jdk8
 
-RUN apt update && apt install -y openjdk-8-jdk && \
-    JAVA_PATH=$(ls -d /usr/lib/jvm/java-8-openjdk-*) && \
-    ln -s "$JAVA_PATH" /usr/lib/jvm/jdk8
+# Build arguments for version management
+ARG JAVA_MAJOR_VERSION=8
+ARG TINI_VERSION=v0.19.0
 
-ENV JAVA_HOME=/usr/lib/jvm/jdk8
+# Base system setup
+RUN set -euxo pipefail; \
+    apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        software-properties-common \
+        ca-certificates \
+        curl \
+        gnupg \
+        iputils-ping \
+        net-tools \
+        vim \
+        wget && \
+    add-apt-repository -y ppa:openjdk-r/ppa && \
+    apt-get update -qq && \
+    apt-get install -y "openjdk-${JAVA_MAJOR_VERSION}-jdk" && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configure Java environment
+RUN set -euxo pipefail; \
+    ARCH=$(dpkg --print-architecture); \
+    ln -sv "/usr/lib/jvm/java-${JAVA_MAJOR_VERSION}-openjdk-${ARCH}" "${JAVA_HOME}"
 
 # Install docker
-RUN \
-    # Add Docker's official GPG key:
-    apt update && \
-    apt install -y ca-certificates curl gnupg && \
-    install -m 0755 -d /etc/apt/keyrings && \
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+RUN set -euxo pipefail; \
+    mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
     # Add the repository to Apt sources:
-    echo \
-        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-        tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-    apt update && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    tee /etc/apt/sources.list.d/docker.list >/dev/null && \
+    apt-get update -qq && \
     # Install the Docker packages.
-    apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    apt-get install -y --no-install-recommends \
+        docker-ce \
+        docker-ce-cli \
+        containerd.io \
+        docker-buildx-plugin \
+        docker-compose-plugin && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Tini
 ARG TARGETPLATFORM
-ENV TINI_VERSION=v0.19.0
-
-RUN echo "TARGET PLATFORM: $TARGETPLATFORM"
-
-RUN case "$TARGETPLATFORM" in \
-        "linux/amd64") TINI_PLATFORM=amd64 ;; \
-        "linux/arm64") TINI_PLATFORM=arm64 ;; \
-        *) echo "Unknown TARGETPLATFORM: $TARGETPLATFORM" && exit 2 ;; \
-    esac && \
-    wget --no-check-certificate -O /usr/sbin/tini "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${TINI_PLATFORM}" && \
+RUN set -euxo pipefail; \
+    case "${TARGETPLATFORM}" in \
+        "linux/amd64") ARCH=amd64 ;; \
+        "linux/arm64") ARCH=arm64 ;; \
+        *) echo "Unsupported platform: ${TARGETPLATFORM}"; exit 1 ;; \
+    esac; \
+    wget --no-check-certificate \
+        -O /usr/sbin/tini \
+        "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${ARCH}" && \
     chmod +x /usr/sbin/tini
 
 # Install StreamPark
-COPY dist/apache-streampark*-*-bin.tar.gz /tmp/streampark.tar.gz
-RUN tar -zxvf /tmp/streampark.tar.gz -C /opt && \
-    mv /opt/apache-streampark*-*-bin /opt/streampark && \
-    rm -f /tmp/streampark.tar.gz
+COPY dist/apache-streampark*-*-bin.tar.gz /
+RUN tar -zxvf apache-streampark*-*-bin.tar.gz \
+    && mv apache-streampark*-*-bin streampark \
+    && rm -f apache-streampark*-*-bin.tar.gz
 
 ENTRYPOINT ["/usr/sbin/tini", "--", "/streampark/bin/streampark.sh", "start_docker"]
