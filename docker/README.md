@@ -8,4 +8,4 @@
 
 http://localhost:10000
 
-#### [more detail](https://streampark.apache.org/docs/get-started/docker-deployment)
+#### [more detail](https://streampark.apache.org/docs/get-started/installation-docker)
