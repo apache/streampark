@@ -32,7 +32,7 @@ Apache StreamPark
 **StreamPark** is an open-source streaming application development framework and cloud-native real-time computing platform. Designed to simplify the development and management of streaming applications, StreamPark provides a development framework for developing stream processing applications using Apache Flink and Apache Spark, alongside a professional management platform. The platform covers the full lifecycle of streaming applications, including development, debugging, interactive querying, deployment, operations, and maintenance. Originally named StreamX, the project was rebranded as StreamPark in August 2022 and graduated as an Apache Top-Level Project (TLP) in January 2025.
 
 * **Streaming Application Development Framework**
-    * Provides a Delivers a streaming-application framework to accelerate Apache Flink and Spark development, featuring prebuilt plug-and-play APIs and connectors.
+    * Provides a streaming-application framework to accelerate Apache Flink and Spark development, featuring prebuilt plug-and-play APIs and connectors.
 * **Real-Time Computing Platform**
     * Provides a one-stop solution for real-time computing, featuring application development, deployment, management, monitoring, and more.
 * **Supports Batch & Streaming**
