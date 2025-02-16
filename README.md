@@ -38,7 +38,7 @@ Apache StreamPark
 * **Supports Batch & Streaming**
     * Supports Apache Flink and Apache Spark, enabling both stream processing and batch processing.
 * **Supports Multi-engine/Multi-version**
-  * Enables seamless cross-version development and management of Apache Flink and Apache Spark applications within a unified framework.
+  * Enables cross-version development and management of Apache Flink and Apache Spark applications within a unified framework.
 * **Multi-environment Compatibility**
     * Compatible with various cluster environments, users can submit Flink and Spark applications to standalone clusters, YARN (Hadoop 2.x/3.x), and Kubernetes.
 * **Rich Ecosystems**
