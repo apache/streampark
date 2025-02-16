@@ -29,22 +29,22 @@ Apache StreamPark
 
 ## 📊 Overview
 
-**StreamPark** is a streaming application development framework and cloud-native real-time computing platform. Designed to simplify the development and management of streaming applications, StreamPark provides a development framework for constructing stream processing applications using Apache Flink and Apache Spark, along with a professional streaming application management platform. The platform encompasses application development, debugging, interactive querying, deployment, operation, maintenance, and more. Originally named StreamX, the project was renamed StreamPark in August 2022 and officially graduated as an Apache Top-Level Project (TLP) in January 2025.
+**StreamPark** is an open-source streaming application development framework and cloud-native real-time computing platform. Designed to simplify the development and management of streaming applications, StreamPark provides a development framework for developing stream processing applications using Apache Flink and Apache Spark, alongside a professional management platform. The platform covers the full lifecycle of streaming applications, including development, debugging, interactive querying, deployment, operations, and maintenance. Originally named StreamX, the project was rebranded as StreamPark in August 2022 and graduated as an Apache Top-Level Project (TLP) in January 2025.
 
 * **Streaming Application Development Framework**
-    * StreamPark provides a Streaming application framework to simplify Apache Flink and Apache Spark application development, offering plug-and-play connectors to reduce the learning curve and development complexity.
+    * Provides a Delivers a streaming-application framework to accelerate Apache Flink and Spark development, featuring prebuilt plug-and-play APIs and connectors.
 * **Real-Time Computing Platform**
-    * StreamPark delivers a one-stop real-time computing platform with core capabilities including application development, deployment, management and monitoring, etc.
+    * Provides a one-stop solution for real-time computing, featuring application development, deployment, management, monitoring, and more.
 * **Supports Batch & Streaming**
-    * Supports both Apache Flink and Apache Spark, enabling seamless integration of streaming and batch processing, with multi-engine/multi-version support on a single platform.
-* **Supports multi-engine/multi-version**
-    * StreamPark supports multiple versions of Apache Flink and Apache Spark, enabling users to develop and manage applications for different versions of these streaming engines within a single framework.
+    * Supports Apache Flink and Apache Spark, enabling both stream processing and batch processing.
+* **Supports Multi-engine/Multi-version**
+  * Enables seamless cross-version development and management of Apache Flink and Apache Spark applications within a unified framework.
 * **Multi-environment Compatibility**
     * Compatible with various cluster environments, users can submit Flink and Spark applications to standalone clusters, YARN (Hadoop 2.x/3.x), and Kubernetes.
 * **Rich Ecosystems**
-    * Compatible with mainstream open-source technologies (e.g., Apache Flink, Apache Spark, Apache Paimon, Apache Doris) and ML/AI ecosystems, ensuring flexible technology adoption.
+    * Compatible with big-data ecosystem tools (e.g., Apache Flink, Apache Spark, Apache Paimon, Apache Doris) and ML/AI ecosystems.
 * **Easy to use**
-    * StreamPark is designed to lower the learning curve and entry barrier. Only one service, deployment easy, allowing even beginners to get started within minutes.
+    * Only one service, deployment easy, allowing even beginners to get started within minutes.
 
 <img src="https://streampark.apache.org/image/dashboard-preview.png"/>
 
