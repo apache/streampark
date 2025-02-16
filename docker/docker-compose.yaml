@@ -23,12 +23,12 @@ services:
       - "10000:10000"  # Map port 10000 of the container to port 10000 of the host to allow access to the service on that port
     environment:
       - TZ=Asia/Shanghai  # Container's timezone
-      - DATASOURCE_DIALECT=h2   # Set the datasource dialect, supports h2, mysql, pgsql, currently set to h2
-                                # If using MySQL or PostgresSQL, set the following parameters:
-                                # - DATASOURCE_URL=jdbc:mysql://localhost:3306/streampark?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
-                                # - DATASOURCE_URL=jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
-                                # - DATASOURCE_USERNAME=root  # Database username
-                                # - DATASOURCE_PASSWORD=streampark  # Database password
+      - DATASOURCE_DIALECT=h2   # Set the datasource dialect, supports h2, mysql, pgsql, default: h2
+      # If using MySQL or postgresql, please set the parameters:
+      # - DATASOURCE_URL=jdbc:mysql://localhost:3306/streampark?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+      # - DATASOURCE_URL=jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
+      # - DATASOURCE_USERNAME=root  # Database username
+      # - DATASOURCE_PASSWORD=streampark  # Database password
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Mount the host's Docker socket inside the container to allow interaction with Docker
       - /etc/hosts:/etc/hosts:ro  # Mount the host's /etc/hosts file inside the container, read-only access
