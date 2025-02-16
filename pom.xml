@@ -912,7 +912,6 @@
                             <exclude>compiler/**</exclude>
                             <exclude>dist-material/**</exclude>
                             <exclude>docker/**</exclude>
-                            <exclude>helm/**</exclude>
                             <exclude>mvnw</exclude>
                             <exclude>mvnw.cmd</exclude>
                             <exclude>README.md</exclude>

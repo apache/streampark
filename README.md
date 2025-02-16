@@ -50,20 +50,25 @@ Apache StreamPark
 
 ## 🚀 QuickStart
 
-```shell
-curl -L https://streampark.apache.org/quickstart.sh | sh
+#### 🐳 Play StreamPark in Docker
+
+```shell 
+  docker run -d -p 10000:10000 apache/streampark:latest
 ```
 
-https://github.com/user-attachments/assets/dd7d5a89-bc28-4ccc-9ad5-258925fc4f34
+---
 
-more:
-- [Start with Docker](docker/README.md)
-- [Start with Kubernetes](helm/README.md)
+#### 🖥️ Local Quick Installation Experience
+
+```shell
+  curl -L https://streampark.apache.org/quickstart.sh | sh
+```
+https://github.com/user-attachments/assets/dd7d5a89-bc28-4ccc-9ad5-258925fc4f34
 
 ## 🔨 How to Build
 
 ```shell
-./build.sh
+ ./build.sh
 ```
 
 🗄 how to [Development](https://streampark.apache.org/docs/development/development)
