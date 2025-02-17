@@ -18,6 +18,7 @@
 package org.apache.streampark.flink.packer.pipeline.impl
 
 import org.apache.streampark.common.fs.LfsOperator
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.ThreadUtils
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
 import org.apache.streampark.flink.kubernetes.ingress.IngressController
@@ -139,29 +140,34 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     execStep(5) {
       usingDockerClient {
         dockerClient =>
-          val pullImageCmd = {
-            // when the register address prefix is explicitly identified on base image tag,
-            // the user's pre-saved docker register auth info would be used.
-            val pullImageCmdState =
-              dockerConf.registerAddress != null && !baseImageTag.startsWith(
-                dockerConf.registerAddress)
-            if (pullImageCmdState) {
-              dockerClient.pullImageCmd(baseImageTag)
-            } else {
-              dockerClient
-                .pullImageCmd(baseImageTag)
-                .withAuthConfig(dockerConf.toAuthConf)
+          val imgExists = dockerClient.listImagesCmd().exec().exists(_.getRepoTags.exists(_.contains(baseImageTag)))
+          if (imgExists) {
+            logInfo(s"found local docker image $baseImageTag, no need to pull from remote.")
+          } else {
+            val pullImageCmd = {
+              // when the register address prefix is explicitly identified on base image tag,
+              // the user's pre-saved docker register auth info would be used.
+              val pullImageCmdState =
+                dockerConf.registerAddress != null && !baseImageTag.startsWith(
+                  dockerConf.registerAddress)
+              if (pullImageCmdState) {
+                dockerClient.pullImageCmd(baseImageTag)
+              } else {
+                dockerClient
+                  .pullImageCmd(baseImageTag)
+                  .withAuthConfig(dockerConf.toAuthConf)
+              }
             }
+            val pullCmdCallback = pullImageCmd
+              .asInstanceOf[HackPullImageCmd]
+              .start(watchDockerPullProcess {
+                pullRsp =>
+                  dockerProcess.pull.update(pullRsp)
+                  Future(dockerProcessWatcher.onDockerPullProgressChange(dockerProcess.pull.snapshot))
+              })
+            pullCmdCallback.awaitCompletion
+            logInfo(s"Already pulled docker image from remote register, imageTag=$baseImageTag")
           }
-          val pullCmdCallback = pullImageCmd
-            .asInstanceOf[HackPullImageCmd]
-            .start(watchDockerPullProcess {
-              pullRsp =>
-                dockerProcess.pull.update(pullRsp)
-                Future(dockerProcessWatcher.onDockerPullProgressChange(dockerProcess.pull.snapshot))
-            })
-          pullCmdCallback.awaitCompletion
-          logInfo(s"Already pulled docker image from remote register, imageTag=$baseImageTag")
       }(err => throw new Exception(s"Pull docker image failed, imageTag=$baseImageTag", err))
     }.getOrElse(throw getError.exception)
 
