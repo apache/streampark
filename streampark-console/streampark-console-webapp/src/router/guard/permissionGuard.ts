@@ -18,7 +18,12 @@ const whitePathList: PageEnum[] = [LOGIN_PATH];
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();
   const permissionStore = usePermissionStoreWithOut();
+
   router.beforeEach(async (to, from, next) => {
+    const isPageNoFound = [
+      PAGE_NOT_FOUND_ROUTE.name,
+      PAGE_NOT_FOUND_ROUTE.name + '_CHILD',
+    ].includes(to.name as string);
     if (
       from.path === ROOT_PATH &&
       to.path === PageEnum.BASE_HOME &&
@@ -72,7 +77,7 @@ export function createPermissionGuard(router: Router) {
     // Jump to the 404 page after processing the login
     if (
       from.path === LOGIN_PATH &&
-      to.name === PAGE_NOT_FOUND_ROUTE.name &&
+      isPageNoFound &&
       to.fullPath !== (userStore.getUserInfo.homePath || PageEnum.BASE_HOME)
     ) {
       next(userStore.getUserInfo.homePath || PageEnum.BASE_HOME);
@@ -103,7 +108,7 @@ export function createPermissionGuard(router: Router) {
 
     permissionStore.setDynamicAddedRoute(true);
 
-    if (to.name === PAGE_NOT_FOUND_ROUTE.name) {
+    if (isPageNoFound) {
       // After dynamically adding the route, it should be redirected to fullPath here, otherwise the 404 page content will load
       next({ path: to.fullPath, replace: true, query: to.query });
     } else {
