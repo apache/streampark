@@ -26,8 +26,8 @@ ARG JAVA_MAJOR_VERSION=8
 ARG TINI_VERSION=v0.19.0
 
 # Base system setup
-RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends \
+RUN apt update && \
+    apt install -y \
         software-properties-common \
         ca-certificates \
         curl \
@@ -37,8 +37,8 @@ RUN apt-get update -qq && \
         vim \
         wget && \
     add-apt-repository -y ppa:openjdk-r/ppa && \
-    apt-get update -qq && \
-    apt-get install -y "openjdk-${JAVA_MAJOR_VERSION}-jdk" && \
+    apt update && \
+    apt install -y "openjdk-${JAVA_MAJOR_VERSION}-jdk" && \
     rm -rf /var/lib/apt/lists/*
 
 # Configure Java environment
@@ -54,9 +54,9 @@ RUN mkdir -p /etc/apt/keyrings && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
     https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
     tee /etc/apt/sources.list.d/docker.list >/dev/null && \
-    apt-get update -qq && \
+    apt update && \
     # Install the Docker packages.
-    apt-get install -y --no-install-recommends \
+    apt install -y \
         docker-ce \
         docker-ce-cli \
         containerd.io \
