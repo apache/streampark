@@ -23,7 +23,7 @@ enum Api {
   ToggleTokenStatus = '/token/toggle',
   AddToken = '/token/create',
   DeleteToken = '/token/delete',
-  CHECK = 'token/check',
+  CHECK = '/token/check',
 }
 /**
  * get token list
