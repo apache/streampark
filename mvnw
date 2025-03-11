@@ -196,7 +196,7 @@ if $cygwin; then
 fi
 
 if [ ! -e "$javaSource" ]; then
-  error "ERROR: $javaSource not exists."
+  echo "ERROR: $javaSource not exists."
   exit 1
 fi
 
