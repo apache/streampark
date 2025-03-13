@@ -45,7 +45,10 @@ class IngressStrategyV1 extends IngressStrategy {
             Option(ingress)
               .map(ingress => ingress.getSpec.getRules.head)
               .map(rule => rule.getHost -> rule.getHttp.getPaths.head.getPath)
-              .map { case (host, path) => s"http://$host$path" }
+              .map { case (host, path) =>
+                val newPath = Option(path).filter(_.nonEmpty).map(_.replaceAll("\\/+$", "")).getOrElse("")
+                s"http://$host$newPath"
+              }
               .getOrElse(clusterClient.autoClose(_.getWebInterfaceURL))
           case None => clusterClient.autoClose(_.getWebInterfaceURL)
         }
