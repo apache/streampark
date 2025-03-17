@@ -434,7 +434,7 @@ create table "public"."t_flink_project" (
   "team_id" int8,
   "name" varchar(255) collate "pg_catalog"."default",
   "url" varchar(255) collate "pg_catalog"."default",
-  "branches" varchar(64) collate "pg_catalog"."default",
+  "refs" varchar(64) collate "pg_catalog"."default",
   "user_name" varchar(64) collate "pg_catalog"."default",
   "password" varchar(512) collate "pg_catalog"."default",
   "prvkey_path" varchar(128) collate "pg_catalog"."default",
