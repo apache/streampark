@@ -111,7 +111,7 @@ create table `t_flink_app` (
 -- ----------------------------
 drop table if exists `t_flink_app_backup`;
 create table `t_flink_app_backup` (
-`id` bigint not null,
+`id` bigint not null auto_increment,
 `app_id` bigint default null,
 `sql_id` bigint default null,
 `config_id` bigint default null,
