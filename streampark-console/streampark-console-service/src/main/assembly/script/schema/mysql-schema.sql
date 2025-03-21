@@ -200,7 +200,7 @@ create table `t_flink_project` (
   `team_id` bigint not null,
   `name` varchar(255) collate utf8mb4_general_ci default null,
   `url` varchar(255) collate utf8mb4_general_ci default null,
-  `branches` varchar(64) collate utf8mb4_general_ci default null,
+  `refs` varchar(255) collate utf8mb4_general_ci default null,
   `user_name` varchar(64) collate utf8mb4_general_ci default null,
   `password` varchar(512) collate utf8mb4_general_ci default null,
   `prvkey_path` varchar(128) collate utf8mb4_general_ci default null,
