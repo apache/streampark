@@ -180,10 +180,12 @@ drop table if exists `t_app_log`;
 create table `t_app_log` (
   `id` bigint not null auto_increment,
   `app_id` bigint default null,
+  `job_type` tinyint default null,
   `cluster_id` varchar(64) collate utf8mb4_general_ci default null,
   `tracking_url` varchar(255) collate utf8mb4_general_ci default null,
   `success` tinyint default null,
   `exception` text collate utf8mb4_general_ci,
+  `create_time` datetime default null,
   `option_time` datetime default null,
   `option_name` tinyint default null,
   `user_id` bigint default null,

@@ -53,6 +53,9 @@ public class ApplicationLog {
     /** start status */
     private Boolean success;
 
+    /** create time */
+    private Date createTime;
+
     /** option name */
     private Integer optionName;
 

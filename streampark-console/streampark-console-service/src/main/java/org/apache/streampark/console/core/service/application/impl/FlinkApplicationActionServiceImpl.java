@@ -534,6 +534,8 @@ public class FlinkApplicationActionServiceImpl
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
         applicationLog.setUserId(ServiceHelper.getUserId());
+        Date date = new Date();
+        applicationLog.setCreateTime(date);
         return applicationLog;
     }
 
