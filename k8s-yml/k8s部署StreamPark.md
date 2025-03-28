@@ -334,5 +334,11 @@ streampark-mysql.yml
 streampark.yml
 ````
 
+````shell
+# 镜像比默认的https://hub.docker.com/r/apache/streampark镜像小（711MB）
+[root@dev-kubectl ~]# docker images |grep 2.1.5
+ccr.ccs.tencentyun.com/huanghuanhui/streampark   2.1.5     e026f97c494f   3 hours ago   711MB
+[root@dev-kubectl ~]#
+````
 
 
