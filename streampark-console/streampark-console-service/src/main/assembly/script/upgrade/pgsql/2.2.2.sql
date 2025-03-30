@@ -36,3 +36,6 @@ ALTER TABLE "public"."t_flink_project"
 
 ALTER TABLE "public"."t_flink_project"
     rename column "branches" to "refs";
+
+ALTER TABLE "public"."t_app_log"
+    rename column "option_time" to "create_time";

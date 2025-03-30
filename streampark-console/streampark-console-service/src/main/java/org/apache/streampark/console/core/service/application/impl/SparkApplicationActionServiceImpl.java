@@ -217,7 +217,7 @@ public class SparkApplicationActionServiceImpl
         applicationLog.setJobType(EngineTypeEnum.SPARK.getCode());
         applicationLog.setOptionName(SparkOperationEnum.CANCEL.getValue());
         applicationLog.setAppId(application.getId());
-        applicationLog.setOptionTime(new Date());
+        applicationLog.setCreateTime(new Date());
         applicationLog.setClusterId(application.getClusterId());
         applicationLog.setUserId(ServiceHelper.getUserId());
         application.setOptionTime(new Date());
@@ -310,7 +310,7 @@ public class SparkApplicationActionServiceImpl
         applicationLog.setJobType(EngineTypeEnum.SPARK.getCode());
         applicationLog.setOptionName(SparkOperationEnum.START.getValue());
         applicationLog.setAppId(application.getId());
-        applicationLog.setOptionTime(new Date());
+        applicationLog.setCreateTime(new Date());
         applicationLog.setUserId(ServiceHelper.getUserId());
 
         // set the latest to Effective, (it will only become the current effective at this time)

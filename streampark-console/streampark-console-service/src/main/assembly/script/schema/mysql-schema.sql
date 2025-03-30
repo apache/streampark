@@ -186,7 +186,6 @@ create table `t_app_log` (
   `success` tinyint default null,
   `exception` text collate utf8mb4_general_ci,
   `create_time` datetime default null,
-  `option_time` datetime default null,
   `option_name` tinyint default null,
   `user_id` bigint default null,
   primary key (`id`) using btree

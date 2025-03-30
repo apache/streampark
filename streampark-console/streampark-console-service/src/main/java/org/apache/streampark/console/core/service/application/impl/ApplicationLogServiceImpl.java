@@ -43,7 +43,7 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
         Page<ApplicationLog> page = MybatisPager.getPage(request);
         return this.lambdaQuery()
             .eq(ApplicationLog::getAppId, applicationLog.getAppId())
-            .orderByDesc(ApplicationLog::getOptionTime).page(page);
+            .page(page);
     }
 
     @Override

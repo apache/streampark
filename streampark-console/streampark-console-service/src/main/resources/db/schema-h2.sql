@@ -169,7 +169,6 @@ create table if not exists `t_app_log` (
   `success` tinyint default null,
   `exception` text ,
   `create_time` datetime default null,
-  `option_time` datetime default null,
   `option_name` tinyint default null,
   `user_id` bigint default null comment 'operator user id',
   primary key(`id`)

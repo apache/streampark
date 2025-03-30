@@ -417,7 +417,6 @@ create table "public"."t_app_log" (
   "success" boolean,
   "exception" text collate "pg_catalog"."default",
   "create_time" timestamp(6),
-  "option_time" timestamp(6),
   "option_name" int2,
   "user_id" int8
 )

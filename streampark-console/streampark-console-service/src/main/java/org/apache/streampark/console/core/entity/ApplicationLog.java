@@ -53,14 +53,11 @@ public class ApplicationLog {
     /** start status */
     private Boolean success;
 
-    /** create time */
-    private Date createTime;
-
     /** option name */
     private Integer optionName;
 
     /** option time */
-    private Date optionTime;
+    private Date createTime;
     /** exception at the start */
     private String exception;
     /** The user who operates the application */
