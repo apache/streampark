@@ -236,18 +236,18 @@ public class SparkApplicationManageServiceImpl
         return page;
     }
 
-    private AppControl getAppControl(SparkApplication record){
+    private AppControl getAppControl(SparkApplication record) {
         return new AppControl()
             .setAllowBuild(
                 record.getBuildStatus() == null
                     || !PipelineStatusEnum.running
-                    .getCode()
-                    .equals(record.getBuildStatus()))
+                        .getCode()
+                        .equals(record.getBuildStatus()))
             .setAllowStart(
                 !record.shouldTracking()
                     && PipelineStatusEnum.success
-                    .getCode()
-                    .equals(record.getBuildStatus()))
+                        .getCode()
+                        .equals(record.getBuildStatus()))
             .setAllowStop(record.isRunning())
             .setAllowView(record.shouldTracking());
     }
