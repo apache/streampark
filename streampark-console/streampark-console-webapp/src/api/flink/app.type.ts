@@ -145,6 +145,7 @@ interface AppControl {
   allowStart: boolean;
   allowStop: boolean;
   allowBuild: boolean;
+  allowView: boolean;
 }
 /* cancel params */
 export interface CancelParam {

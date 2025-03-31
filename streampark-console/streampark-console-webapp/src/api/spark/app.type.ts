@@ -112,6 +112,7 @@ interface AppControl {
   allowStart: boolean;
   allowStop: boolean;
   allowBuild: boolean;
+  allowView: boolean;
 }
 
 // create Params

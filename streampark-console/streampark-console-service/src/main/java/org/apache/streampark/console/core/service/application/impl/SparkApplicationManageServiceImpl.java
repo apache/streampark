@@ -228,25 +228,28 @@ public class SparkApplicationManageServiceImpl
                     if (pipeStates.containsKey(record.getId())) {
                         record.setBuildStatus(pipeStates.get(record.getId()).getCode());
                     }
-
-                    AppControl appControl = new AppControl()
-                        .setAllowBuild(
-                            record.getBuildStatus() == null
-                                || !PipelineStatusEnum.running
-                                    .getCode()
-                                    .equals(record.getBuildStatus()))
-                        .setAllowStart(
-                            !record.shouldTracking()
-                                && PipelineStatusEnum.success
-                                    .getCode()
-                                    .equals(record.getBuildStatus()))
-                        .setAllowStop(record.isRunning())
-                        .setAllowView(record.shouldTracking());
+                    AppControl appControl = getAppControl(record);
                     record.setAppControl(appControl);
                 })
             .collect(Collectors.toList());
         page.setRecords(newRecords);
         return page;
+    }
+
+    private AppControl getAppControl(SparkApplication record){
+        return new AppControl()
+            .setAllowBuild(
+                record.getBuildStatus() == null
+                    || !PipelineStatusEnum.running
+                    .getCode()
+                    .equals(record.getBuildStatus()))
+            .setAllowStart(
+                !record.shouldTracking()
+                    && PipelineStatusEnum.success
+                    .getCode()
+                    .equals(record.getBuildStatus()))
+            .setAllowStop(record.isRunning())
+            .setAllowView(record.shouldTracking());
     }
 
     @Override
@@ -645,7 +648,7 @@ public class SparkApplicationManageServiceImpl
                 application.setConfPath(path);
             }
         }
-
+        application.setAppControl(getAppControl(application));
         application.resolveYarnQueue();
 
         return application;
