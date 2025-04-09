@@ -164,7 +164,7 @@
 </script>
 
 <template>
-  <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
+  <PageWrapper contentFullHeight content-class="flex flex-col">
     <div class="bg-white py-16px px-24px">
       <span class="alarm-title">{{ t('setting.alarm.alertSetting') }}</span>
       <div v-auth="'project:create'">
