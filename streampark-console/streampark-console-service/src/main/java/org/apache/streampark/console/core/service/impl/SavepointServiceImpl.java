@@ -421,10 +421,11 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
     if (StringUtils.isBlank(savepointPath)) {
       result = this.getSavePointPath(application);
     }
-    if (StringUtils.isBlank(result)
-        || application.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+
+    if (StringUtils.isBlank(result) && ExecutionMode.isYarnMode(application.getExecutionMode())) {
       result = Workspace.remote().APP_SAVEPOINTS();
     }
+
     if (StringUtils.isNotBlank(result)) {
       processPath(result, application.getJobName(), application.getId());
     } else {

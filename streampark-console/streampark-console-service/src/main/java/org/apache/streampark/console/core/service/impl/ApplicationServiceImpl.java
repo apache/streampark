@@ -1341,7 +1341,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         customSavepoint = savepointService.getSavePointPath(appParam);
       }
       if (StringUtils.isBlank(customSavepoint)
-          || application.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+          && ExecutionMode.isYarnMode(application.getExecutionMode())) {
         customSavepoint = Workspace.remote().APP_SAVEPOINTS();
       }
       if (StringUtils.isNotBlank(customSavepoint)) {
