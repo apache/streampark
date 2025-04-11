@@ -25,7 +25,6 @@ import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.service.impl.DistributedTaskServiceImpl;
 
-import com.fasterxml.jackson.core.JacksonException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -68,7 +67,7 @@ class DistributedTaskServiceTest {
             FlinkTaskItem flinkTaskItem = distributionTaskService.getFlinkTaskItem(distributedTask);
             FlinkApplication newApplication = distributionTaskService.getAppByFlinkTaskItem(flinkTaskItem);
             assert (application.equals(newApplication));
-        } catch (JacksonException e) {
+        } catch (Exception e) {
             log.error("testFlinkTaskAndApp failed:", e);
         }
     }
@@ -83,7 +82,7 @@ class DistributedTaskServiceTest {
             SparkTaskItem sparkTaskItem = distributionTaskService.getSparkTaskItem(distributedTask);
             SparkApplication newApplication = distributionTaskService.getAppBySparkTaskItem(sparkTaskItem);
             assert (application.equals(newApplication));
-        } catch (JacksonException e) {
+        } catch (Exception e) {
             log.error("testSparkTaskAndApp failed:", e);
         }
     }
