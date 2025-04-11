@@ -7,6 +7,8 @@ import { useUserStoreWithOut } from '/@/store/modules/user';
 
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 
+import { PAGE_NOT_FOUND_NAME } from '/@/router/constant';
+
 import { RootRoute } from '/@/router/routes';
 
 const LOGIN_PATH = PageEnum.BASE_LOGIN;
@@ -18,12 +20,7 @@ const whitePathList: PageEnum[] = [LOGIN_PATH];
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();
   const permissionStore = usePermissionStoreWithOut();
-
   router.beforeEach(async (to, from, next) => {
-    const isPageNoFound = [
-      PAGE_NOT_FOUND_ROUTE.name,
-      PAGE_NOT_FOUND_ROUTE.name + '_CHILD',
-    ].includes(to.name as string);
     if (
       from.path === ROOT_PATH &&
       to.path === PageEnum.BASE_HOME &&
@@ -33,7 +30,6 @@ export function createPermissionGuard(router: Router) {
       next(userStore.getUserInfo.homePath);
       return;
     }
-
     const token = userStore.getToken;
     // Whitelist can be directly entered
     if (whitePathList.includes(to.path as PageEnum)) {
@@ -77,22 +73,12 @@ export function createPermissionGuard(router: Router) {
     // Jump to the 404 page after processing the login
     if (
       from.path === LOGIN_PATH &&
-      isPageNoFound &&
+      to.name === PAGE_NOT_FOUND_NAME &&
       to.fullPath !== (userStore.getUserInfo.homePath || PageEnum.BASE_HOME)
     ) {
       next(userStore.getUserInfo.homePath || PageEnum.BASE_HOME);
       return;
     }
-
-    // get userinfo while last fetch time is empty
-    // if (userStore.getLastUpdateTime === 0) {
-    //   try {
-    //     await userStore.getUserInfoAction();
-    //   } catch (err) {
-    //     next();
-    //     return;
-    //   }
-    // }
 
     if (permissionStore.getIsDynamicAddedRoute) {
       next();
@@ -108,7 +94,7 @@ export function createPermissionGuard(router: Router) {
 
     permissionStore.setDynamicAddedRoute(true);
 
-    if (isPageNoFound) {
+    if (to.name === PAGE_NOT_FOUND_NAME) {
       // After dynamically adding the route, it should be redirected to fullPath here, otherwise the 404 page content will load
       next({ path: to.fullPath, replace: true, query: to.query });
     } else {

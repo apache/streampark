@@ -294,7 +294,9 @@
                       allow-clear
                       v-model:value="searchRef.tags"
                       @change="() => handleResetReload()"
-                      :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
+                      :options="
+                        (tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))
+                      "
                     />
                   </Form.Item>
                 </Col>
@@ -322,11 +324,11 @@
                       v-model:value="searchRef.userId"
                       @change="() => handleResetReload()"
                       :options="
-                      (users || []).map((u: Recordable) => ({
-                        label: u.nickName || u.username,
-                        value: u.userId,
-                      }))
-                    "
+                        (users || []).map((u: Recordable) => ({
+                          label: u.nickName || u.username,
+                          value: u.userId,
+                        }))
+                      "
                     />
                   </Form.Item>
                 </Col>
