@@ -40,8 +40,10 @@ public class DatabaseServiceTest extends MysqlBaseITCASE {
 
     @Autowired
     private FlinkCatalogService catalogService;
+
     @Autowired
     private DatabaseService databaseService;
+
     private FlinkCatalogParams flinkCatalog = new FlinkCatalogParams();
 
     @BeforeEach

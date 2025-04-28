@@ -724,7 +724,8 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
                     .set(FlinkApplication::getRelease, ReleaseStateEnum.DONE.get())
                     .set(FlinkApplication::getOptionState, OptionStateEnum.NONE.getValue());
             }
-            this.update(update);
+
+            update.update();
 
             // backup
             if (appParam.isJobTypeFlinkSqlOrCDC()) {

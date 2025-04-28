@@ -416,7 +416,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
         ApplicationLog applicationLog = new ApplicationLog();
         applicationLog.setOptionName(RELEASE.getValue());
         applicationLog.setAppId(app.getId());
-        applicationLog.setOptionTime(new Date());
+        applicationLog.setCreateTime(new Date());
         applicationLog.setUserId(ServiceHelper.getUserId());
         return applicationLog;
     }

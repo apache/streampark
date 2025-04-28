@@ -157,7 +157,7 @@ public class SparkApplicationBuildPipelineServiceImpl
         applicationLog.setJobType(EngineTypeEnum.SPARK.getCode());
         applicationLog.setOptionName(RELEASE.getValue());
         applicationLog.setAppId(app.getId());
-        applicationLog.setOptionTime(new Date());
+        applicationLog.setCreateTime(new Date());
         applicationLog.setUserId(ServiceHelper.getUserId());
 
         // check if you need to go through the build process (if the jar and pom have changed,

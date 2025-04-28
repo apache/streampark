@@ -46,6 +46,7 @@ alter table t_flink_log rename to t_app_log;
 alter table `t_app_log`
     change column `yarn_app_id` `cluster_id` varchar(64) default null,
     change column `job_manager_url` `tracking_url` varchar(255) default null,
+    change column `option_time` `create_time` datetime default null,
     add column `job_type` tinyint default null,
     add column `user_id` bigint default null comment 'operator user id';
 

@@ -168,7 +168,7 @@ create table if not exists `t_app_log` (
   `tracking_url` varchar(255)  default null,
   `success` tinyint default null,
   `exception` text ,
-  `option_time` datetime default null,
+  `create_time` datetime default null,
   `option_name` tinyint default null,
   `user_id` bigint default null comment 'operator user id',
   primary key(`id`)

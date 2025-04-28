@@ -226,13 +226,13 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
                 return;
             }
             this.save(distributedTask);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.error("Failed to save Distributed task: {}", e.getMessage());
         }
     }
 
     public DistributedTask getDistributedTaskByFlinkApp(FlinkApplication appParam, boolean autoStart,
-                                                        DistributedTaskEnum action) throws JsonProcessingException {
+                                                        DistributedTaskEnum action) throws Exception {
         FlinkTaskItem flinkTaskItem = new FlinkTaskItem();
         flinkTaskItem.setAppId(appParam.getId());
         flinkTaskItem.setAutoStart(autoStart);
@@ -252,7 +252,7 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     }
 
     public DistributedTask getDistributedTaskBySparkApp(SparkApplication appParam, boolean autoStart,
-                                                        DistributedTaskEnum action) throws JsonProcessingException {
+                                                        DistributedTaskEnum action) throws Exception {
         SparkTaskItem sparkTaskItem = new SparkTaskItem();
         sparkTaskItem.setAppId(appParam.getId());
         sparkTaskItem.setAutoStart(autoStart);

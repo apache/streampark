@@ -165,13 +165,11 @@ object YarnSessionClient extends YarnClientTrait {
     } catch {
       case e: Exception =>
         logError(s"start flink session fail in ${deployRequest.deployMode} mode")
-        e.printStackTrace()
         throw e
     } finally {
       Utils.close(client, clusterDescriptor)
     }
   }
-
   def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
     var clusterDescriptor: YarnClusterDescriptor = null
     var client: ClusterClient[ApplicationId] = null
@@ -203,11 +201,9 @@ object YarnSessionClient extends YarnClientTrait {
     } catch {
       case e: Exception =>
         logError(s"shutdown flink session fail in ${shutDownRequest.deployMode} mode")
-        e.printStackTrace()
         throw e
     } finally {
       Utils.close(client, clusterDescriptor)
     }
   }
-
 }

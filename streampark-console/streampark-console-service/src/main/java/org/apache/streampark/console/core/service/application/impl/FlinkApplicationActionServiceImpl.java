@@ -279,7 +279,7 @@ public class FlinkApplicationActionServiceImpl
         applicationLog.setOptionName(OperationEnum.CANCEL.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setTrackingUrl(application.getJobManagerUrl());
-        applicationLog.setOptionTime(new Date());
+        applicationLog.setCreateTime(new Date());
         applicationLog.setClusterId(application.getClusterId());
         applicationLog.setUserId(ServiceHelper.getUserId());
 
@@ -532,7 +532,7 @@ public class FlinkApplicationActionServiceImpl
         applicationLog.setJobType(EngineTypeEnum.FLINK.getCode());
         applicationLog.setOptionName(OperationEnum.START.getValue());
         applicationLog.setAppId(application.getId());
-        applicationLog.setOptionTime(new Date());
+        applicationLog.setCreateTime(new Date());
         applicationLog.setUserId(ServiceHelper.getUserId());
         return applicationLog;
     }

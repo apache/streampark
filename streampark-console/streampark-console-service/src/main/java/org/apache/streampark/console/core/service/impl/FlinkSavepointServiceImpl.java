@@ -191,7 +191,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
         applicationLog.setOptionName(OperationEnum.SAVEPOINT.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setTrackingUrl(application.getJobManagerUrl());
-        applicationLog.setOptionTime(new Date());
+        applicationLog.setCreateTime(new Date());
         applicationLog.setClusterId(application.getClusterId());
         applicationLog.setUserId(ServiceHelper.getUserId());
         return applicationLog;

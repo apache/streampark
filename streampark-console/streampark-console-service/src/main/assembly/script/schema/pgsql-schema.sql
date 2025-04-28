@@ -411,11 +411,12 @@ create sequence "public"."streampark_t_app_log_id_seq"
 create table "public"."t_app_log" (
   "id" int8 not null default nextval('streampark_t_app_log_id_seq'::regclass),
   "app_id" int8,
+  "job_type" int2,
   "cluster_id" varchar(64) collate "pg_catalog"."default",
   "tracking_url" varchar(255) collate "pg_catalog"."default",
   "success" boolean,
   "exception" text collate "pg_catalog"."default",
-  "option_time" timestamp(6),
+  "create_time" timestamp(6),
   "option_name" int2,
   "user_id" int8
 )

@@ -22,7 +22,7 @@
     props: {
       column: {
         type: Object as PropType<BasicColumn>,
-        default: () => ({} as BasicColumn),
+        default: () => ({}) as BasicColumn,
       },
     },
     setup(props) {
