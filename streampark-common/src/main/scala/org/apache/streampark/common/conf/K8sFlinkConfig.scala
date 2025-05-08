@@ -35,7 +35,12 @@ object K8sFlinkConfig {
     classType = classOf[java.lang.Long],
     description = "run timeout seconds of single flink-k8s job status tracking task")
 
-  @deprecated
+  val maxK8sEventBusThreadNum: InternalOption = InternalOption(
+    key = "streampark.flink-k8s.tracking.max-event-bus-thread-num",
+    defaultValue = 10,
+    classType = classOf[java.lang.Integer],
+    description = "max event bus thread num")
+
   val jobStatueTrackTaskIntervalSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-interval-sec.job-status",
     defaultValue = 5L,
