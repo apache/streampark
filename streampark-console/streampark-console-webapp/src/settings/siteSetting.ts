@@ -2,7 +2,7 @@
 export const GITHUB_URL = 'https://github.com/apache/streampark';
 
 // doc
-export const DOC_URL = 'https://streampark.apache.org/docs/get-started/intro';
+export const DOC_URL = 'https://streampark.apache.org/docs/get-started/introduction';
 
 // site url
 export const SITE_URL = 'https://streampark.apache.org';
