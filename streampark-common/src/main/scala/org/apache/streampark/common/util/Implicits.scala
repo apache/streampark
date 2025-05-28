@@ -55,7 +55,7 @@ object Implicits extends ToScalaImplicits with ToJavaImplicits with DecorateAsJa
 
   implicit class AutoCloseImplicits[T <: AutoCloseable](autoCloseable: T) {
     implicit def using[R](func: T => R)(implicit excFunc: Throwable => R = null): R = {
-      var exception: Option[Throwable] = null
+      var exception: Option[Throwable] = Option.empty
       try {
         func(autoCloseable)
       } catch {
