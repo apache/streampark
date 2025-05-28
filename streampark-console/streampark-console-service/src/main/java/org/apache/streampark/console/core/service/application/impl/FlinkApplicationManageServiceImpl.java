@@ -276,15 +276,16 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             .peek(
                 record -> {
                     // status of flink job on kubernetes mode had been automatically persisted
-                    // to db
-                    // in time.
+                    // to db in time.
                     if (record.isKubernetesModeJob()) {
-                        // set duration
                         String restUrl = k8SFlinkTrackMonitor
                             .getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
                         record.setFlinkRestUrl(restUrl);
-                        setAppDurationIfNeeded(record, now);
                     }
+
+                    // set duration
+                    setAppDurationIfNeeded(record, now);
+
                     if (pipeStates.containsKey(record.getId())) {
                         record.setBuildStatus(pipeStates.get(record.getId()).getCode());
                     }
@@ -763,11 +764,11 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         if (application.isKubernetesModeJob()) {
             String restUrl = k8SFlinkTrackMonitor.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(application));
             application.setFlinkRestUrl(restUrl);
-
-            // set duration
-            long now = System.currentTimeMillis();
-            setAppDurationIfNeeded(application, now);
         }
+
+        // set duration
+        long now = System.currentTimeMillis();
+        setAppDurationIfNeeded(application, now);
 
         application.setYarnQueueByHotParams();
 
