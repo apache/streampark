@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
-import org.apache.streampark.common.util.Implicits.AutoCloseImplicits
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Logger
 
 import org.apache.flink.client.program.ClusterClient
@@ -27,7 +27,7 @@ object IngressController extends Logger {
 
   private[this] val VERSION_REGEXP = "(\\d+\\.\\d+)".r
 
-  private lazy val clusterVersion = new DefaultKubernetesClient().autoClose(client => {
+  private lazy val clusterVersion = new DefaultKubernetesClient().using(client => {
     VERSION_REGEXP.findFirstIn(client.getVersion.getGitVersion).get.toDouble
   })
 

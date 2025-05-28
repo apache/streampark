@@ -17,12 +17,11 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.util.Utils.close
-
 import java.lang.{Boolean => JavaBool, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
 
 import scala.collection.convert.{DecorateAsJava, DecorateAsScala, ToJavaImplicits, ToScalaImplicits}
 import scala.language.implicitConversions
+import scala.util.Try
 
 object Implicits extends ToScalaImplicits with ToJavaImplicits with DecorateAsJava with DecorateAsScala {
 
@@ -55,17 +54,25 @@ object Implicits extends ToScalaImplicits with ToJavaImplicits with DecorateAsJa
   type JavaShort = java.lang.Short
 
   implicit class AutoCloseImplicits[T <: AutoCloseable](autoCloseable: T) {
-
-    implicit def autoClose[R](func: T => R)(implicit excFunc: Throwable => R = null): R = {
+    implicit def using[R](func: T => R)(implicit excFunc: Throwable => R = null): R = {
+      var exception: Option[Throwable] = null
       try {
         func(autoCloseable)
       } catch {
-        case e: Throwable if excFunc != null => excFunc(e)
+        case e: Throwable =>
+          exception = Some(e)
+          if (excFunc != null) {
+            excFunc(e)
+          } else {
+            throw e
+          }
       } finally {
-        close(autoCloseable)
+        Try(autoCloseable.close()).recover { case e =>
+          exception.foreach(originalEx => e.addSuppressed(originalEx))
+          throw e
+        }
       }
     }
-
   }
 
   implicit class StringImplicits(v: String) {

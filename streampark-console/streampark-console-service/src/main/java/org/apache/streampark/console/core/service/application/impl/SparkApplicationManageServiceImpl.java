@@ -28,14 +28,12 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationConfig;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.ChangeTypeEnum;
-import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
@@ -46,7 +44,6 @@ import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.SparkApplicationBackupService;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
@@ -94,9 +91,6 @@ public class SparkApplicationManageServiceImpl
 
     @Autowired
     private ProjectService projectService;
-
-    @Autowired
-    private ApplicationService applicationService;
 
     @Autowired
     private SparkApplicationBackupService backUpService;
@@ -292,10 +286,6 @@ public class SparkApplicationManageServiceImpl
             appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
         }
 
-        // 1) save application
-        Application application = applicationService.create(EngineTypeEnum.SPARK);
-        appParam.setId(application.getId());
-
         boolean saveSuccess = save(appParam);
 
         if (saveSuccess) {
@@ -365,9 +355,6 @@ public class SparkApplicationManageServiceImpl
         newApp.setCreateTime(new Date());
         newApp.setModifyTime(newApp.getCreateTime());
         newApp.setTags(oldApp.getTags());
-
-        Application application = applicationService.create(EngineTypeEnum.SPARK);
-        newApp.setId(application.getId());
 
         boolean saved = save(newApp);
         if (saved) {

@@ -88,7 +88,7 @@ object KubernetesRetriever extends Logger {
       .getClusterClientFactory(flinkConfig)
       .createClusterDescriptor(flinkConfig)
       .asInstanceOf[KubernetesClusterDescriptor]
-      .autoClose(clusterProvider =>
+      .using(clusterProvider =>
         Try {
           clusterProvider
             .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
@@ -113,7 +113,7 @@ object KubernetesRetriever extends Logger {
 
     KubernetesRetriever
       .newK8sClient()
-      .autoClose(client => {
+      .using(client => {
         client
           .apps()
           .deployments()

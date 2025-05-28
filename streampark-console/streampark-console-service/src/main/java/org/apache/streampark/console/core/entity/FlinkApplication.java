@@ -65,7 +65,7 @@ import java.util.Optional;
 @Slf4j
 public class FlinkApplication extends BaseEntity {
 
-    @TableId(type = IdType.INPUT)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long teamId;
@@ -292,9 +292,9 @@ public class FlinkApplication extends BaseEntity {
     private transient String savepointPath;
     private transient Boolean restoreOrTriggerSavepoint = false;
     private transient Boolean drain = false;
-    private transient Boolean nativeFormat = false;
     private transient Long savepointTimeout = 60L;
     private transient Boolean allowNonRestored = false;
+    private transient Boolean nativeFormat = false;
     private transient Integer restoreMode;
     private transient String socketId;
     private transient String projectName;

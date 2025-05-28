@@ -216,12 +216,12 @@ object FlinkShimsProxy extends Logger {
   def getObject[T](loader: ClassLoader, obj: Object): T = {
     val arrayOutputStream = new ByteArrayOutputStream
     new ObjectOutputStream(arrayOutputStream)
-      .autoClose(out => {
+      .using(out => {
         out.writeObject(obj)
         val byteArrayInputStream =
           new ByteArrayInputStream(arrayOutputStream.toByteArray)
         new ClassLoaderObjectInputStream(loader, byteArrayInputStream)
-          .autoClose(_.readObject())
+          .using(_.readObject())
       })
       .asInstanceOf[T]
   }

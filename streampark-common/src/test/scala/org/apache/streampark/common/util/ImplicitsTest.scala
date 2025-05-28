@@ -23,7 +23,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class ImplicitsTest extends AnyFunSuite {
   test(
-    "AutoCloseImplicits.autoClose should close the resource after execution and handle exceptions") {
+    "AutoCloseImplicits.using should close the resource after execution and handle exceptions") {
     class MockResource extends AutoCloseable {
       var closed = false
       def close(): Unit = closed = true
@@ -35,7 +35,7 @@ class ImplicitsTest extends AnyFunSuite {
 
     val mockResource = new MockResource
     assertThrows[RuntimeException] {
-      mockResource.autoClose(operation)
+      mockResource.using(operation)
     }
     assert(mockResource.closed)
   }

@@ -487,7 +487,6 @@ create table if not exists `t_access_token` (
   primary key(`id`)
 );
 
-
 -- ----------------------------
 -- Table of t_external_link definition
 -- ----------------------------
@@ -502,7 +501,6 @@ create table if not exists `t_external_link` (
   primary key(`id`)
 );
 
-
 -- ----------------------------
 -- table structure for t_yarn_queue
 -- ----------------------------
@@ -516,21 +514,6 @@ create table if not exists `t_yarn_queue` (
   `modify_time` datetime default null comment 'modify time',
   unique key (`team_id`,`queue_label`),
   primary key (`id`)
-);
-
--- ----------------------------
--- Table structure for t_flink_catalog
--- ----------------------------
-create table if not exists t_flink_catalog (
-   `id` BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
-   `team_id` bigint not null,
-   `user_id` bigint default null,
-   `catalog_type` varchar(255) not NULL,
-   `catalog_name` VARCHAR(255) NOT NULL,
-   `configuration` text,
-   `create_time` TIMESTAMP WITHOUT TIME ZONE DEFAULT NULL,
-   `update_time` TIMESTAMP WITHOUT TIME ZONE DEFAULT NULL,
-   CONSTRAINT uniq_catalog_name UNIQUE (`catalog_name`)
 );
 
 -- ----------------------------

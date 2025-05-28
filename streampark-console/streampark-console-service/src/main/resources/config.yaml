@@ -64,8 +64,6 @@ streampark:
     project:
         # Number of projects allowed to be running at the same time , If there is no limit, -1 can be configured
         max-build: 16
-    # console heartbeat interval
-    max-heartbeat-interval: 10s
 
 # flink on yarn or spark on yarn, when the hadoop cluster enable kerberos authentication, it is necessary to set Kerberos authentication parameters.
 security:
@@ -100,39 +98,3 @@ sso:
         # Optional, change by authentication client
         # Please replace and fill in your client config below when enabled SSO
 
-## flink catalog store config
-table:
-    catalog-store:
-        kind: jdbc
-        jdbc:
-            url: jdbc://mysql:127.0.0.1:3306/flink-test
-            # The JDBC database url.
-            table-name: t_flink_catalog
-            ## catalog store table
-            driver: com.mysql.cj.jdbc.Driver
-            # The class name of the JDBC driver to use to connect to this URL, if not set, it will automatically be derived from the URL.
-            username: flinkuser
-            # The JDBC user name. 'username' and 'password' must both be specified if any of them is specified.
-            password: flinkpw
-            # 	The JDBC password.
-            max-retry-timeout: 600
-
-
-
-registry:
-  type: jdbc
-  heartbeat-refresh-interval: 1s
-  session-timeout: 3s
-
-network:
-  # network interface preferred like eth0, default: empty
-  preferred-interface: ""
-  # network interface restricted like docker0, default: empty
-  restrict-interface: docker0
-  # network IP gets priority, default inner outer
-  priority-strategy: default
-
-  # Add configurable job.state-watcher.fixed-delayed
-job:
-    state-watcher:
-        fixed-delayed: 1000

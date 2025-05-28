@@ -51,7 +51,7 @@ object FileUtils {
     if (input == null) {
       throw new RuntimeException("The inputStream can not be null")
     }
-    input.autoClose(in => {
+    input.using(in => {
       val b = new Array[Byte](4)
       in.read(b, 0, b.length)
       bytesToHexString(b)
@@ -174,7 +174,7 @@ object FileUtils {
 
   @throws[IOException]
   def readInputStream(in: InputStream, array: Array[Byte]): Unit = {
-    in.autoClose(is => {
+    in.using(is => {
       var toRead = array.length
       var ret = 0
       var off = 0
@@ -196,7 +196,7 @@ object FileUtils {
       val array = new Array[Byte](len.toInt)
       Files
         .newInputStream(file.toPath)
-        .autoClose(is => {
+        .using(is => {
           readInputStream(is, array)
           new String(array, StandardCharsets.UTF_8)
         })
@@ -215,7 +215,7 @@ object FileUtils {
   @throws[IOException]
   def readEndOfFile(file: File, maxSize: Long): Array[Byte] = {
     var readSize = maxSize
-    new RandomAccessFile(file, "r").autoClose(raFile => {
+    new RandomAccessFile(file, "r").using(raFile => {
       if (raFile.length > maxSize) {
         raFile.seek(raFile.length - maxSize)
       } else if (raFile.length < maxSize) {
@@ -249,7 +249,7 @@ object FileUtils {
       throw new IllegalArgumentException(
         s"The startOffset $startOffset is great than the file length ${file.length}")
     }
-    new RandomAccessFile(file, "r").autoClose(raFile => {
+    new RandomAccessFile(file, "r").using(raFile => {
       val readSize = Math.min(maxSize, file.length - startOffset)
       raFile.seek(startOffset)
       val fileContent = new Array[Byte](readSize.toInt)
@@ -275,7 +275,7 @@ object FileUtils {
     if (file.exists && file.isFile) {
       Files
         .lines(Paths.get(path))
-        .autoClose(stream =>
+        .using(stream =>
           stream
             .skip(offset)
             .limit(limit)

@@ -30,7 +30,6 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -38,7 +37,6 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.ChangeTypeEnum;
-import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
@@ -52,7 +50,6 @@ import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
-import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
@@ -107,9 +104,6 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
     @Autowired
     private ProjectService projectService;
-
-    @Autowired
-    private ApplicationService applicationService;
 
     @Autowired
     private FlinkApplicationBackupService backUpService;
@@ -363,10 +357,6 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
         }
 
-        // 1) save application
-        Application application = applicationService.create(EngineTypeEnum.FLINK);
-        appParam.setId(application.getId());
-
         boolean saveSuccess = save(appParam);
         if (saveSuccess) {
             FlinkJobType jobType = appParam.getJobTypeEnum();
@@ -449,9 +439,6 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         newApp.setTags(persist.getTags());
         newApp.setTeamId(persist.getTeamId());
         newApp.setDependency(persist.getDependency());
-
-        Application application = applicationService.create(EngineTypeEnum.FLINK);
-        newApp.setId(application.getId());
 
         boolean saved = save(newApp);
         if (saved) {

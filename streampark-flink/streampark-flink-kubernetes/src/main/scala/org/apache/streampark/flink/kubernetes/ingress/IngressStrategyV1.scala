@@ -31,7 +31,7 @@ class IngressStrategyV1 extends IngressStrategy {
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String = {
-    new DefaultKubernetesClient().autoClose(client =>
+    new DefaultKubernetesClient().using(client =>
       Try {
         Option(
           Try(
@@ -49,8 +49,8 @@ class IngressStrategyV1 extends IngressStrategy {
                 val newPath = Option(path).filter(_.nonEmpty).map(_.replaceAll("\\/+$", "")).getOrElse("")
                 s"http://$host$newPath"
               }
-              .getOrElse(clusterClient.autoClose(_.getWebInterfaceURL))
-          case None => clusterClient.autoClose(_.getWebInterfaceURL)
+              .getOrElse(clusterClient.using(_.getWebInterfaceURL))
+          case None => clusterClient.using(_.getWebInterfaceURL)
         }
       } match {
         case Success(value) => value
@@ -75,7 +75,7 @@ class IngressStrategyV1 extends IngressStrategy {
   }
 
   override def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
-    new DefaultKubernetesClient().autoClose(client => {
+    new DefaultKubernetesClient().using(client => {
       val ownerReference = getOwnerReference(nameSpace, clusterId, client)
       val ingressBackendRestServicePort =
         touchIngressBackendRestPort(client, clusterId, nameSpace)

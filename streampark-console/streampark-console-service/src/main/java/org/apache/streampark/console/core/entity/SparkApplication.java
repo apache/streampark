@@ -62,7 +62,7 @@ import java.util.Objects;
 @Slf4j
 public class SparkApplication extends BaseEntity {
 
-    @TableId(type = IdType.INPUT)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long teamId;

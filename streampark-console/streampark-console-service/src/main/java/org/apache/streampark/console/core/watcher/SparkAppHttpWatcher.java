@@ -28,7 +28,6 @@ import org.apache.streampark.console.core.enums.StopFromEnum;
 import org.apache.streampark.console.core.metrics.spark.Job;
 import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
-import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
@@ -63,7 +62,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -77,9 +75,6 @@ public class SparkAppHttpWatcher {
 
     @Autowired
     private SparkApplicationInfoService applicationInfoService;
-
-    @Autowired
-    private DistributedTaskService distributedTaskService;
 
     @Autowired
     private AlertService alertService;
@@ -134,10 +129,7 @@ public class SparkAppHttpWatcher {
         List<SparkApplication> applications = applicationManageService.list(
             new LambdaQueryWrapper<SparkApplication>()
                 .eq(SparkApplication::getTracking, 1)
-                .ne(SparkApplication::getState, SparkAppStateEnum.LOST.getValue()))
-            .stream()
-            .filter(application -> distributedTaskService.isLocalProcessing(application.getId()))
-            .collect(Collectors.toList());
+                .ne(SparkApplication::getState, SparkAppStateEnum.LOST.getValue()));
 
         applications.forEach(app -> {
             Long appId = app.getId();
@@ -161,7 +153,7 @@ public class SparkAppHttpWatcher {
      *
      * <p><strong>2) Normal information obtain, once every 5 seconds</strong>
      */
-    @Scheduled(fixedDelayString = "${job.state-watcher.fixed-delayed:1000}")
+    @Scheduled(fixedDelay = 1, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     public void start() {
         Long timeMillis = System.currentTimeMillis();
         if (lastWatchTime == null

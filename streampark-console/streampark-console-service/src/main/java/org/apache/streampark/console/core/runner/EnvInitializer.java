@@ -26,11 +26,9 @@ import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
-import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.SparkEnv;
-import org.apache.streampark.console.core.service.RegistryService;
 import org.apache.streampark.console.core.service.SettingService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -83,9 +81,6 @@ public class EnvInitializer implements ApplicationRunner {
         // init InternalConfig
         initConfig();
 
-        // init RegistryService
-        initRegistryService();
-
         boolean isTest = Arrays.asList(context.getEnvironment().getActiveProfiles()).contains("test");
         if (!isTest) {
             // initialize local file system resources
@@ -113,17 +108,6 @@ public class EnvInitializer implements ApplicationRunner {
         // overwrite system variable HADOOP_USER_NAME
         String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
         overrideSystemProp(ConfigKeys.KEY_HADOOP_USER_NAME(), hadoopUserName);
-    }
-
-    private void initRegistryService() {
-        if (WebUtils.isHaEnable()) {
-            RegistryService registryService = SpringContextUtils.getBean(RegistryService.class);
-            registryService.registry();
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                registryService.unRegister();
-                log.info("RegistryService unRegister success");
-            }));
-        }
     }
 
     private void overrideSystemProp(String key, String defaultValue) {

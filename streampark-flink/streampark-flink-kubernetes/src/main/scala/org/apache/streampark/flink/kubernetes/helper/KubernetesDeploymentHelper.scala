@@ -35,7 +35,7 @@ object KubernetesDeploymentHelper extends Logger {
   private[this] def getPods(nameSpace: String, deploymentName: String): List[Pod] = {
     KubernetesRetriever
       .newK8sClient()
-      .autoClose(client => {
+      .using(client => {
         Try {
           client.pods
             .inNamespace(nameSpace)
@@ -72,7 +72,7 @@ object KubernetesDeploymentHelper extends Logger {
   private[this] def deleteDeployment(nameSpace: String, deploymentName: String): Unit = {
     KubernetesRetriever
       .newK8sClient()
-      .autoClose(client => {
+      .using(client => {
         val map = client.apps.deployments.inNamespace(nameSpace)
         map.withLabel("app", deploymentName).delete
         map.withName(deploymentName).delete()
@@ -82,7 +82,7 @@ object KubernetesDeploymentHelper extends Logger {
   private[this] def deleteConfigMap(nameSpace: String, deploymentName: String): Unit = {
     KubernetesRetriever
       .newK8sClient()
-      .autoClose(client => {
+      .using(client => {
         val map = client.configMaps().inNamespace(nameSpace)
         map.withLabel("app", deploymentName).delete
         map.withName(deploymentName).delete()
@@ -106,7 +106,7 @@ object KubernetesDeploymentHelper extends Logger {
   def watchDeploymentLog(nameSpace: String, jobName: String, jobId: String): String = {
     KubernetesRetriever
       .newK8sClient()
-      .autoClose(client => {
+      .using(client => {
         val path = KubernetesDeploymentHelper.getJobLog(jobId)
         val file = new File(path)
         val log = client.apps.deployments
@@ -121,7 +121,7 @@ object KubernetesDeploymentHelper extends Logger {
   def watchPodTerminatedLog(nameSpace: String, jobName: String, jobId: String): String = {
     KubernetesRetriever
       .newK8sClient()
-      .autoClose(client =>
+      .using(client =>
         Try {
           val podName = getPods(nameSpace, jobName).head.getMetadata.getName
           val path = KubernetesDeploymentHelper.getJobErrorLog(jobId)

@@ -35,7 +35,6 @@ import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
-import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
@@ -98,9 +97,6 @@ public class FlinkAppHttpWatcher {
 
     @Autowired
     private SavepointService savepointService;
-
-    @Autowired
-    private DistributedTaskService distributedTaskService;
 
     // track interval every 5 seconds
     public static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
@@ -183,11 +179,7 @@ public class FlinkAppHttpWatcher {
         List<FlinkApplication> applications = applicationManageService.list(
             new LambdaQueryWrapper<FlinkApplication>()
                 .eq(FlinkApplication::getTracking, 1)
-                .notIn(FlinkApplication::getDeployMode, FlinkDeployMode.getKubernetesMode()))
-            .stream()
-            .filter(application -> distributedTaskService.isLocalProcessing(application.getId()))
-            .collect(Collectors.toList());
-
+                .notIn(FlinkApplication::getDeployMode, FlinkDeployMode.getKubernetesMode()));
         applications.forEach(app -> {
             Long appId = app.getId();
             WATCHING_APPS.put(appId, app);
@@ -210,7 +202,7 @@ public class FlinkAppHttpWatcher {
      *
      * <p><strong>2) Normal information obtain, once every 5 seconds</strong>
      */
-    @Scheduled(fixedDelayString = "${job.state-watcher.fixed-delayed:1000}")
+    @Scheduled(fixedDelay = 1, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     public void start() {
         Long timeMillis = System.currentTimeMillis();
         if (lastWatchTime == null

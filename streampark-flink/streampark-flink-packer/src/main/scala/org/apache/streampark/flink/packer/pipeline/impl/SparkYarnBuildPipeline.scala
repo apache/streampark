@@ -96,7 +96,7 @@ class SparkYarnBuildPipeline(request: SparkYarnBuildRequest)
           val uploadFile =
             s"${Workspace.remote.APP_UPLOADS}/${originFile.getName}"
           if (fsOperator.exists(uploadFile)) {
-            new FileInputStream(originFile).autoClose(inputStream => {
+            new FileInputStream(originFile).using(inputStream => {
               if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadFile)) {
                 fsOperator.upload(originFile.getAbsolutePath, uploadFile)
               }
