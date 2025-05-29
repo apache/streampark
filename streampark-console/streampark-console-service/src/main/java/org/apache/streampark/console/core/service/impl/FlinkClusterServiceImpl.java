@@ -348,11 +348,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             || FlinkDeployMode.isKubernetesSessionMode(flinkCluster.getDeployMode())) {
             ApiAlertException.throwIfTrue(
                 ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
-                "Flink cluster is running, cannot be delete, please check.");
+                "Flink cluster is running, cannot be deleted, please check.");
         }
         ApiAlertException.throwIfTrue(
             applicationInfoService.existsByClusterId(id),
-            "Some app on this cluster, the cluster cannot be delete, please check.");
+            "Some apps on this cluster, the cluster cannot be deleted, please check.");
         removeById(id);
     }
 
