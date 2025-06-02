@@ -76,7 +76,7 @@ export default {
   jmMemoryOptions: 'JM内存',
   tmMemoryOptions: 'TM内存',
   podTemplate: 'Kubernetes Pod 模板',
-  sparkCluster: 'Flink集群',
+  sparkCluster: 'Spark集群',
   yarnQueue: 'Yarn队列',
   mavenPom: 'maven pom',
   uploadJar: '上传依赖Jar文件',
