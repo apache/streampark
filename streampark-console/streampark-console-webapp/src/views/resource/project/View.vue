@@ -106,6 +106,7 @@
                 class: 'e2e-project-build-btn',
                 icon: 'ant-design:thunderbolt-outlined',
                 auth: 'project:build',
+                tooltip: t('flink.project.operationTips.buildProject'),
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 popConfirm: {
                   okButtonProps: {
