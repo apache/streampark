@@ -40,15 +40,21 @@ public class ApplicationBackUpCleanTask {
     public void backUpClean() {
         log.info("Start to clean application backup");
         // select all application backup which count > maxBackupNum group by app_id
-        backUpService.lambdaQuery().groupBy(FlinkApplicationBackup::getAppId)
-            .having("count(*) > " + maxBackupNum).list().stream()
+        backUpService.lambdaQuery()
+            .select(FlinkApplicationBackup::getAppId)
+            .groupBy(FlinkApplicationBackup::getAppId)
+            .having("count(*) > " + maxBackupNum)
+            .list()
+            .stream()
             .map(FlinkApplicationBackup::getAppId)
             .forEach(
                 appId -> {
                     // order by create_time desc and skip first maxBackupNum records and delete
                     // others
-                    backUpService.lambdaQuery().eq(FlinkApplicationBackup::getAppId, appId)
-                        .orderByDesc(FlinkApplicationBackup::getCreateTime).list()
+                    backUpService.lambdaQuery()
+                        .eq(FlinkApplicationBackup::getAppId, appId)
+                        .orderByDesc(FlinkApplicationBackup::getCreateTime)
+                        .list()
                         .stream()
                         .skip(maxBackupNum)
                         .forEach(
