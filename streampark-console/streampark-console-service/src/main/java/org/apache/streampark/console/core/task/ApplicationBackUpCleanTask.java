@@ -43,7 +43,7 @@ public class ApplicationBackUpCleanTask {
         backUpService.lambdaQuery()
             .select(FlinkApplicationBackup::getAppId)
             .groupBy(FlinkApplicationBackup::getAppId)
-            .having("count(*) > " + maxBackupNum)
+            .having("COUNT(*) > {0}", maxBackupNum)
             .list()
             .stream()
             .map(FlinkApplicationBackup::getAppId)
