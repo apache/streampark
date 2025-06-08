@@ -498,7 +498,7 @@ public class FlinkAppHttpWatcher {
                         savepointService.expire(application.getId());
                     }
                     stopCanceledJob(application.getId());
-                    doAlert(application, FlinkAppStateEnum.CANCELED);
+                    doAlert(application, currentState);
                 }
                 STOP_FROM_MAP.remove(application.getId());
                 doPersistMetrics(application, true);
@@ -509,7 +509,7 @@ public class FlinkAppHttpWatcher {
                 STOP_FROM_MAP.remove(application.getId());
                 application.setState(FlinkAppStateEnum.FAILED.getValue());
                 doPersistMetrics(application, true);
-                doAlert(application, FlinkAppStateEnum.FAILED);
+                doAlert(application, currentState);
                 applicationActionService.start(application, true);
                 break;
             case RESTARTING:
