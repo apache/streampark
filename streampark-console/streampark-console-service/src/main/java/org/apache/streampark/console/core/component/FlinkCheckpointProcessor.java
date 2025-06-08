@@ -111,14 +111,15 @@ public class FlinkCheckpointProcessor {
                                          FlinkApplication application, @Nonnull CheckPoints.CheckPoint checkPoint,
                                          Long appId) {
         Counter counter = checkPointFailedCache.get(appId);
-        if (counter == null) {
-            checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
+        Long ckTriggerTimestamp = checkPoint.getTriggerTimestamp();
+        Integer cpFailureRateInterval = application.getCpFailureRateInterval();
+        if (counter == null || counter.getDuration(ckTriggerTimestamp) >= cpFailureRateInterval) {
+            checkPointFailedCache.put(appId, new Counter(ckTriggerTimestamp));
             return;
         }
 
-        long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
-        if (minute > application.getCpFailureRateInterval()
-            || counter.getCount() < application.getCpMaxFailureInterval()) {
+        long minute = counter.getDuration(ckTriggerTimestamp);
+        if (minute > cpFailureRateInterval || counter.getCount() < application.getCpMaxFailureInterval()) {
             counter.increment();
             return;
         }
