@@ -38,7 +38,7 @@ create table `t_app` (
 -- ----------------------------
 drop table if exists `t_flink_app`;
 create table `t_flink_app` (
-  `id` bigint not null,
+  `id` bigint not null auto_increment,
   `team_id` bigint not null,
   `job_type` tinyint default null,
   `deploy_mode` tinyint default null,
