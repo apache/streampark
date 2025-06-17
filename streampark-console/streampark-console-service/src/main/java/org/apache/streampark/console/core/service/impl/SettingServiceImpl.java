@@ -79,10 +79,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
                 .set(Setting::getSettingValue, value)
                 .update();
 
-            getMavenConfig().updateConfig();
-
             Optional<Setting> optional = Optional.ofNullable(SETTINGS.get(setting.getSettingKey()));
             optional.ifPresent(x -> x.setSettingValue(value));
+
+            getMavenConfig().updateConfig();
+
             return true;
         } catch (Exception e) {
             return false;
