@@ -40,6 +40,7 @@
         <module>streampark-flink-shims_flink-1.17</module>
         <module>streampark-flink-shims_flink-1.18</module>
         <module>streampark-flink-shims_flink-1.19</module>
+        <module>streampark-flink-shims_flink-1.20</module>
     </modules>
 
 </project>
