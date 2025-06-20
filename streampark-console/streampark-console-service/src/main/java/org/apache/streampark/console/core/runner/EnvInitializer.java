@@ -71,7 +71,7 @@ public class EnvInitializer implements ApplicationRunner {
     private final FileFilter fileFilter = p -> !".gitkeep".equals(p.getName());
 
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
-        "^streampark-flink-shims_flink-(1.1[2-9])_(2.12)-(.*).jar$",
+        "^streampark-flink-shims_flink-(1.1[2-9]|1\\.2[0-9])_(2.12)-(.*).jar$",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @SneakyThrows
