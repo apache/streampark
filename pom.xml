@@ -67,6 +67,7 @@
         <module>streampark-flink</module>
         <module>streampark-spark</module>
         <module>streampark-console</module>
+        <module>streampark-flink/streampark-flink-shims/streampark-flink-shims_flink-1.20</module>
     </modules>
 
     <scm>

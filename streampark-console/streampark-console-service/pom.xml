@@ -586,6 +586,13 @@
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
+                        <!-- flink 1.20 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-1.20_${scala.binary.version}</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
                         <!-- flink-submit-core -->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
