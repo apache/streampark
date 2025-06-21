@@ -39,7 +39,7 @@ class PropertiesUtilsTestCase {
         "--sink-conf jdbc-url=jdbc:mysql://127.0.0.1:9030 " +
         "--sink-conf sink.label-prefix=label" +
         "--table-conf replication_num=1"
-    val programArgs = PropertiesUtils.extractArguments(args)
+    val programArgs = FlinkConfigurationUtils.extractArguments(args)
     Assertions.assertTrue(programArgs.contains("username=root"))
   }
 
@@ -56,7 +56,7 @@ class PropertiesUtilsTestCase {
         |
         |""".stripMargin
 
-    val map = PropertiesUtils.extractDynamicProperties(dynamicProperties)
+    val map = FlinkConfigurationUtils.extractDynamicProperties(dynamicProperties)
     Assertions.assertEquals(map("env.java.opts1"), "-Dfile.encoding=UTF-8")
     Assertions.assertEquals(map("env.java.opts2"), "-Dfile.enc\\\"oding=UTF-8")
     Assertions.assertEquals(map("env.java.opts3"), " -Dfile.encoding=UTF-8")

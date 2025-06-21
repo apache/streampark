@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.FlinkVersion;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.PropertiesUtils;
+import org.apache.streampark.common.util.FlinkConfigurationUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 
@@ -76,9 +76,8 @@ public class FlinkEnv implements Serializable {
     private transient String streamParkScalaVersion = scala.util.Properties.versionNumberString();
 
     public void doSetFlinkConf() throws ApiDetailException {
-
         File yaml;
-        float ver = Float.parseFloat(getVersionOfFirst().concat(".").concat(getVersionOfMiddle()));
+        Float ver = getVersionNumber();
         if (ver < 1.19f) {
             yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
             if (!yaml.exists()) {
@@ -119,7 +118,10 @@ public class FlinkEnv implements Serializable {
 
     public Map<String, String> convertFlinkYamlAsMap() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
-        return PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
+        if (isLegacyFlinkConf()) {
+            return FlinkConfigurationUtils.loadLegacyFlinkConf(flinkYamlString);
+        }
+        return FlinkConfigurationUtils.loadFlinkConf(flinkYamlString);
     }
 
     @JsonIgnore
@@ -166,8 +168,19 @@ public class FlinkEnv implements Serializable {
     public Properties getFlinkConfig() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
         Properties flinkConfig = new Properties();
-        Map<String, String> config = PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
+        Map<String, String> config = FlinkConfigurationUtils.loadLegacyFlinkConf(flinkYamlString);
         flinkConfig.putAll(config);
         return flinkConfig;
+    }
+
+    private Float getVersionNumber() {
+        if (StringUtils.isNotBlank(this.version)) {
+            return Float.parseFloat(getVersionOfFirst() + "." + getVersionOfMiddle());
+        }
+        throw new RuntimeException("Flink version is null");
+    }
+
+    public boolean isLegacyFlinkConf() {
+        return getVersionNumber() < 1.19f;
     }
 }

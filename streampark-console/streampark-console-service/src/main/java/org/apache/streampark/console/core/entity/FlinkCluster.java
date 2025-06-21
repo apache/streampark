@@ -22,8 +22,8 @@ import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
+import org.apache.streampark.common.util.FlinkConfigurationUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
-import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
 
@@ -180,8 +180,8 @@ public class FlinkCluster implements Serializable {
     @JsonIgnore
     public Map<String, Object> getProperties() {
         Map<String, Object> propertyMap = new HashMap<>();
-        Map<String, String> dynamicPropertyMap = PropertiesUtils
-            .extractDynamicPropertiesAsJava(this.getDynamicProperties());
+        Map<String, String> dynamicPropertyMap =
+            FlinkConfigurationUtils.extractDynamicPropertiesAsJava(this.getDynamicProperties());
         propertyMap.putAll(this.getOptionMap());
         propertyMap.putAll(dynamicPropertyMap);
         ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());

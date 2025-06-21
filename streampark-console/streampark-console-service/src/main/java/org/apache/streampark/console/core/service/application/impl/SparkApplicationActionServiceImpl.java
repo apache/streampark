@@ -28,7 +28,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
-import org.apache.streampark.common.util.PropertiesUtils;
+import org.apache.streampark.common.util.SparkConfigurationUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
@@ -322,8 +322,8 @@ public class SparkApplicationActionServiceImpl
             application.getAppName(),
             application.getMainClass(),
             appConf,
-            PropertiesUtils.extractSparkPropertiesAsJava(application.getAppProperties()),
-            PropertiesUtils.extractSparkArgumentsAsJava(applicationArgs),
+            SparkConfigurationUtils.extractPropertiesAsJava(application.getAppProperties()),
+            SparkConfigurationUtils.extractArgumentsAsJava(applicationArgs),
             application.getApplicationType(),
             application.getHadoopUser(),
             buildResult,

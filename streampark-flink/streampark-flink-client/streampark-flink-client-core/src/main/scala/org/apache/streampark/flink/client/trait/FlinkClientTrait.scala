@@ -469,7 +469,7 @@ trait FlinkClientTrait extends Logger {
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
     val programArgs = new ArrayBuffer[String]()
-    programArgs ++= PropertiesUtils.extractArguments(submitRequest.args)
+    programArgs ++= FlinkConfigurationUtils.extractArguments(submitRequest.args)
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
 

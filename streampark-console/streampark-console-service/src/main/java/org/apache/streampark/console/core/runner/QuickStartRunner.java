@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.runner;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.common.util.PropertiesUtils;
+import org.apache.streampark.common.util.FlinkConfigurationUtils;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
@@ -64,7 +64,8 @@ public class QuickStartRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        Map<String, Map<String, String>> map = PropertiesUtils.extractMultipleArgumentsAsJava(args.getSourceArgs());
+        Map<String, Map<String, String>> map =
+            FlinkConfigurationUtils.extractMultipleArgumentsAsJava(args.getSourceArgs());
 
         Map<String, String> quickstart = map.get("quickstart");
 

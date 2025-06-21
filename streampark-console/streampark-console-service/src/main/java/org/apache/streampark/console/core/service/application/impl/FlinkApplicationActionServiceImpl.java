@@ -31,8 +31,8 @@ import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.FlinkConfigurationUtils;
 import org.apache.streampark.common.util.HadoopUtils;
-import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.base.util.Tuple2;
@@ -805,7 +805,7 @@ public class FlinkApplicationActionServiceImpl
         }
 
         Map<String, String> dynamicProperties =
-            PropertiesUtils.extractDynamicPropertiesAsJava(runtimeProperties);
+            FlinkConfigurationUtils.extractDynamicPropertiesAsJava(runtimeProperties);
         properties.putAll(dynamicProperties);
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
         if (resolveOrder != null) {

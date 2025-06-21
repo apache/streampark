@@ -21,6 +21,7 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.FlinkConfigurationUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -80,7 +81,6 @@ import java.util.concurrent.TimeoutException;
 
 import static org.apache.flink.configuration.CheckpointingOptions.MAX_RETAINED_CHECKPOINTS;
 import static org.apache.flink.configuration.CheckpointingOptions.SAVEPOINT_DIRECTORY;
-import static org.apache.streampark.common.util.PropertiesUtils.extractDynamicPropertiesAsJava;
 import static org.apache.streampark.console.core.enums.CheckPointTypeEnum.CHECKPOINT;
 
 @Slf4j
@@ -328,7 +328,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     @VisibleForTesting
     @Nullable
     public String getSavepointFromDynamicProps(String dynamicProps) {
-        return extractDynamicPropertiesAsJava(dynamicProps).get(SAVEPOINT_DIRECTORY.key());
+        return FlinkConfigurationUtils.extractDynamicPropertiesAsJava(dynamicProps).get(SAVEPOINT_DIRECTORY.key());
     }
 
     /**
@@ -388,7 +388,8 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
      * Try get the 'state.checkpoints.num-retained' from the dynamic properties.
      */
     private Optional<Integer> tryGetChkNumRetainedFromDynamicProps(String dynamicProps) {
-        String rawCfgValue = extractDynamicPropertiesAsJava(dynamicProps).get(MAX_RETAINED_CHECKPOINTS.key());
+        String rawCfgValue =
+            FlinkConfigurationUtils.extractDynamicPropertiesAsJava(dynamicProps).get(MAX_RETAINED_CHECKPOINTS.key());
         if (StringUtils.isBlank(rawCfgValue)) {
             return Optional.empty();
         }

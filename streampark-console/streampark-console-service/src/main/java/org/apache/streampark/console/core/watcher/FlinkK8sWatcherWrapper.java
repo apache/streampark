@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.common.util.PropertiesUtils;
+import org.apache.streampark.common.util.FlinkConfigurationUtils;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
@@ -128,7 +128,7 @@ public class FlinkK8sWatcherWrapper {
         FlinkEnv flinkEnv = flinkEnvService.getById(app.getVersionId());
         Properties properties = flinkEnv.getFlinkConfig();
 
-        Map<String, String> dynamicProperties = PropertiesUtils
+        Map<String, String> dynamicProperties = FlinkConfigurationUtils
             .extractDynamicPropertiesAsJava(app.getDynamicProperties());
         String archiveDir = dynamicProperties.get(JobManagerOptions.ARCHIVE_DIR.key());
         if (archiveDir != null) {

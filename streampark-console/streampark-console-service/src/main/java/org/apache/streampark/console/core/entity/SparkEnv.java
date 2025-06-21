@@ -19,11 +19,9 @@ package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.SparkVersion;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -36,8 +34,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -91,14 +87,6 @@ public class SparkEnv implements Serializable {
         this.setScalaVersion(this.getSparkVersion().scalaVersion());
     }
 
-    public Map<String, String> convertSparkYamlAsMap() {
-        if (sparkConf == null) {
-            return new HashMap<>();
-        }
-        String sparkYamlString = DeflaterUtils.unzipString(sparkConf);
-        return PropertiesUtils.loadFlinkConfYaml(sparkYamlString);
-    }
-
     @JsonIgnore
     public SparkVersion getSparkVersion() {
         if (this.sparkVersion == null) {
@@ -113,31 +101,4 @@ public class SparkEnv implements Serializable {
         }
     }
 
-    public String getLargeVersion() {
-        if (StringUtils.isNotBlank(this.version)) {
-            return this.version.substring(0, this.version.lastIndexOf("."));
-        }
-        return null;
-    }
-
-    public String getVersionOfFirst() {
-        if (StringUtils.isNotBlank(this.version)) {
-            return this.version.split("\\.")[0];
-        }
-        return null;
-    }
-
-    public String getVersionOfMiddle() {
-        if (StringUtils.isNotBlank(this.version)) {
-            return this.version.split("\\.")[1];
-        }
-        return null;
-    }
-
-    public String getVersionOfLast() {
-        if (StringUtils.isNotBlank(this.version)) {
-            return this.version.split("\\.")[2];
-        }
-        return null;
-    }
 }
