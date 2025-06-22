@@ -30,7 +30,6 @@ import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
-import java.io.File
 import java.lang.{Boolean => JavaBool}
 
 /** yarn PerJob mode submit */
@@ -60,7 +59,7 @@ object YarnPerJobClient extends YarnClientTrait {
       getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser)
     val flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome)
     clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
-    clusterDescriptor.addShipFiles(List(new File(s"$flinkHome/lib")))
+    clusterDescriptor.addShipFiles(List(new HadoopPath(s"$flinkHome/lib")))
 
     var packagedProgram: PackagedProgram = null
     val clusterClient = {
