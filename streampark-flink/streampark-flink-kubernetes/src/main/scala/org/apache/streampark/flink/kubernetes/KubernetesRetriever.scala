@@ -44,7 +44,7 @@ object KubernetesRetriever extends Logger {
 
   // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
   val FLINK_REST_AWAIT_TIMEOUT_SEC: Timeout =
-    Timeout.ofMilliseconds(RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue())
+    Timeout.ofMilliseconds(RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue().toMillis)
 
   private val DEPLOYMENT_LOST_TIME = collection.mutable.Map[String, Long]()
 
