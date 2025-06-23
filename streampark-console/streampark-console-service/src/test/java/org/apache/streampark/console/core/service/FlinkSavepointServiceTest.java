@@ -82,8 +82,8 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
      */
     @Test
     void testGetSavepointFromDynamicProps() {
-        String propsWithEmptyTargetValue = "-Dstate.savepoints.dir=";
-        String props = "-Dstate.savepoints.dir=hdfs:///test";
+        String propsWithEmptyTargetValue = "-Dexecution.checkpointing.savepoint-dir=";
+        String props = "-Dexecution.checkpointing.savepoint-dir=hdfs:///test";
         FlinkSavepointServiceImpl savepointServiceImpl = (FlinkSavepointServiceImpl) savepointService;
 
         assertThat(savepointServiceImpl.getSavepointFromDynamicProps(null)).isNull();
@@ -114,11 +114,13 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
         app.setJobType(FlinkJobType.FLINK_JAR.getMode());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
 
+        String ckDir = SAVEPOINT_DIRECTORY.key() + "=hdfs:///test";
+
         // Test for (StreamPark job Or FlinkSQL job) with application config just disabled checkpoint.
         FlinkApplicationConfig appCfg = new FlinkApplicationConfig();
         appCfg.setId(appCfgId);
         appCfg.setAppId(appId);
-        appCfg.setContent("state.savepoints.dir=hdfs:///test");
+        appCfg.setContent(ckDir);
         appCfg.setFormat(ConfigFileTypeEnum.PROPERTIES.getValue());
         configService.save(appCfg);
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
@@ -134,9 +136,10 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
         // Test for configured CHECKPOINTING_INTERVAL
         appCfg.setContent(
             DeflaterUtils.zipString(
-                "state.savepoints.dir=hdfs:///test\n"
+                ckDir + "\n"
                     + String.format("%s=%s", CHECKPOINTING_INTERVAL.key(),
                         "3min")));
+
         configService.updateById(appCfg);
         FlinkEffective effective = new FlinkEffective();
         effective.setTargetId(appCfg.getId());
