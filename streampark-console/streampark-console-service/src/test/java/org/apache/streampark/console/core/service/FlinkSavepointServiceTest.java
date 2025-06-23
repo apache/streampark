@@ -82,8 +82,8 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
      */
     @Test
     void testGetSavepointFromDynamicProps() {
-        String propsWithEmptyTargetValue = "-Dexecution.checkpointing.dir=";
-        String props = "-Dexecution.checkpointing.dir=hdfs:///test";
+        String propsWithEmptyTargetValue = "-Dexecution.checkpointing.savepoint-dir=";
+        String props = "-Dexecution.checkpointing.savepoint-dir=hdfs:///test";
         FlinkSavepointServiceImpl savepointServiceImpl = (FlinkSavepointServiceImpl) savepointService;
 
         assertThat(savepointServiceImpl.getSavepointFromDynamicProps(null)).isNull();
