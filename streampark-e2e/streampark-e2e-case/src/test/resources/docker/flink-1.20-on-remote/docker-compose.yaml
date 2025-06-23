@@ -1,0 +1,90 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+services:
+  jobmanager:
+    image: flink:1.20.1
+    command: jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+    networks:
+      - e2e
+    volumes:
+      - flink_data:/opt/flink
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:8081" ]
+      interval: 5s
+      timeout: 5s
+      retries: 120
+
+  taskmanager:
+    image: flink:1.20.1
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    scale: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+    networks:
+      - e2e
+    volumes:
+      - flink_data:/opt/flink
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:8081" ]
+      interval: 5s
+      timeout: 5s
+      retries: 120
+
+  streampark:
+    image: apache/streampark:ci
+    command: bash bin/streampark.sh start_docker
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    ports:
+      - 10000:10000
+      - 10030:10030
+    environment:
+      - SPRING_PROFILES_ACTIVE=h2
+      - TZ=Asia/Shanghai
+      - FLINK_JOBMANAGER_URL=http://jobmanager:8081
+    privileged: true
+    restart: unless-stopped
+    networks:
+      - e2e
+    volumes:
+      - flink_data:/opt/flink
+      - ${HOME}/streampark_build_logs:/tmp/streampark/logs/build_logs/
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:10000" ]
+      interval: 5s
+      timeout: 5s
+      retries: 120
+networks:
+  e2e:
+volumes:
+  flink_data:

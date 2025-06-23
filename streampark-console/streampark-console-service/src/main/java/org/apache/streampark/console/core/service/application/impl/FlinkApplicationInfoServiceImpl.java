@@ -484,21 +484,21 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
             final String pathPart = uri.getPath();
             String error = null;
             if (scheme == null) {
-                error = "This state.savepoints.dir value "
+                error = "This state-savepoints-dir value "
                     + savepointPath
                     + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
             } else if (pathPart == null) {
-                error = "This state.savepoints.dir value "
+                error = "This state-savepoints-dir value "
                     + savepointPath
                     + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
             } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
-                error = "This state.savepoints.dir value "
+                error = "This state-savepoints-dir value "
                     + savepointPath
                     + " Cannot use the root directory for checkpoints.";
             }
             return error;
         } else {
-            return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
+            return "When custom savepoint is not set, state-savepoints-dir needs to be set in properties or flink config of application";
         }
     }
 }
