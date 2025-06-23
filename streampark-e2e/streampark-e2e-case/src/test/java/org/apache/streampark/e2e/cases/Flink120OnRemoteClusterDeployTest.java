@@ -36,7 +36,7 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/flink-1.20-on-remote/docker-compose.yaml")
-public class Flink118OnRemoteClusterDeployTest {
+public class Flink120OnRemoteClusterDeployTest {
 
     public static RemoteWebDriver browser;
 
