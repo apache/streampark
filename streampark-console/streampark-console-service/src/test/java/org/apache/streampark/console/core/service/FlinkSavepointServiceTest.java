@@ -114,7 +114,7 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
         app.setJobType(FlinkJobType.FLINK_JAR.getMode());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
 
-        String ckDir = "execution.checkpointing.dir=hdfs:///test";
+        String ckDir =  SAVEPOINT_DIRECTORY.key() + "=hdfs:///test";
 
         // Test for (StreamPark job Or FlinkSQL job) with application config just disabled checkpoint.
         FlinkApplicationConfig appCfg = new FlinkApplicationConfig();
