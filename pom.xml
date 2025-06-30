@@ -137,7 +137,6 @@
         <spotless.scalafmt.version>3.7.5</spotless.scalafmt.version>
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
         <maven-scalastyle-plugin.version>1.0.0</maven-scalastyle-plugin.version>
-        <owasp-dependency-check-maven.version>10.0.2</owasp-dependency-check-maven.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <httpclient5.version>5.1</httpclient5.version>
@@ -853,28 +852,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven-deploy-plugin.version}</version>
-                </plugin>
-
-                <plugin>
-                    <!-- run via "mvn -DskipDependencyCheck=false org.owasp:dependency-check-maven:aggregate" -->
-                    <groupId>org.owasp</groupId>
-                    <artifactId>dependency-check-maven</artifactId>
-                    <version>${owasp-dependency-check-maven.version}</version>
-                    <configuration>
-                        <skip>${owasp.skip}</skip>
-                        <skipProvidedScope>true</skipProvidedScope>
-                        <skipRuntimeScope>true</skipRuntimeScope>
-                        <skipSystemScope>true</skipSystemScope>
-                        <failBuildOnCVSS>7</failBuildOnCVSS>
-                        <nvdApiKeyEnvironmentVariable>NIST_NVD_API_KEY</nvdApiKeyEnvironmentVariable>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>aggregate</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
 
                 <!--mvn apache-rat:check-->
