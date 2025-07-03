@@ -37,7 +37,6 @@
         <module>streampark-flink-proxy</module>
         <module>streampark-flink-packer</module>
         <module>streampark-flink-kubernetes</module>
-        <module>streampark-flink-cdcclient</module>
     </modules>
 
     <dependencies>

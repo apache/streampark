@@ -39,8 +39,6 @@ public class ServiceHelper {
 
     private static String flinkSqlClientJar = null;
 
-    private static String flinkCDCClientJar = null;
-
     private static String sparkSqlClientJar = null;
 
     public static User getLoginUser() {
@@ -58,28 +56,6 @@ public class ServiceHelper {
             return user.getUserId();
         }
         return null;
-    }
-
-    public static String getFlinkCDCClientJar(FlinkEnv flinkEnv) {
-        if (flinkCDCClientJar == null) {
-            File localClient = WebUtils.getAppClientDir();
-            ApiAlertException.throwIfFalse(localClient.exists(),
-                "[StreamPark]" + localClient + " no exists. please check.");
-            String regex = String.format("streampark-flink-cdcclient_%s-.*\\.jar", flinkEnv.getScalaVersion());
-
-            List<String> jars = Arrays.stream(Objects.requireNonNull(localClient.list()))
-                .filter(x -> x.matches(regex))
-                .collect(Collectors.toList());
-            ApiAlertException.throwIfTrue(
-                jars.isEmpty(),
-                "[StreamPark] can't found streampark-flink-cdcclient jar in " + localClient);
-
-            ApiAlertException.throwIfTrue(
-                jars.size() > 1,
-                "[StreamPark] found multiple streampark-flink-cdclient jar in " + localClient);
-            flinkCDCClientJar = jars.get(0);
-        }
-        return flinkCDCClientJar;
     }
 
     public static String getFlinkSqlClientJar(FlinkEnv flinkEnv) {

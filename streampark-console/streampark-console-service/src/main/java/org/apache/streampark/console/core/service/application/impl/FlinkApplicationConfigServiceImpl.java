@@ -99,7 +99,7 @@ public class FlinkApplicationConfigServiceImpl
     public synchronized void update(FlinkApplication appParam, Boolean latest) {
         // flink sql job
         FlinkApplicationConfig latestConfig = getLatest(appParam.getId());
-        if (appParam.isJobTypeFlinkSqlOrCDC()) {
+        if (appParam.isFlinkSql()) {
             updateForFlinkSqlJob(appParam, latest, latestConfig);
         } else {
             updateForNonFlinkSqlJob(appParam, latest, latestConfig);

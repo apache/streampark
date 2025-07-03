@@ -342,7 +342,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     @VisibleForTesting
     @Nullable
     public String getSavepointFromConfig(FlinkApplication application) {
-        if (!application.isAppTypeStreamPark() && !application.isJobTypeFlinkSqlOrCDC()) {
+        if (!application.isStreamParkType() && !application.isFlinkSql()) {
             return null;
         }
         FlinkApplicationConfig applicationConfig = configService.getEffective(application.getId());

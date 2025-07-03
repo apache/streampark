@@ -34,37 +34,33 @@ primary key(`id`)
 
 
 alter table `t_flink_app`
-    modify column `id` not null;
+modify column `id` not null;
 add column `k8s_name` varchar(63) collate utf8mb4_general_ci default null,
-    -- modify_time change with duration #3188
-    modify column `modify_time` datetime not null default current_timestamp comment 'modify time';
+-- modify_time change with duration #3188
+modify column `modify_time` datetime not null default current_timestamp comment 'modify time';
 
 alter table t_app_backup rename to t_flink_app_backup;
 
 alter table t_flink_log rename to t_app_log;
 
 alter table `t_app_log`
-    change column `yarn_app_id` `cluster_id` varchar(64) default null,
-    change column `job_manager_url` `tracking_url` varchar(255) default null,
-    change column `option_time` `create_time` datetime default null,
-    add column `job_type` tinyint default null,
-    add column `user_id` bigint default null comment 'operator user id';
+change column `yarn_app_id` `cluster_id` varchar(64) default null,
+change column `job_manager_url` `tracking_url` varchar(255) default null,
+add column `job_type` tinyint default null,
+add column `user_id` bigint default null comment 'operator user id';
 
 alter table `t_flink_project`
-    add column `salt` varchar(26) collate utf8mb4_general_ci default null comment 'password salt',
-    modify column `password` varchar(512) collate utf8mb4_general_ci default null comment 'password';
-
-ALTER TABLE `t_flink_project`
-    change column `branches` `refs` varchar(255) collate utf8mb4_general_ci default null;
+add column `salt` varchar(26) collate utf8mb4_general_ci default null comment 'password salt',
+modify column `password` varchar(512) collate utf8mb4_general_ci default null comment 'password';
 
 alter table `t_flink_sql`
-    add column `team_resource` varchar(64) default null;
+add column `team_resource` varchar(64) default null;
 
 alter table `t_flink_cluster`
-    add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`,
-    add column `start_time` datetime default null comment 'start time',
-    add column `end_time` datetime default null comment 'end time',
-    add column `alert_id` bigint default null comment 'alert id';
+add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`,
+add column `start_time` datetime default null comment 'start time',
+add column `end_time` datetime default null comment 'end time',
+add column `alert_id` bigint default null comment 'alert id';
 
 -- ----------------------------
 -- Table of t_resource
@@ -107,59 +103,5 @@ insert into `t_role_menu` (role_id, menu_id) values (100002, 120403);
 -- add sso as login type
 alter table `t_user` modify column `password` varchar(64) collate utf8mb4_general_ci default null comment 'password';
 alter table `t_user` modify column `login_type` tinyint default 0 comment 'login type 0:password 1:ldap 2:sso';
-
--- ----------------------------
--- table structure for t_flink_catalog
--- ----------------------------
-drop table if exists `t_flink_catalog`;
-CREATE TABLE `t_flink_catalog` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `team_id` BIGINT NOT NULL,
-    `user_id` BIGINT DEFAULT NULL,
-    `catalog_type` VARCHAR(255) NOT NULL,
-    `catalog_name` VARCHAR(255) NOT NULL,
-    `configuration` TEXT,
-    `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `update_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_catalog_name (`catalog_name`)
-) ENGINE=InnoDB auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-insert into `t_menu` values (150601, 150600, 'catalog view', null, null, 'catalog:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150602, 150600, 'catalog create', null, null, 'catalog:create', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150603, 150600, 'catalog update', null, null, 'catalog:update', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150604, 150600, 'catalog delete', null, null, 'catalog:delete', null, '1', 1, null, now(), now());
-
-insert into `t_menu` values (150605, 150600, 'database view', null, null, 'database:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150606, 150600, 'database create', null, null, 'database:create', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150607, 150600, 'database delete', null, null, 'database:delete', null, '1', 1, null, now(), now());
-
-insert into `t_menu` values (150608, 150600, 'table view', null, null, 'table:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150609, 150600, 'table create', null, null, 'table:create', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150610, 150600, 'table update', null, null, 'table:update', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150611, 150600, 'table view', null, null, 'table:column:add', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150612, 150600, 'table column list', null, null, 'table:column:list', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150613, 150600, 'table column drop', null, null, 'table:column:drop', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150614, 150600, 'table option add', null, null, 'option:add', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150615, 150600, 'table option remove', null, null, 'option:remove', null, '1', 1, null, now(), now());
-
--- -------
-
-insert into `t_role_menu` values (100107, 100002, 150601);
-insert into `t_role_menu` values (100108, 100002, 150602);
-insert into `t_role_menu` values (100109, 100002, 150603);
-insert into `t_role_menu` values (100110, 100002, 150604);
-insert into `t_role_menu` values (100115, 100002, 150605);
-insert into `t_role_menu` values (100116, 100002, 150606);
-insert into `t_role_menu` values (100117, 100002, 150607);
-insert into `t_role_menu` values (100118, 100002, 150608);
-insert into `t_role_menu` values (100119, 100002, 150609);
-insert into `t_role_menu` values (100120, 100002, 150610);
-insert into `t_role_menu` values (100121, 100002, 150611);
-insert into `t_role_menu` values (100122, 100002, 150612);
-insert into `t_role_menu` values (100123, 100002, 150613);
-insert into `t_role_menu` values (100124, 100002, 150614);
-insert into `t_role_menu` values (100125, 100002, 150615);
-insert into `t_role_menu` values (100126, 100002, 150600);
-insert into `t_role_menu` values (100127, 100001, 150600);
 
 set foreign_key_checks = 1;

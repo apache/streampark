@@ -205,7 +205,7 @@ public class FlinkApplicationActionServiceImpl
         // 3) restore related status
         LambdaUpdateWrapper<FlinkApplication> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(FlinkApplication::getId, application.getId());
-        if (application.isJobTypeFlinkSqlOrCDC()) {
+        if (application.isFlinkSql()) {
             updateWrapper.set(FlinkApplication::getRelease, ReleaseStateEnum.FAILED.get());
         } else {
             updateWrapper.set(FlinkApplication::getRelease, ReleaseStateEnum.NEED_RELEASE.get());
@@ -421,7 +421,7 @@ public class FlinkApplicationActionServiceImpl
         applicationManageService.toEffective(application);
 
         Map<String, Object> extraParameter = new HashMap<>(0);
-        if (application.isJobTypeFlinkSqlOrCDC()) {
+        if (application.isFlinkSql()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
             // Get the sql of the replaced placeholder
             String realSql = variableService.replaceVariable(application.getTeamId(), flinkSql.getSql());
@@ -659,24 +659,6 @@ public class FlinkApplicationActionServiceImpl
                 }
                 break;
 
-            case FLINK_CDC:
-                log.info("the current job id: {}", application.getId());
-                FlinkSql flinkCDC = flinkSqlService.getEffective(application.getId(), false);
-                AssertUtils.notNull(flinkCDC);
-                // 1) dist_userJar
-                String cdcDistJar = ServiceHelper.getFlinkCDCClientJar(flinkEnv);
-                // 2) appConfig
-                appConf =
-                    applicationConfig == null
-                        ? null
-                        : String.format("yaml://%s", applicationConfig.getContent());
-                // 3) client
-                if (FlinkDeployMode.YARN_APPLICATION == deployModeEnum) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
-                    flinkUserJar = String.format("%s/%s", clientPath, cdcDistJar);
-                }
-                break;
-
             case PYFLINK:
                 Resource resource =
                     resourceService.findByResourceName(application.getTeamId(), application.getJar());
@@ -695,7 +677,7 @@ public class FlinkApplicationActionServiceImpl
                 break;
 
             case FLINK_JAR:
-                if (application.isResourceFromUpload()) {
+                if (application.isUploadResource()) {
                     appConf =
                         String.format(
                             "json://{\"%s\":\"%s\"}",

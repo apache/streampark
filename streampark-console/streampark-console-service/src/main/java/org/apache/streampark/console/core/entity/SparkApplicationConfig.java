@@ -18,8 +18,6 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -30,12 +28,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nullable;
-
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 @Getter
 @Setter
 @TableName("t_spark_config")
@@ -75,21 +69,4 @@ public class SparkApplicationConfig {
         application.setFormat(this.format);
     }
 
-    @Nullable
-    private Map<String, String> readConfig() {
-        ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(this.format);
-        if (fileType == null) {
-            return null;
-        }
-        switch (fileType) {
-            case YAML:
-                return PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
-            case PROPERTIES:
-                return PropertiesUtils.fromPropertiesTextAsJava(DeflaterUtils.unzipString(this.content));
-            case HOCON:
-                return PropertiesUtils.fromHoconTextAsJava(DeflaterUtils.unzipString(this.content));
-            default:
-                return new HashMap<>();
-        }
-    }
 }

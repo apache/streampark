@@ -818,27 +818,6 @@ create table "public"."t_external_link" (
 alter table "public"."t_external_link" add constraint "t_external_link_pkey" primary key ("id");
 
 -- ----------------------------
--- table structure for t_flink_catalog
--- ----------------------------
-
-create sequence "public"."streampark_t_flink_catalog_id_seq"
-    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
-
-CREATE TABLE "public"."t_flink_catalog" (
-    "id" int8 not null default nextval('streampark_t_flink_catalog_id_seq'::regclass),
-    "team_id" BIGINT NOT NULL,
-    "user_id" BIGINT DEFAULT NULL,
-    "catalog_type" VARCHAR(255) NOT NULL,
-    "catalog_name" VARCHAR(255) NOT NULL,
-    "configuration" TEXT,
-    "create_time" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    "update_time" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uniq_catalog_name UNIQUE (catalog_name)
-);
-alter table "public"."t_flink_catalog" add constraint "t_flink_catalog_pkey" primary key ("id");
-
-
--- ----------------------------
 -- table structure for t_yarn_queue
 -- ----------------------------
 create sequence "public"."streampark_t_yarn_queue_id_seq"

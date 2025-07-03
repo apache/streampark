@@ -470,8 +470,6 @@ public class FlinkApplication extends BaseEntity {
         switch (flinkJobType) {
             case FLINK_SQL:
                 return Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS;
-            case FLINK_CDC:
-                return Constants.STREAMPARK_FLINKCDC_CLIENT_CLASS;
             case PYFLINK:
                 return Constants.PYTHON_FLINK_DRIVER_CLASS_NAME;
             case FLINK_JAR:
@@ -505,35 +503,34 @@ public class FlinkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public boolean isJobTypeFlinkSqlOrCDC() {
-        return FlinkJobType.FLINK_SQL.getMode().equals(this.getJobType()) ||
-            FlinkJobType.FLINK_CDC.getMode().equals(this.getJobType());
+    public boolean isFlinkSql() {
+        return FlinkJobType.FLINK_SQL.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
-    public boolean isJobTypeFlinkJar() {
+    public boolean isFlinkJar() {
         return FlinkJobType.FLINK_JAR.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
-    public boolean isJobTypeFlinkJarOrPyFlink() {
+    public boolean isFlinkJarOrPyFlink() {
         return FlinkJobType.FLINK_JAR.getMode().equals(this.getJobType())
             || FlinkJobType.PYFLINK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
-    public boolean isResourceFromUpload() {
-        return isJobTypeFlinkJarOrPyFlink()
+    public boolean isUploadResource() {
+        return isFlinkJarOrPyFlink()
             && ResourceFromEnum.UPLOAD.getValue().equals(this.getResourceFrom());
     }
 
     @JsonIgnore
-    public boolean isResourceFromBuild() {
-        return isJobTypeFlinkJarOrPyFlink()
+    public boolean isBuildResource() {
+        return isFlinkJarOrPyFlink()
             && ResourceFromEnum.BUILD.getValue().equals(this.getResourceFrom());
     }
 
-    public boolean isAppTypeStreamPark() {
+    public boolean isStreamParkType() {
         return this.getAppType() == ApplicationType.STREAMPARK_FLINK.getType();
     }
 

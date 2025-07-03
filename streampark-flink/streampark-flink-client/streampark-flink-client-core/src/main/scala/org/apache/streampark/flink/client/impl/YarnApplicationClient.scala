@@ -52,7 +52,7 @@ object YarnApplicationClient extends YarnClientTrait {
         submitRequest.hdfsWorkspace.flinkPlugins,
         submitRequest.hdfsWorkspace.appJars)
       submitRequest.jobType match {
-        case FlinkJobType.FLINK_SQL | FlinkJobType.FLINK_CDC =>
+        case FlinkJobType.FLINK_SQL =>
           array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"
           val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.id}/lib"
           if (HdfsUtils.exists(jobLib)) {

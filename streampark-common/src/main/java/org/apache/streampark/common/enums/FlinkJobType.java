@@ -43,12 +43,7 @@ public enum FlinkJobType {
     /**
      * Py flink Mode
      */
-    PYFLINK("Python Flink", 3),
-
-    /**
-     * Flink CDC
-     */
-    FLINK_CDC("Flink CDC", 4);
+    PYFLINK("Python Flink", 3);
 
     private final String name;
 

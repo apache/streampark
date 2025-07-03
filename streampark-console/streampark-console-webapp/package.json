@@ -65,8 +65,7 @@
     "vue": "^3.3.4",
     "vue-i18n": "^9.2.2",
     "vue-router": "^4.2.4",
-    "vue-types": "^5.1.0",
-    "js-yaml": "^4.1.0"
+    "vue-types": "^5.1.0"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.89",

@@ -46,7 +46,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
   override protected def buildProcess(): SimpleBuildResponse = {
     execStep(1) {
       request.flinkJobType match {
-        case FlinkJobType.FLINK_SQL | FlinkJobType.FLINK_CDC | FlinkJobType.PYFLINK =>
+        case FlinkJobType.FLINK_SQL | FlinkJobType.PYFLINK =>
           LfsOperator.mkCleanDirs(request.localWorkspace)
           HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
         case _ =>

@@ -192,7 +192,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
             return true;
         }
         // rollback
-        if (app.isNeedRollback() && app.isJobTypeFlinkSqlOrCDC()) {
+        if (app.isNeedRollback() && app.isFlinkSql()) {
             flinkSqlService.rollback(app);
         }
 
@@ -200,7 +200,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
         FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateTypeEnum.NEW);
         FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
         FlinkJobType jobType = app.getJobTypeEnum();
-        if (jobType == FlinkJobType.FLINK_SQL || jobType == FlinkJobType.PYFLINK || jobType == FlinkJobType.FLINK_CDC) {
+        if (jobType == FlinkJobType.FLINK_SQL || jobType == FlinkJobType.PYFLINK) {
             FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
             AssertUtils.notNull(flinkSql);
             app.setDependency(flinkSql.getDependency());
@@ -236,12 +236,12 @@ public class FlinkApplicationBuildPipelineServiceImpl
                     // 2) some preparatory work
                     String appUploads = app.getWorkspace().APP_UPLOADS();
 
-                    if (app.isJobTypeFlinkJarOrPyFlink()) {
+                    if (app.isFlinkJarOrPyFlink()) {
                         // flinkJar upload jar to appHome...
                         String appHome = app.getAppHome();
                         FsOperator fsOperator = app.getFsOperator();
                         fsOperator.delete(appHome);
-                        if (app.isResourceFromUpload()) {
+                        if (app.isUploadResource()) {
                             String uploadJar = appUploads.concat("/").concat(app.getJar());
                             File localJar = new File(
                                 String.format(
@@ -325,10 +325,10 @@ public class FlinkApplicationBuildPipelineServiceImpl
                             // If the current task is not running, or the task has just been added, directly
                             // set
                             // the candidate version to the official version
-                            if (app.isJobTypeFlinkSqlOrCDC()) {
+                            if (app.isFlinkSql()) {
                                 applicationManageService.toEffective(app);
                             } else {
-                                if (app.isAppTypeStreamPark()) {
+                                if (app.isStreamParkType()) {
                                     FlinkApplicationConfig config =
                                         applicationConfigService.getLatest(app.getId());
                                     if (config != null) {
@@ -341,7 +341,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
                         }
                         // backup.
                         if (!app.isNeedRollback()) {
-                            if (app.isJobTypeFlinkSqlOrCDC() && newFlinkSql != null) {
+                            if (app.isFlinkSql() && newFlinkSql != null) {
                                 backUpService.backup(app, newFlinkSql);
                             } else {
                                 backUpService.backup(app, null);
@@ -575,7 +575,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
             app.getLocalAppHome(),
             mainClass,
             flinkUserJar,
-            app.isJobTypeFlinkJar(),
+            app.isFlinkJar(),
             app.getDeployModeEnum(),
             app.getJobTypeEnum(),
             flinkEnv.getFlinkVersion(),
@@ -608,13 +608,6 @@ public class FlinkApplicationBuildPipelineServiceImpl
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
-            case FLINK_CDC:
-                String cdcDistJar = ServiceHelper.getFlinkCDCClientJar(flinkEnv);
-                if (app.getDeployModeEnum() == FlinkDeployMode.YARN_APPLICATION) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
-                    return String.format("%s/%s", clientPath, cdcDistJar);
-                }
-                return Workspace.local().APP_CLIENT().concat("/").concat(cdcDistJar);
             default:
                 throw new UnsupportedOperationException(
                     "[StreamPark] unsupported JobType: " + app.getJobTypeEnum());

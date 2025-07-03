@@ -44,7 +44,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -525,15 +524,4 @@ public class SparkApplication extends BaseEntity {
         return Objects.hash(id);
     }
 
-    public static class SFunc {
-
-        public static final SFunction<SparkApplication, Long> ID = SparkApplication::getId;
-        public static final SFunction<SparkApplication, String> APP_ID = SparkApplication::getClusterId;
-        public static final SFunction<SparkApplication, Date> START_TIME = SparkApplication::getStartTime;
-        public static final SFunction<SparkApplication, Date> END_TIME = SparkApplication::getEndTime;
-        public static final SFunction<SparkApplication, Long> DURATION = SparkApplication::getDuration;
-        public static final SFunction<SparkApplication, Integer> STATE = SparkApplication::getState;
-        public static final SFunction<SparkApplication, String> OPTIONS = SparkApplication::getOptions;
-        public static final SFunction<SparkApplication, Integer> EXECUTION_MODE = SparkApplication::getDeployMode;
-    }
 }

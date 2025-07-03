@@ -32,10 +32,10 @@ public enum ChangeTypeEnum {
     DEPENDENCY(1, "[DEPENDENCY], Dependency has changed"),
 
     /** Represents a change in SQL. */
-    SQL(2, "[SQL], Flink Sql is changed"),
+    SQL(2, "[SQL], SQL is changed"),
 
     /** Represents a change in both dependencies and SQL. */
-    ALL(3, "[ALL], Dependency and Flink Sql all changed"),
+    ALL(3, "[ALL], Dependency and SQL both changed"),
 
     /** Represents a change in team resources. */
     TEAM_RESOURCE(4, "[TEAM_RESOURCE], Team resource has changed");

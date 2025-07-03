@@ -542,8 +542,6 @@ create table `t_yarn_queue` (
    unique key `unq_team_id_queue_label` (`team_id`, `queue_label`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
-
-
 -- ----------------------------
 -- Table of t_resource
 -- ----------------------------
@@ -670,22 +668,6 @@ create table `t_spark_log` (
   `user_id` bigint default null,
   primary key (`id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
--- ----------------------------
--- table structure for t_flink_catalog
--- ----------------------------
-drop table if exists `t_flink_catalog`;
-CREATE TABLE `t_flink_catalog` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `team_id` BIGINT NOT NULL,
-    `user_id` BIGINT DEFAULT NULL,
-    `catalog_type` VARCHAR(255) NOT NULL,
-    `catalog_name` VARCHAR(255) NOT NULL,
-    `configuration` TEXT,
-    `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `update_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_catalog_name (`catalog_name`)
-) ENGINE=InnoDB auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- ----------------------------
 -- table structure for t_spark_effective

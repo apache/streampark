@@ -89,7 +89,7 @@ public class FlinkApplicationBackupServiceImpl
         // If necessary, perform the backup first
         if (bakParam.isBackup()) {
             application.setBackUpDescription(bakParam.getDescription());
-            if (application.isJobTypeFlinkSqlOrCDC()) {
+            if (application.isFlinkSql()) {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
                 backup(application, flinkSql);
             } else {
@@ -107,7 +107,7 @@ public class FlinkApplicationBackupServiceImpl
             effectiveService.saveOrUpdate(
                 bakParam.getAppId(), EffectiveTypeEnum.CONFIG, bakParam.getId());
             // if flink sql task, will be rollback sql and dependencies
-            if (application.isJobTypeFlinkSqlOrCDC()) {
+            if (application.isFlinkSql()) {
                 effectiveService.saveOrUpdate(
                     bakParam.getAppId(), EffectiveTypeEnum.FLINKSQL, bakParam.getSqlId());
             }
@@ -190,7 +190,7 @@ public class FlinkApplicationBackupServiceImpl
     @Override
     public void backup(FlinkApplication appParam, FlinkSql flinkSqlParam) {
         // basic configuration file backup
-        String appHome = (appParam.isJobTypeFlinkJar() && appParam.isResourceFromBuild())
+        String appHome = (appParam.isFlinkJar() && appParam.isBuildResource())
             ? appParam.getDistHome()
             : appParam.getAppHome();
         FsOperator fsOperator = appParam.getFsOperator();

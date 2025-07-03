@@ -159,7 +159,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         if (config != null) {
             this.configService.toEffective(appParam.getId(), config.getId());
         }
-        if (appParam.isJobTypeFlinkSqlOrCDC()) {
+        if (appParam.isFlinkSql()) {
             FlinkSql flinkSql = flinkSqlService.getCandidate(appParam.getId(), null);
             if (flinkSql != null) {
                 flinkSqlService.toEffective(appParam.getId(), flinkSql.getId());
@@ -345,7 +345,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             appParam.getTeamId());
 
         appParam.doSetHotParams();
-        if (appParam.isResourceFromUpload()) {
+        if (appParam.isUploadResource()) {
             String jarPath = String.format(
                 "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
             if (!new File(jarPath).exists()) {
@@ -360,8 +360,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         boolean saveSuccess = save(appParam);
         if (saveSuccess) {
             FlinkJobType jobType = appParam.getJobTypeEnum();
-            if (jobType == FlinkJobType.FLINK_SQL || jobType == FlinkJobType.PYFLINK
-                || jobType == FlinkJobType.FLINK_CDC) {
+            if (jobType == FlinkJobType.FLINK_SQL || jobType == FlinkJobType.PYFLINK) {
                 FlinkSql flinkSql = new FlinkSql(appParam);
                 flinkSqlService.create(flinkSql);
             }
@@ -442,7 +441,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
         boolean saved = save(newApp);
         if (saved) {
-            if (newApp.isJobTypeFlinkSqlOrCDC()) {
+            if (newApp.isFlinkSql()) {
                 FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
                 newApp.setFlinkSql(copyFlinkSql.getSql());
                 newApp.setDependency(copyFlinkSql.getDependency());
@@ -493,7 +492,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         application.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
 
         // 1) jar job jar file changed
-        if (application.isResourceFromUpload()) {
+        if (application.isUploadResource()) {
             if (!Objects.equals(application.getJar(), appParam.getJar())) {
                 application.setBuild(true);
             } else {
@@ -577,12 +576,12 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         }
 
         // Flink Sql job...
-        if (application.isJobTypeFlinkSqlOrCDC()) {
+        if (application.isFlinkSql()) {
             updateFlinkSqlJob(application, appParam);
             return true;
         }
 
-        if (application.isAppTypeStreamPark()) {
+        if (application.isStreamParkType()) {
             configService.update(appParam, application.isRunning());
         } else {
             application.setJar(appParam.getJar());
@@ -715,7 +714,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             update.update();
 
             // backup
-            if (appParam.isJobTypeFlinkSqlOrCDC()) {
+            if (appParam.isFlinkSql()) {
                 FlinkSql newFlinkSql = flinkSqlService.getCandidate(appParam.getId(), CandidateTypeEnum.NEW);
                 if (!appParam.isNeedRollback() && newFlinkSql != null) {
                     backUpService.backup(appParam, newFlinkSql);
@@ -746,7 +745,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         if (config != null) {
             config.setToApplication(application);
         }
-        if (application.isJobTypeFlinkSqlOrCDC()) {
+        if (application.isFlinkSql()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
             if (flinkSql == null) {
                 flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
@@ -754,7 +753,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             }
             flinkSql.setToApplication(application);
         } else {
-            if (application.isResourceFromBuild()) {
+            if (application.isBuildResource()) {
                 String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
                 application.setConfPath(path);
             }

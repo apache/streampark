@@ -26,10 +26,6 @@ set foreign_key_checks = 0;
 -- ----------------------------
 insert into `t_team` values (100000, 'default', null, now(), now());
 
--- ----------------------------
--- Records of flink-app
--- ----------------------------
-INSERT INTO `t_app` (`id`, `job_type`, `create_time`, `modify_time`) VALUES (100000, 1, now(), now());
 
 -- ----------------------------
 -- Records of t_flink_app
@@ -56,28 +52,23 @@ insert into `t_flink_project` values (100000, 100000, 'streampark-quickstart', '
 insert into `t_flink_sql` values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', null, null, 1, 1, now());
 
 -- ----------------------------
--- Records of spark-app
--- ----------------------------
-INSERT INTO `t_app` (`id`, `job_type`, `create_time`, `modify_time`) VALUES (100001, 2, now(), now());
-
--- ----------------------------
 -- Records of t_spark_app
 -- ----------------------------
 insert into `t_spark_app` (
-     `id`, `team_id`, `job_type`, `app_type`, `app_name`, `deploy_mode`, `resource_from`, `main_class`,
-     `yarn_queue`, `k8s_image_pull_policy`, `k8s_namespace`, `state`, `option_state`, `user_id`,
-     `description`, `tracking`, `release`, `build`, `create_time`, `modify_time`, `tags`)
-values (100001, 100000, 2, 4, 'Spark SQL Demo', 2, 2, 'org.apache.streampark.spark.cli.SqlClient', 'default', 0, 'default', 0, 0, 100000, 'Spark SQL Demo', 0, 1, 1, now(), now(), 'streampark,test');
+    `id`, `team_id`, `job_type`, `app_type`, `app_name`, `deploy_mode`, `resource_from`, `main_class`,
+    `yarn_queue`, `k8s_image_pull_policy`, `k8s_namespace`, `state`, `option_state`, `user_id`,
+    `description`, `tracking`, `release`, `build`, `create_time`, `modify_time`, `tags`)
+values (100000, 100000, 2, 4, 'Spark SQL Demo', 2, 2, 'org.apache.streampark.spark.cli.SqlClient', 'default', 0, 'default', 0, 0, 100000, 'Spark SQL Demo', 0, 1, 1, now(), now(), 'streampark,test');
 
 -- ----------------------------
 -- Records of t_spark_effective
 -- ----------------------------
-insert into `t_spark_effective` values (100000, 100001, 4, 100000, now());
+insert into `t_spark_effective` values (100000, 100000, 4, 100000, now());
 
 -- ----------------------------
 -- Records of t_spark_sql
 -- ----------------------------
-insert into `t_spark_sql` values (100000, 100001, 'eNq1jr0OgjAURnee4m4FY/oCTJVUg/KT9F7cK2kQiy2W+P6KMQ6yuDh9+YZzcjIlBUkgsSkkXCbv0N9Da0ifBgOx01cDSCqvdmsIpuu9e98kavA54EPH9ajbs+HTqIPl023gsyeN8gqlIsgrqhfmoygaiTEre2vYGliDgiW/IXvd2hdymIls0d87+5f6jxdlITOCFWxVXX5npg92MWtB', null, null, 1, 1, now());
+insert into `t_spark_sql` values (100000, 100000, 'eNq1jr0OgjAURnee4m4FY/oCTJVUg/KT9F7cK2kQiy2W+P6KMQ6yuDh9+YZzcjIlBUkgsSkkXCbv0N9Da0ifBgOx01cDSCqvdmsIpuu9e98kavA54EPH9ajbs+HTqIPl023gsyeN8gqlIsgrqhfmoygaiTEre2vYGliDgiW/IXvd2hdymIls0d87+5f6jxdlITOCFWxVXX5npg92MWtB', null, null, 1, 1, now());
 
 
 -- ----------------------------
@@ -190,25 +181,6 @@ insert into `t_menu` values (150502, 150500, 'member add', null, null, 'member:a
 insert into `t_menu` values (150503, 150500, 'member update', null, null, 'member:update', null, '1', 1, null, now(), now());
 insert into `t_menu` values (150504, 150500, 'member delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
 
-insert into `t_menu` values (150601, 150600, 'catalog view', null, null, 'catalog:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150602, 150600, 'catalog create', null, null, 'catalog:create', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150603, 150600, 'catalog update', null, null, 'catalog:update', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150604, 150600, 'catalog delete', null, null, 'catalog:delete', null, '1', 1, null, now(), now());
-
-insert into `t_menu` values (150605, 150600, 'database view', null, null, 'database:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150606, 150600, 'database create', null, null, 'database:create', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150607, 150600, 'database delete', null, null, 'database:delete', null, '1', 1, null, now(), now());
-
-insert into `t_menu` values (150608, 150600, 'table view', null, null, 'table:view', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150609, 150600, 'table create', null, null, 'table:create', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150610, 150600, 'table update', null, null, 'table:update', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150611, 150600, 'table view', null, null, 'table:column:add', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150612, 150600, 'table column list', null, null, 'table:column:list', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150613, 150600, 'table column drop', null, null, 'table:column:drop', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150614, 150600, 'table option add', null, null, 'option:add', null, '1', 1, null, now(), now());
-insert into `t_menu` values (150615, 150600, 'table option remove', null, null, 'option:remove', null, '1', 1, null, now(), now());
-
--- -------
 -- ----------------------------
 -- Records of t_role
 -- ----------------------------
@@ -324,27 +296,11 @@ insert into `t_role_menu` values (100102, 100002, 140401);
 insert into `t_role_menu` values (100103, 100002, 140402);
 insert into `t_role_menu` values (100104, 100002, 140403);
 insert into `t_role_menu` values (100105, 100002, 150000);
+insert into `t_role_menu` values (100106, 100002, 150500);
 insert into `t_role_menu` values (100107, 100002, 150501);
 insert into `t_role_menu` values (100108, 100002, 150502);
 insert into `t_role_menu` values (100109, 100002, 150503);
 insert into `t_role_menu` values (100110, 100002, 150504);
-insert into `t_role_menu` values (100111, 100002, 150601);
-insert into `t_role_menu` values (100112, 100002, 150602);
-insert into `t_role_menu` values (100113, 100002, 150603);
-insert into `t_role_menu` values (100114, 100002, 150604);
-insert into `t_role_menu` values (100115, 100002, 150605);
-insert into `t_role_menu` values (100116, 100002, 150606);
-insert into `t_role_menu` values (100117, 100002, 150607);
-insert into `t_role_menu` values (100118, 100002, 150608);
-insert into `t_role_menu` values (100119, 100002, 150609);
-insert into `t_role_menu` values (100120, 100002, 150610);
-insert into `t_role_menu` values (100121, 100002, 150611);
-insert into `t_role_menu` values (100122, 100002, 150612);
-insert into `t_role_menu` values (100123, 100002, 150613);
-insert into `t_role_menu` values (100124, 100002, 150614);
-insert into `t_role_menu` values (100125, 100002, 150615);
-insert into `t_role_menu` values (100126, 100002, 150600);
-insert into `t_role_menu` values (100127, 100001, 150600);
 
 -- ----------------------------
 -- Records of t_setting

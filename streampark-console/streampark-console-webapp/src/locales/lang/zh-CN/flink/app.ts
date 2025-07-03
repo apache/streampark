@@ -195,8 +195,6 @@ export default {
     flinkSqlRequired: 'Flink Sql 为必填项',
     appidCheck: 'appid 不能为空',
     sqlCheck: 'SQL 检查错误',
-    yamlRequired: 'Yaml 不能为空',
-    yamlCheck: 'Yaml 检查错误',
   },
   operation: {
     edit: '编辑作业',

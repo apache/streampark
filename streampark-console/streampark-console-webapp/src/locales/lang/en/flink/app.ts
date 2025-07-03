@@ -205,10 +205,8 @@ export default {
   editStreamPark: {
     success: 'update successful',
     flinkSqlRequired: 'Flink Sql is required',
-    yamlRequired: 'Yaml is required',
     appidCheck: 'appid can not be empty',
     sqlCheck: 'SQL check error',
-    yamlCheck: 'Yaml check error',
   },
   operation: {
     edit: 'Edit Job',

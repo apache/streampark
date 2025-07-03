@@ -68,7 +68,6 @@ case class SubmitRequest(
     case FlinkJobType.FLINK_SQL =>
       Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS
     case FlinkJobType.PYFLINK => Constants.PYTHON_FLINK_DRIVER_CLASS_NAME
-    case FlinkJobType.FLINK_CDC => Constants.STREAMPARK_FLINKCDC_CLIENT_CLASS
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 

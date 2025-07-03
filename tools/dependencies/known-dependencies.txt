@@ -12,7 +12,6 @@ aether-transport-http-1.1.0.jar
 aether-util-1.1.0.jar
 aircompressor-0.10.jar
 antlr4-runtime-4.8-1.jar
-apiguardian-api-1.1.2.jar
 aopalliance-repackaged-2.6.1.jar
 arrow-format-2.0.0.jar
 arrow-memory-core-2.0.0.jar
@@ -72,10 +71,6 @@ enumeratum_2.12-1.6.1.jar
 failureaccess-1.0.1.jar
 flatbuffers-java-1.9.0.jar
 flink-annotations-1.20.1.jar
-flink-cdc-cli-3.2.1.jar
-flink-cdc-common-3.2.1.jar
-flink-cdc-composer-3.2.1.jar
-flink-cdc-runtime-3.2.1.jar
 flink-clients-1.20.1.jar
 flink-connector-datagen-1.20.1.jar
 flink-core-1.20.1.jar

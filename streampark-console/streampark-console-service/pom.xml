@@ -412,12 +412,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-cdcclient_${scala.binary.version}</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
         </dependency>
