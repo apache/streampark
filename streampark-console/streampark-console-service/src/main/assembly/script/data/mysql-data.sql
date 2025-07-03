@@ -26,6 +26,10 @@ set foreign_key_checks = 0;
 -- ----------------------------
 insert into `t_team` values (100000, 'default', null, now(), now());
 
+-- ----------------------------
+-- Records of flink-app
+-- ----------------------------
+INSERT INTO `t_app` (`id`, `job_type`, `create_time`, `modify_time`) VALUES (100000, 1, now(), now());
 
 -- ----------------------------
 -- Records of t_flink_app
@@ -52,24 +56,28 @@ insert into `t_flink_project` values (100000, 100000, 'streampark-quickstart', '
 insert into `t_flink_sql` values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', null, null, 1, 1, now());
 
 -- ----------------------------
+-- Records of spark-app
+-- ----------------------------
+INSERT INTO `t_app` (`id`, `job_type`, `create_time`, `modify_time`) VALUES (100001, 2, now(), now());
+
+-- ----------------------------
 -- Records of t_spark_app
 -- ----------------------------
 insert into `t_spark_app` (
     `id`, `team_id`, `job_type`, `app_type`, `app_name`, `deploy_mode`, `resource_from`, `main_class`,
     `yarn_queue`, `k8s_image_pull_policy`, `k8s_namespace`, `state`, `option_state`, `user_id`,
     `description`, `tracking`, `release`, `build`, `create_time`, `modify_time`, `tags`)
-values (100000, 100000, 2, 4, 'Spark SQL Demo', 2, 2, 'org.apache.streampark.spark.cli.SqlClient', 'default', 0, 'default', 0, 0, 100000, 'Spark SQL Demo', 0, 1, 1, now(), now(), 'streampark,test');
+values (100001, 100000, 2, 4, 'Spark SQL Demo', 2, 2, 'org.apache.streampark.spark.cli.SqlClient', 'default', 0, 'default', 0, 0, 100000, 'Spark SQL Demo', 0, 1, 1, now(), now(), 'streampark,test');
 
 -- ----------------------------
 -- Records of t_spark_effective
 -- ----------------------------
-insert into `t_spark_effective` values (100000, 100000, 4, 100000, now());
+insert into `t_spark_effective` values (100000, 100001, 4, 100000, now());
 
 -- ----------------------------
 -- Records of t_spark_sql
 -- ----------------------------
-insert into `t_spark_sql` values (100000, 100000, 'eNq1jr0OgjAURnee4m4FY/oCTJVUg/KT9F7cK2kQiy2W+P6KMQ6yuDh9+YZzcjIlBUkgsSkkXCbv0N9Da0ifBgOx01cDSCqvdmsIpuu9e98kavA54EPH9ajbs+HTqIPl023gsyeN8gqlIsgrqhfmoygaiTEre2vYGliDgiW/IXvd2hdymIls0d87+5f6jxdlITOCFWxVXX5npg92MWtB', null, null, 1, 1, now());
-
+insert into `t_spark_sql` values (100000, 100001, 'eNq1jr0OgjAURnee4m4FY/oCTJVUg/KT9F7cK2kQiy2W+P6KMQ6yuDh9+YZzcjIlBUkgsSkkXCbv0N9Da0ifBgOx01cDSCqvdmsIpuu9e98kavA54EPH9ajbs+HTqIPl023gsyeN8gqlIsgrqhfmoygaiTEre2vYGliDgiW/IXvd2hdymIls0d87+5f6jxdlITOCFWxVXX5npg92MWtB', null, null, 1, 1, now());
 
 -- ----------------------------
 -- Records of t_menu
