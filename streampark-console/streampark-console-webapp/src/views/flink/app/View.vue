@@ -15,250 +15,250 @@
   limitations under the License.
 -->
 <script lang="ts" setup name="AppView">
-import { PlusOutlined } from '@ant-design/icons-vue';
-import { nextTick, ref, onUnmounted, onMounted } from 'vue';
-import { useAppTableAction } from './hooks/useAppTableAction';
-import { useI18n } from '/@/hooks/web/useI18n';
-import { JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
-import { useDebounceFn, useTimeoutFn } from '@vueuse/core';
-import {
-  Form,
-  Button,
-  Select,
-  Input,
-  Tooltip,
-  Badge,
-  Tag,
-  Popover,
-  Row,
-  Col,
-} from 'ant-design-vue';
-import { fetchAppRecord } from '/@/api/flink/app';
-import { useTable } from '/@/components/Table';
-import { PageWrapper } from '/@/components/Page';
-import { BasicTable, TableAction } from '/@/components/Table';
-import { AppListRecord } from '/@/api/flink/app.type';
-import { releaseTitleMap } from './data';
-import { useDrawer } from '/@/components/Drawer';
-import { useModal } from '/@/components/Modal';
+  import { PlusOutlined } from '@ant-design/icons-vue';
+  import { nextTick, ref, onUnmounted, onMounted } from 'vue';
+  import { useAppTableAction } from './hooks/useAppTableAction';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import { JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
+  import { useDebounceFn, useTimeoutFn } from '@vueuse/core';
+  import {
+    Form,
+    Button,
+    Select,
+    Input,
+    Tooltip,
+    Badge,
+    Tag,
+    Popover,
+    Row,
+    Col,
+  } from 'ant-design-vue';
+  import { fetchAppRecord } from '/@/api/flink/app';
+  import { useTable } from '/@/components/Table';
+  import { PageWrapper } from '/@/components/Page';
+  import { BasicTable, TableAction } from '/@/components/Table';
+  import { AppListRecord } from '/@/api/flink/app.type';
+  import { releaseTitleMap } from './data';
+  import { useDrawer } from '/@/components/Drawer';
+  import { useModal } from '/@/components/Modal';
 
-import StartApplicationModal from './components/AppView/StartApplicationModal.vue';
-import StopApplicationModal from './components/AppView/StopApplicationModal.vue';
-import LogModal from './components/AppView/LogModal.vue';
-import BuildDrawer from './components/AppView/BuildDrawer.vue';
-import AppDashboard from './components/AppView/AppDashboard.vue';
-import State, {
-  buildStatusMap,
-  optionStateMap,
-  releaseStateMap,
-  stateMap,
-} from './components/State';
-import { useSavepoint } from './hooks/useSavepoint';
-import { useAppTableColumns } from './hooks/useAppTableColumns';
-import AppTableResize from './components/AppResize.vue';
-import { useRouter } from 'vue-router';
+  import StartApplicationModal from './components/AppView/StartApplicationModal.vue';
+  import StopApplicationModal from './components/AppView/StopApplicationModal.vue';
+  import LogModal from './components/AppView/LogModal.vue';
+  import BuildDrawer from './components/AppView/BuildDrawer.vue';
+  import AppDashboard from './components/AppView/AppDashboard.vue';
+  import State, {
+    buildStatusMap,
+    optionStateMap,
+    releaseStateMap,
+    stateMap,
+  } from './components/State';
+  import { useSavepoint } from './hooks/useSavepoint';
+  import { useAppTableColumns } from './hooks/useAppTableColumns';
+  import AppTableResize from './components/AppResize.vue';
+  import { useRouter } from 'vue-router';
 
-defineOptions({
-  name: 'AppView',
-});
-const { t } = useI18n();
-const searchRef = ref<Recordable>({
-  tags: undefined,
-  owner: undefined,
-  jobType: undefined,
-});
-const optionApps = {
-  starting: new Map(),
-  stopping: new Map(),
-  release: new Map(),
-  savepointing: new Map(),
-};
+  defineOptions({
+    name: 'AppView',
+  });
+  const { t } = useI18n();
+  const searchRef = ref<Recordable>({
+    tags: undefined,
+    owner: undefined,
+    jobType: undefined,
+  });
+  const optionApps = {
+    starting: new Map(),
+    stopping: new Map(),
+    release: new Map(),
+    savepointing: new Map(),
+  };
 
-const titleLenRef = ref({
-  maxState: '',
-  maxRelease: '',
-  maxBuild: '',
-});
+  const titleLenRef = ref({
+    maxState: '',
+    maxRelease: '',
+    maxBuild: '',
+  });
 
-const appDashboardRef = ref<any>();
-const noData = ref<boolean>();
+  const appDashboardRef = ref<any>();
+  const noData = ref<boolean>();
 
-const currentTablePage = ref(1);
-const router = useRouter();
-const { onTableColumnResize, tableColumnWidth, getAppColumns } = useAppTableColumns();
-const { openSavepoint } = useSavepoint(handleOptionApp);
-const [registerStartModal, { openModal: openStartModal }] = useModal();
-const [registerStopModal, { openModal: openStopModal }] = useModal();
-const [registerLogModal, { openModal: openLogModal }] = useModal();
-const [registerBuildDrawer, { openDrawer: openBuildDrawer }] = useDrawer();
+  const currentTablePage = ref(1);
+  const router = useRouter();
+  const { onTableColumnResize, tableColumnWidth, getAppColumns } = useAppTableColumns();
+  const { openSavepoint } = useSavepoint(handleOptionApp);
+  const [registerStartModal, { openModal: openStartModal }] = useModal();
+  const [registerStopModal, { openModal: openStopModal }] = useModal();
+  const [registerLogModal, { openModal: openLogModal }] = useModal();
+  const [registerBuildDrawer, { openDrawer: openBuildDrawer }] = useDrawer();
 
-const [registerTable, { reload, getLoading, setPagination }] = useTable({
-  rowKey: 'id',
-  api: fetchAppRecord,
-  beforeFetch: (params) => {
-    if (Reflect.has(params, 'state')) {
-      if (params.state && params.state.length > 0) {
-        params['stateArray'] = [...params.state];
+  const [registerTable, { reload, getLoading, setPagination }] = useTable({
+    rowKey: 'id',
+    api: fetchAppRecord,
+    beforeFetch: (params) => {
+      if (Reflect.has(params, 'state')) {
+        if (params.state && params.state.length > 0) {
+          params['stateArray'] = [...params.state];
+        }
+        delete params.state;
       }
-      delete params.state;
-    }
-    currentTablePage.value = params.pageNum;
-    Object.assign(params, searchRef.value);
-    sessionStorage.setItem('appPageNo', params.pageNum);
-    return params;
-  },
-  afterFetch: (dataSource) => {
-    const timestamp = new Date().getTime();
-    noData.value = dataSource.length == 0;
-    dataSource.forEach((x) => {
-      x.expanded = [
+      currentTablePage.value = params.pageNum;
+      Object.assign(params, searchRef.value);
+      sessionStorage.setItem('appPageNo', params.pageNum);
+      return params;
+    },
+    afterFetch: (dataSource) => {
+      const timestamp = new Date().getTime();
+      noData.value = dataSource.length == 0;
+      dataSource.forEach((x) => {
+        x.expanded = [
+          {
+            jmMemory: x.jmMemory,
+            tmMemory: x.tmMemory,
+            totalTM: x.totalTM,
+            totalSlot: x.totalSlot,
+            availableSlot: x.availableSlot,
+          },
+        ];
+        if (x['optionState'] === OptionStateEnum.NONE) {
+          if (optionApps.starting.get(x.id)) {
+            if (timestamp - optionApps.starting.get(x.id) > 2000 * 2) {
+              optionApps.starting.delete(x.id);
+            }
+          }
+          if (optionApps.stopping.get(x.id)) {
+            if (timestamp - optionApps.stopping.get(x.id) > 2000) {
+              optionApps.stopping.delete(x.id);
+            }
+          }
+          if (optionApps.release.get(x.id)) {
+            if (timestamp - optionApps.release.get(x.id) > 2000) {
+              optionApps.release.delete(x.id);
+            }
+          }
+          if (optionApps.savepointing.get(x.id)) {
+            if (timestamp - optionApps.savepointing.get(x.id) > 2000) {
+              optionApps.savepointing.delete(x.id);
+            }
+          }
+        }
+      });
+      const stateLenMap = dataSource.reduce(
+        (
+          prev: {
+            maxState: string;
+            maxRelease: string;
+            maxBuild: string;
+          },
+          cur: any,
+        ) => {
+          const { state, optionState, release, buildStatus } = cur;
+          // state title len
+          if (optionState === OptionStateEnum.NONE) {
+            const stateStr = stateMap[state]?.title;
+            if (stateStr && stateStr.length > prev.maxState.length) {
+              prev.maxState = stateStr;
+            }
+          } else {
+            const stateStr = optionStateMap[optionState]?.title;
+            if (stateStr && stateStr.length > prev.maxState.length) {
+              prev.maxState = stateStr;
+            }
+          }
+          //release title len
+          const releaseStr = releaseStateMap[release]?.title;
+          if (releaseStr && releaseStr.length > prev.maxRelease.length) {
+            prev.maxRelease = releaseStr;
+          }
+          //build title len
+          const buildStr = buildStatusMap[buildStatus]?.title;
+          if (buildStr && buildStr.length > prev.maxBuild.length) {
+            prev.maxBuild = buildStr;
+          }
+          return prev;
+        },
         {
-          jmMemory: x.jmMemory,
-          tmMemory: x.tmMemory,
-          totalTM: x.totalTM,
-          totalSlot: x.totalSlot,
-          availableSlot: x.availableSlot,
+          maxState: '',
+          maxRelease: '',
+          maxBuild: '',
         },
-      ];
-      if (x['optionState'] === OptionStateEnum.NONE) {
-        if (optionApps.starting.get(x.id)) {
-          if (timestamp - optionApps.starting.get(x.id) > 2000 * 2) {
-            optionApps.starting.delete(x.id);
-          }
-        }
-        if (optionApps.stopping.get(x.id)) {
-          if (timestamp - optionApps.stopping.get(x.id) > 2000) {
-            optionApps.stopping.delete(x.id);
-          }
-        }
-        if (optionApps.release.get(x.id)) {
-          if (timestamp - optionApps.release.get(x.id) > 2000) {
-            optionApps.release.delete(x.id);
-          }
-        }
-        if (optionApps.savepointing.get(x.id)) {
-          if (timestamp - optionApps.savepointing.get(x.id) > 2000) {
-            optionApps.savepointing.delete(x.id);
-          }
-        }
-      }
-    });
-    const stateLenMap = dataSource.reduce(
-      (
-        prev: {
-          maxState: string;
-          maxRelease: string;
-          maxBuild: string;
-        },
-        cur: any,
-      ) => {
-        const { state, optionState, release, buildStatus } = cur;
-        // state title len
-        if (optionState === OptionStateEnum.NONE) {
-          const stateStr = stateMap[state]?.title;
-          if (stateStr && stateStr.length > prev.maxState.length) {
-            prev.maxState = stateStr;
-          }
-        } else {
-          const stateStr = optionStateMap[optionState]?.title;
-          if (stateStr && stateStr.length > prev.maxState.length) {
-            prev.maxState = stateStr;
-          }
-        }
-        //release title len
-        const releaseStr = releaseStateMap[release]?.title;
-        if (releaseStr && releaseStr.length > prev.maxRelease.length) {
-          prev.maxRelease = releaseStr;
-        }
-        //build title len
-        const buildStr = buildStatusMap[buildStatus]?.title;
-        if (buildStr && buildStr.length > prev.maxBuild.length) {
-          prev.maxBuild = buildStr;
-        }
-        return prev;
-      },
-      {
-        maxState: '',
-        maxRelease: '',
-        maxBuild: '',
-      },
-    );
-    Object.assign(titleLenRef.value, stateLenMap);
-    return dataSource;
-  },
-  fetchSetting: { listField: 'records' },
-  immediate: true,
-  canResize: false,
-  showIndexColumn: false,
-  showTableSetting: false,
-  useSearchForm: false,
-  tableSetting: { fullScreen: true, redo: false },
-  actionColumn: {
-    dataIndex: 'operation',
-    title: t('component.table.operation'),
-    width: 180,
-  },
-});
-
-const { getTableActions, tagsOptions, users } = useAppTableAction(
-  openStartModal,
-  openStopModal,
-  openSavepoint,
-  openLogModal,
-  openBuildDrawer,
-  handlePageDataReload,
-  optionApps,
-);
-
-/* view */
-function handleJobView(app: AppListRecord) {
-  router.push({ path: '/flink/app/detail', query: { appId: app.id } });
-}
-
-/* Update options data */
-function handleOptionApp(data: {
-  type: 'starting' | 'stopping' | 'release' | 'savepointing';
-  key: any;
-  value: any;
-}) {
-  optionApps[data.type].set(data.key, data.value);
-}
-
-function handlePageDataReload(polling = false) {
-  nextTick(() => {
-    appDashboardRef.value?.handleDashboard(false);
-    reload({ polling });
+      );
+      Object.assign(titleLenRef.value, stateLenMap);
+      return dataSource;
+    },
+    fetchSetting: { listField: 'records' },
+    immediate: true,
+    canResize: false,
+    showIndexColumn: false,
+    showTableSetting: false,
+    useSearchForm: false,
+    tableSetting: { fullScreen: true, redo: false },
+    actionColumn: {
+      dataIndex: 'operation',
+      title: t('component.table.operation'),
+      width: 180,
+    },
   });
-}
 
-const handleResetReload = useDebounceFn(() => {
-  setPagination({
-    current: 1,
-  });
-  reload();
-}, 500);
+  const { getTableActions, tagsOptions, users } = useAppTableAction(
+    openStartModal,
+    openStopModal,
+    openSavepoint,
+    openLogModal,
+    openBuildDrawer,
+    handlePageDataReload,
+    optionApps,
+  );
 
-const { start, stop } = useTimeoutFn(() => {
-  if (!getLoading()) {
-    handlePageDataReload(true);
+  /* view */
+  function handleJobView(app: AppListRecord) {
+    router.push({ path: '/flink/app/detail', query: { appId: app.id } });
   }
-  start();
-}, 2000);
 
-onMounted(() => {
-  // If there is a page, jump to the page number of the record
-  const currentPage = sessionStorage.getItem('appPageNo');
-  if (currentPage) {
+  /* Update options data */
+  function handleOptionApp(data: {
+    type: 'starting' | 'stopping' | 'release' | 'savepointing';
+    key: any;
+    value: any;
+  }) {
+    optionApps[data.type].set(data.key, data.value);
+  }
+
+  function handlePageDataReload(polling = false) {
+    nextTick(() => {
+      appDashboardRef.value?.handleDashboard(false);
+      reload({ polling });
+    });
+  }
+
+  const handleResetReload = useDebounceFn(() => {
     setPagination({
-      current: Number(currentPage) || 1,
+      current: 1,
     });
-    sessionStorage.removeItem('appPageNo');
-  }
-});
+    reload();
+  }, 500);
 
-onUnmounted(() => {
-  stop();
-});
+  const { start, stop } = useTimeoutFn(() => {
+    if (!getLoading()) {
+      handlePageDataReload(true);
+    }
+    start();
+  }, 2000);
+
+  onMounted(() => {
+    // If there is a page, jump to the page number of the record
+    const currentPage = sessionStorage.getItem('appPageNo');
+    if (currentPage) {
+      setPagination({
+        current: Number(currentPage) || 1,
+      });
+      sessionStorage.removeItem('appPageNo');
+    }
+  });
+
+  onUnmounted(() => {
+    stop();
+  });
 </script>
 <template>
   <PageWrapper contentFullHeight content-class="flex flex-col">
@@ -433,5 +433,5 @@ onUnmounted(() => {
   </PageWrapper>
 </template>
 <style lang="less">
-@import url('./styles/View.less');
+  @import url('./styles/View.less');
 </style>

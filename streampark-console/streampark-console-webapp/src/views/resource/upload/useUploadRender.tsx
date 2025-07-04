@@ -18,12 +18,14 @@ import { Select, Tag } from 'ant-design-vue';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { EngineTypeEnum, ResourceTypeEnum } from './upload.data';
 
-import flinkAppSvg from '/@/assets/icons/flink2.svg';
-import sparkSvg from '/@/assets/icons/spark.svg';
+import flinkAppSvg from '/@/assets/icons/flink.svg';
+import sparkSvg from '/@/assets/icons/spark2.svg';
+
 import connectorSvg from '/@/assets/icons/connector.svg';
 import udxfSvg from '/@/assets/icons/fx.svg';
 import jarSvg from '/@/assets/icons/jar.svg';
 import groupSvg from '/@/assets/icons/group.svg';
+import { SvgIcon } from '/@/components/Icon';
 
 const { t } = useI18n();
 
@@ -34,7 +36,12 @@ export const renderResourceType = ({ model }) => {
       {
         label: model.engineType === EngineTypeEnum.FLINK ? 'Flink App' : 'Spark App',
         value: ResourceTypeEnum.APP,
-        src: model.engineType === EngineTypeEnum.FLINK ? flinkAppSvg : sparkSvg,
+        src:
+          model.engineType === EngineTypeEnum.FLINK ? (
+            <SvgIcon name="flink2" size={12} />
+          ) : (
+            <SvgIcon name="spark2" size={12} />
+          ),
       },
       { label: 'Connector', value: ResourceTypeEnum.CONNECTOR, src: connectorSvg },
       { label: 'UDXF', value: ResourceTypeEnum.UDXF, src: udxfSvg },

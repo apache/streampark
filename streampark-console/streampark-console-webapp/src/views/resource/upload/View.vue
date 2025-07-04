@@ -36,7 +36,7 @@
             <SvgIcon name="flink" /> Apache Flink
           </span>
           <span v-if="record.engineType === EngineTypeEnum.SPARK">
-            <SvgIcon name="spark" /> Apache Spark
+            <SvgIcon name="spark2" /> Apache Spark
           </span>
         </template>
         <template v-if="column.dataIndex === 'resourceType'">

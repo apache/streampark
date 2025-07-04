@@ -209,6 +209,7 @@
     }
 
     .ant-drawer-body {
+      padding: 0;
       height: calc(100% - @header-height);
       background-color: @component-background;
 

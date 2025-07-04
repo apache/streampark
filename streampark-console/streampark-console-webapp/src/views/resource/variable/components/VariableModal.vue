@@ -17,7 +17,7 @@
 <template>
   <BasicModal :width="600" @register="registerModal" showFooter>
     <template #title>
-      <Icon icon="ant-design:code-outlined" />
+      <SvgIcon name="variable" />
       {{ getTitle }}
     </template>
     <div class="mt-3">
@@ -40,7 +40,7 @@
   import { ref, h, computed, unref, reactive } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicModal, useModalInner } from '/@/components/Modal';
-  import { Icon } from '/@/components/Icon';
+  import { SvgIcon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
   import {
