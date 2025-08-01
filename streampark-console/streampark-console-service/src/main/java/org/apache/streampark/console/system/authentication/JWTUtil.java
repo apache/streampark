@@ -204,7 +204,7 @@ public class JWTUtil {
         }
     }
 
-    // 修复加密方法
+    // Fix encryption method
     public static String encrypt(String content) throws Exception {
         // 生成随机IV
         byte[] iv = new byte[GCM_IV_LENGTH];
