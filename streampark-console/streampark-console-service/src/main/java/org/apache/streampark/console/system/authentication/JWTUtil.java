@@ -219,7 +219,7 @@ public class JWTUtil {
         // Encrypt data
         byte[] encrypted = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
 
-        // 组合IV + 密文
+        // Combine IV and ciphertext
         ByteBuffer buffer = ByteBuffer.allocate(iv.length + encrypted.length);
         buffer.put(iv);
         buffer.put(encrypted);
