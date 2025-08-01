@@ -216,7 +216,7 @@ public class JWTUtil {
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
 
-        // 加密数据
+        // Encrypt data
         byte[] encrypted = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
 
         // 组合IV + 密文
