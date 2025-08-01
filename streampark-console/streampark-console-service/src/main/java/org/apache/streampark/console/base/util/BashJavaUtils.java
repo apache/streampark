@@ -149,12 +149,11 @@ public class BashJavaUtils {
             try {
                 FileUtils.writeFile(secret, keyFile);
                 try {
-                    Files.setPosixFilePermissions(Paths.get(keyFile.getAbsolutePath()),
+                    Files.setPosixFilePermissions(
+                        Paths.get(keyFile.getAbsolutePath()),
                         PosixFilePermissions.fromString("rw-------"));
                 } catch (UnsupportedOperationException e) {
-                    keyFile.setReadable(true, true);
-                    keyFile.setWritable(true, true);
-                    keyFile.setExecutable(false, false);
+                    System.err.println("Warning: setPosixFilePermissions for " + keyFile.getAbsolutePath());
                 }
             } catch (Exception e) {
                 throw new SecurityException("Failed to generate JWT key", e);
