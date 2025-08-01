@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.console.system.authentication.JWTUtil;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -27,8 +27,8 @@ class EncryptUtilsTest {
     @Test
     void testEncrypt() throws Exception {
         String value = "apache streampark";
-        String encrypt = EncryptUtils.encrypt(value, Constants.STREAM_PARK);
-        String decrypt = EncryptUtils.decrypt(encrypt, Constants.STREAM_PARK);
+        String encrypt = JWTUtil.encrypt(value);
+        String decrypt = JWTUtil.decrypt(encrypt);
         Assertions.assertEquals(value, decrypt);
     }
 }

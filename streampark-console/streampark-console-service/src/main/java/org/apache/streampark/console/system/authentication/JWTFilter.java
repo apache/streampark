@@ -17,8 +17,6 @@
 
 package org.apache.streampark.console.system.authentication;
 
-import org.apache.streampark.console.base.util.EncryptUtils;
-
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 
@@ -58,7 +56,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String token = httpServletRequest.getHeader(TOKEN);
         try {
-            token = EncryptUtils.decrypt(token);
+            token = JWTUtil.decrypt(token);
             JWTToken jwtToken = new JWTToken(token);
             getSubject(request, response).login(jwtToken);
             return true;

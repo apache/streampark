@@ -19,7 +19,6 @@ package org.apache.streampark.console.system.authentication;
 
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.SpringUnitTestBase;
-import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.entity.User;
 
@@ -47,7 +46,7 @@ class JWTTest extends SpringUnitTestBase {
                 AuthenticationType.SIGN,
                 DateUtils.getTime(ttl, DateUtils.fullFormat(), TimeZone.getDefault()));
         assert token != null;
-        Date expiresAt = JWT.decode(EncryptUtils.decrypt(token)).getExpiresAt();
+        Date expiresAt = JWT.decode(JWTUtil.decrypt(token)).getExpiresAt();
         String decodeExpireTime =
             DateUtils.format(expiresAt, DateUtils.fullFormat(), TimeZone.getDefault());
         Assertions.assertEquals(ttl, decodeExpireTime);

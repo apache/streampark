@@ -18,7 +18,6 @@
 package org.apache.streampark.console.system.authentication;
 
 import org.apache.streampark.common.util.SystemPropertyUtils;
-import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.User;
@@ -90,6 +89,12 @@ public class ShiroRealm extends AuthorizingRealm {
             throw new AuthenticationException("the authorization token is invalid");
         }
 
+        // Query user information by username
+        User user = userService.getByUsername(username);
+        if (user == null || !user.getUserId().equals(userId)) {
+            throw new AuthenticationException("the authorization token verification failed.");
+        }
+
         switch (authType) {
             case SIGN:
                 Long timestamp = JWTUtil.getTimestamp(credential);
@@ -102,7 +107,7 @@ public class ShiroRealm extends AuthorizingRealm {
                 // Check whether the token belongs to the api and whether the permission is valid
                 AccessToken accessToken = accessTokenService.getByUserId(userId);
                 try {
-                    String encryptToken = EncryptUtils.encrypt(credential);
+                    String encryptToken = JWTUtil.encrypt(credential);
                     if (accessToken == null || !accessToken.getToken().equals(encryptToken)) {
                         throw new AuthenticationException("the openapi authorization token is invalid");
                     }
@@ -112,7 +117,7 @@ public class ShiroRealm extends AuthorizingRealm {
 
                 if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {
                     throw new AuthenticationException(
-                        "the openapi authorization token is disabled, please contact the administrator");
+                        "The OpenAPI authorization token is disabled. Please contact the administrator.");
                 }
 
                 if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
@@ -123,12 +128,6 @@ public class ShiroRealm extends AuthorizingRealm {
                 break;
             default:
                 break;
-        }
-
-        // Query user information by username
-        User user = userService.getByUsername(username);
-        if (user == null || !JWTUtil.verify(credential, username, user.getPassword())) {
-            throw new AuthenticationException("the authorization token verification failed.");
         }
 
         return new SimpleAuthenticationInfo(credential, credential, "streampark_shiro_realm");
