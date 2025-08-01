@@ -193,7 +193,7 @@ public class JWTUtil {
 
     public static boolean verify(String token) {
         try {
-            // Base64解码签名密钥
+            // Decode the signing key using Base64
             Algorithm algorithm = Algorithm.HMAC256(JWT_KEY);
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(decrypt(token));
