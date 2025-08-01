@@ -206,7 +206,7 @@ public class JWTUtil {
 
     // Fix encryption method
     public static String encrypt(String content) throws Exception {
-        // 生成随机IV
+        // Generate a random IV
         byte[] iv = new byte[GCM_IV_LENGTH];
         SecureRandom.getInstanceStrong().nextBytes(iv);
 
