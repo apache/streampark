@@ -56,7 +56,7 @@ public class JWTUtil {
     private static final String JWT_TYPE = "type";
     private static final String JWT_TIMESTAMP = "timestamp";
 
-    private static byte[] JWT_KEY = loadSigningKey(); // 用于 HMAC256
+    private static byte[] JWT_KEY = loadSigningKey(); // Used for HMAC256
 
     private static byte[] loadSigningKey() {
         String userHome = System.getProperty("user.home");
