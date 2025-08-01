@@ -212,7 +212,7 @@ public class JWTUtil {
 
         SecretKeySpec keySpec = new SecretKeySpec(JWT_KEY, "AES");
 
-        // 初始化加密器
+        // Initialize the cipher
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
 
