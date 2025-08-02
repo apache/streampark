@@ -1,0 +1,33 @@
+name: Paths Filter (Multi-Rule)
+description: Filter changed files by path patterns, supports wildcards and exclusion. Replacement for dorny/paths-filter in restricted environments.
+inputs:
+  filters:
+    description: |
+      Multi-line string defining filter groups. Supports:
+        - Wildcards: *, **, ?
+        - Exclusion: !pattern
+      Example:
+        backend:
+          - 'src/**'
+          - '!**/*.md'
+        docs:
+          - '**/*.md'
+        frontend:
+          - 'web/**'
+          - 'assets/**'
+        config:
+          - 'pom.xml'
+          - 'workflow/**'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run path filter
+      id: run
+      shell: bash
+      env:
+        INPUT_FILTERS: ${{ inputs.filters }}
+      run: |
+        chmod +x ${{ github.action_path }}/filter.sh
+        ${{ github.action_path }}/filter.sh
