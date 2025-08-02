@@ -86,7 +86,7 @@ public class JWTSecret {
         try {
             // 确保目录存在
             Files.createDirectories(keyPath.getParent());
-            // 安全写入临时文件后重命名
+            // Safely write to a temporary file before renaming
             Path tempFile = Files.createTempFile(keyPath.getParent(), "streampark", ".tmp");
             Files.write(tempFile, encodedKey.getBytes(StandardCharsets.UTF_8));
 
