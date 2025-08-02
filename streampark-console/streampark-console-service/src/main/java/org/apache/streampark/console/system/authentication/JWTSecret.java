@@ -84,7 +84,7 @@ public class JWTSecret {
     private static void saveNewKey(byte[] keyBytes, Path keyPath) {
         String encodedKey = Base64.getEncoder().encodeToString(keyBytes);
         try {
-            // 确保目录存在
+            // Ensure the directory exists
             Files.createDirectories(keyPath.getParent());
             // Safely write to a temporary file before renaming
             Path tempFile = Files.createTempFile(keyPath.getParent(), "streampark", ".tmp");
