@@ -41,7 +41,7 @@ public class JWTSecret {
         Path keyPath = Paths.get(System.getProperty("user.home"), "streampark.jwt.key");
         File keyFile = keyPath.toFile();
 
-        // 尝试加载现有密钥
+        // Try to load existing key
         byte[] keyBytes = loadExistingKey(keyFile);
         if (keyBytes != null) {
             return keyBytes;
