@@ -185,7 +185,7 @@ public class JWTUtil {
     public static String encrypt(String content) throws Exception {
         // Generate a random IV
         byte[] iv = new byte[GCM_IV_LENGTH];
-        SecureRandom.getInstanceStrong().nextBytes(iv);
+        SECURE_RANDOM.nextBytes(iv);
 
         SecretKeySpec keySpec = new SecretKeySpec(JWT_KEY, "AES");
 
