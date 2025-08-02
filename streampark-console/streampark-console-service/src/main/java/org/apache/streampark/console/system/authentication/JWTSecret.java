@@ -47,7 +47,7 @@ public class JWTSecret {
             return keyBytes;
         }
 
-        // 生成新密钥
+        // Generate new key
         keyBytes = generateNewKey();
         saveNewKey(keyBytes, keyPath);
         return keyBytes;
