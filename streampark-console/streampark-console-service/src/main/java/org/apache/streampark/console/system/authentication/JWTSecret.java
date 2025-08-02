@@ -90,7 +90,7 @@ public class JWTSecret {
             Path tempFile = Files.createTempFile(keyPath.getParent(), "streampark", ".tmp");
             Files.write(tempFile, encodedKey.getBytes(StandardCharsets.UTF_8));
 
-            // 设置权限后原子移动
+            // Atomically move after setting permissions
             setStrictPermissions(tempFile);
             Files.move(tempFile, keyPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 
