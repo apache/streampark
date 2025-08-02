@@ -173,7 +173,15 @@ public class JWTUtil {
         }
     }
 
-    // Fix encryption method
+    /**
+     * Encrypts the given content using AES-GCM with a randomly generated IV.
+     * The IV is prepended to the ciphertext and the result is Base64-encoded.
+     * This allows the decrypt method to extract the IV and correctly decrypt the content.
+     *
+     * @param content the plaintext string to encrypt
+     * @return the Base64-encoded string containing the IV and ciphertext
+     * @throws Exception if encryption fails
+     */
     public static String encrypt(String content) throws Exception {
         // Generate a random IV
         byte[] iv = new byte[GCM_IV_LENGTH];
