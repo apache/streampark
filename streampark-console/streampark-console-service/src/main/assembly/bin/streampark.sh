@@ -394,8 +394,6 @@ start() {
 
   echo_g "JAVA_OPTS:  ${JAVA_OPTS}"
 
-  jwt_secret
-
   eval $NOHUP $JAVACMD $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
@@ -516,13 +514,6 @@ stop() {
 
   if [[ "$SLEEP" -lt 0 ]]; then
      echo_r "StreamPark has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
-  fi
-}
-
-jwt_secret() {
-  local secret=`$JAVACMD -cp "$APP_LIB/*" $BASH_UTIL --jwt_secret`
-  if [[ -n "$secret" ]]; then
-    echo "JWT_SECRET: $secret"
   fi
 }
 

@@ -17,11 +17,8 @@
 
 package org.apache.streampark.console.system.authentication;
 
-import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.entity.User;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
@@ -34,7 +31,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -50,39 +46,12 @@ public class JWTUtil {
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final int GCM_TAG_LENGTH = 128;
     private static final int GCM_IV_LENGTH = 12;
-
     private static final String JWT_USERID = "userId";
     private static final String JWT_USERNAME = "userName";
     private static final String JWT_TYPE = "type";
     private static final String JWT_TIMESTAMP = "timestamp";
 
-    private static byte[] JWT_KEY = loadSigningKey(); // Used for HMAC256
-
-    private static byte[] loadSigningKey() {
-        String userHome = System.getProperty("user.home");
-        File keyFile = new File(userHome, "streampark.jwt.key");
-        String secret = null;
-        if (keyFile.exists()) {
-            try {
-                secret = FileUtils.readFile(keyFile).trim();
-            } catch (Exception e) {
-                log.error("Failed to read JWT key file", e);
-            }
-        }
-
-        if (StringUtils.isEmpty(secret)) {
-            throw new ExceptionInInitializerError("JWT secret initialization failed.");
-        }
-        try {
-            byte[] key = Base64.getDecoder().decode(secret);
-            if (key.length != 32) {
-                throw new SecurityException("HMAC key must be 32 bytes");
-            }
-            return key;
-        } catch (Exception e) {
-            throw new SecurityException("Invalid JWT secret format", e);
-        }
-    }
+    private static byte[] JWT_KEY = JWTSecret.getJWTSecret(); // Used for HMAC256
 
     /** get username from token */
     public static String getUserName(String token) {

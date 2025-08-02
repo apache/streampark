@@ -34,10 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.PosixFilePermissions;
-import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Map;
 
 public class BashJavaUtils {
@@ -49,12 +46,6 @@ public class BashJavaUtils {
         String[] actionArgs = Arrays.copyOfRange(args, 1, args.length);
 
         switch (action) {
-            case "--jwt_secret":
-                String secret = getFirstOrCreateJWTSecret();
-                if (secret != null) {
-                    System.out.println(secret);
-                }
-                break;
             case "--get_yaml":
                 String key = actionArgs[0];
                 String conf = actionArgs[1];
@@ -137,30 +128,6 @@ public class BashJavaUtils {
             default:
                 break;
         }
-    }
-
-    private static String getFirstOrCreateJWTSecret() {
-        String userHome = System.getProperty("user.home");
-        File keyFile = new File(userHome, "streampark.jwt.key");
-        if (!keyFile.exists()) {
-            byte[] bytes = new byte[32];
-            new SecureRandom().nextBytes(bytes);
-            String secret = Base64.getEncoder().encodeToString(bytes);
-            try {
-                FileUtils.writeFile(secret, keyFile);
-                try {
-                    Files.setPosixFilePermissions(
-                        Paths.get(keyFile.getAbsolutePath()),
-                        PosixFilePermissions.fromString("rw-------"));
-                } catch (UnsupportedOperationException e) {
-                    System.err.println("Warning: setPosixFilePermissions for " + keyFile.getAbsolutePath());
-                }
-            } catch (Exception e) {
-                throw new SecurityException("Failed to generate JWT key", e);
-            }
-            return secret;
-        }
-        return null;
     }
 
 }
