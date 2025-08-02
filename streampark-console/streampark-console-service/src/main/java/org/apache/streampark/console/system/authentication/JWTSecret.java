@@ -70,7 +70,7 @@ public class JWTSecret {
         } catch (Exception e) {
             log.error("Failed to read JWT key file", e);
         }
-        // 清理无效文件
+        // Clean up invalid file
         safelyDeleteFile(keyFile);
         return null;
     }
