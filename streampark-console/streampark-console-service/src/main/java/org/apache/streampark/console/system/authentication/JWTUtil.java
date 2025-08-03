@@ -165,7 +165,7 @@ public class JWTUtil {
             // Decode the signing key using Base64
             Algorithm algorithm = Algorithm.HMAC256(JWT_KEY);
             JWTVerifier verifier = JWT.require(algorithm).build();
-            verifier.verify(decrypt(token));
+            verifier.verify(token);
             return true;
         } catch (Exception e) {
             log.warn("Invalid JWT: {}", e.getMessage());
