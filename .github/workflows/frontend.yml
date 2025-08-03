@@ -42,7 +42,7 @@ jobs:
         id: filter
         with:
           filters: |
-            docs:
+            not-ignore:
               - '!**/*.md'
   build:
     name: Build
