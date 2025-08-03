@@ -33,6 +33,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -184,7 +185,7 @@ public class JWTUtil {
     public static String encrypt(String content) throws Exception {
         // Generate a random IV
         byte[] iv = new byte[GCM_IV_LENGTH];
-        SECURE_RANDOM.nextBytes(iv);
+        SecureRandom.getInstanceStrong().nextBytes(iv);
 
         SecretKeySpec keySpec = new SecretKeySpec(JWT_KEY, "AES");
 
