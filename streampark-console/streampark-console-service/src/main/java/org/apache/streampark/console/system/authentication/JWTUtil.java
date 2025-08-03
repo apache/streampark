@@ -33,7 +33,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
 import java.util.regex.Pattern;
