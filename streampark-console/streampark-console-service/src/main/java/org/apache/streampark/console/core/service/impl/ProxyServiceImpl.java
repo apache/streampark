@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.util.HadoopConfigUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.core.entity.ApplicationLog;
@@ -228,9 +229,11 @@ public class ProxyServiceImpl implements ProxyService {
             setRestTemplateCredentials(ugi.getShortUserName());
             return ugi.doAs(
                 (PrivilegedExceptionAction<ResponseEntity<?>>) () -> proxy(request, url, requestEntity));
-        } else {
-            return proxyRequest(request, url);
         }
+        if (YarnUtils.hasYarnHttpSimpleAuth()) {
+            return proxyRequest(request, String.format("%s?user.name=%s", url, HadoopConfigUtils.hadoopUserName()));
+        }
+        return proxyRequest(request, url);
     }
 
     private ResponseEntity<?> proxy(
