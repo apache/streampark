@@ -231,7 +231,10 @@ public class ProxyServiceImpl implements ProxyService {
                 (PrivilegedExceptionAction<ResponseEntity<?>>) () -> proxy(request, url, requestEntity));
         }
         if (YarnUtils.hasYarnHttpSimpleAuth()) {
-            return proxyRequest(request, String.format("%s?user.name=%s", url, HadoopConfigUtils.hadoopUserName()));
+            String urlTemplate =
+                StringUtils.isNotBlank(request.getQueryString()) ? "%s&user.name=%s" : "%s?user.name=%s";
+            return proxyRequest(
+                request, String.format(urlTemplate, url, HadoopConfigUtils.hadoopUserName()));
         }
         return proxyRequest(request, url);
     }
