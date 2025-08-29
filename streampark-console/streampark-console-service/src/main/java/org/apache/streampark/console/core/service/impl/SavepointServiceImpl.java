@@ -353,9 +353,6 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
     // infer savepoint
     String customSavepoint = this.getFinalSavepointDir(savepointPath, application);
-    if (StringUtils.isNotBlank(customSavepoint)) {
-      customSavepoint = processPath(customSavepoint, application.getJobName(), application.getId());
-    }
 
     FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
     String clusterId = getClusterId(application, cluster);
@@ -427,7 +424,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
     }
 
     if (StringUtils.isNotBlank(result)) {
-      processPath(result, application.getJobName(), application.getId());
+      result = processPath(result, application.getJobName(), application.getId());
     } else {
       throw new IllegalArgumentException(
           String.format(
