@@ -238,6 +238,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
                                                FlinkApplication application,
                                                ApplicationLog applicationLog,
                                                CompletableFuture<SavepointResponse> savepointFuture) {
+        final Date triggerTime = new Date();
         CompletableFutureUtils.runTimeout(
             savepointFuture,
             10L,
@@ -246,6 +247,16 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
                 if (savepointResponse != null && savepointResponse.savepointDir() != null) {
                     applicationLog.setSuccess(true);
                     String savepointDir = savepointResponse.savepointDir();
+
+                    // savepoint successfully add saved
+                    FlinkSavepoint savepoint = new FlinkSavepoint();
+                    savepoint.setAppId(application.getId());
+                    savepoint.setLatest(true);
+                    savepoint.setType(CheckPointTypeEnum.SAVEPOINT.get());
+                    savepoint.setPath(savepointDir);
+                    savepoint.setTriggerTime(triggerTime);
+                    savepoint.setCreateTime(new Date());
+                    save(savepoint);
                     log.info("Request savepoint successful, savepointDir: {}", savepointDir);
                 }
             },
