@@ -50,14 +50,14 @@ public class OpenAPIController {
     @OpenAPI(name = "flinkStart", header = {
             @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class)
     }, param = {
-            @OpenAPI.Param(name = "id", description = "current flink application id", required = true, type = Long.class, bindFor = "appId"),
+            @OpenAPI.Param(name = "id", description = "current flink application id", required = true, type = Long.class),
             @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
             @OpenAPI.Param(name = "argument", description = "flink program run arguments", required = false, type = String.class, bindFor = "args"),
             @OpenAPI.Param(name = "restoreFromSavepoint", description = "restored app from the savepoint or checkpoint", required = false, type = Boolean.class, defaultValue = "false", bindFor = "restoreOrTriggerSavepoint"),
             @OpenAPI.Param(name = "savepointPath", description = "savepoint or checkpoint path", required = false, type = String.class),
             @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = Boolean.class, defaultValue = "false"),
     })
-    @Permission(app = "#app.appId", team = "#app.teamId")
+    @Permission(app = "#app.id", team = "#app.teamId")
     @PostMapping("app/start")
     @RequiresPermissions("app:start")
     public RestResponse flinkStart(FlinkApplication app) throws Exception {
@@ -68,13 +68,13 @@ public class OpenAPIController {
     @OpenAPI(name = "flinkCancel", header = {
             @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class)
     }, param = {
-            @OpenAPI.Param(name = "id", description = "current flink application id", required = true, type = Long.class, bindFor = "appId"),
+            @OpenAPI.Param(name = "id", description = "current flink application id", required = true, type = Long.class),
             @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
             @OpenAPI.Param(name = "triggerSavepoint", description = "trigger savepoint before taking stopping", required = false, type = Boolean.class, defaultValue = "false", bindFor = "restoreOrTriggerSavepoint"),
             @OpenAPI.Param(name = "savepointPath", description = "savepoint path", required = false, type = String.class),
             @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = Boolean.class, defaultValue = "false"),
     })
-    @Permission(app = "#app.appId", team = "#app.teamId")
+    @Permission(app = "#app.id", team = "#app.teamId")
     @PostMapping("app/cancel")
     @RequiresPermissions("app:cancel")
     public RestResponse flinkCancel(FlinkApplication app) throws Exception {
