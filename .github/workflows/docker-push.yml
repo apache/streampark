@@ -19,7 +19,7 @@ name: "Build Docker Image"
 
 on:
   schedule:
-    - cron: '40 01 * * *'
+    - cron: '30 02 * * *'
   push:
     branches:
       - release-*
