@@ -19,10 +19,8 @@ name: "Build Docker Image"
 
 on:
   schedule:
-    - cron: '30 02 * * *'
+    - cron: '30 03 * * *'
   push:
-    branches:
-      - release-*
     tags:
       - 'v[2-9]+.[0-9]+.[0-9]+'
 
@@ -31,12 +29,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_image:
+  get-tags:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'apache/streampark' }}
+    if: ${{ github.repository == 'apache/streampark' && github.event_name == 'schedule' }}
+    outputs:
+      tags: ${{ steps.get-tags.outputs.tags }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get all matching tags
+        id: get-tags
+        run: |
+          # 获取所有符合规则的标签
+          TAGS=$(git tag -l | grep -E '^v[2-9]+\.[0-9]+\.[0-9]+$' | sort -V)
+          echo "Found tags: $TAGS"
+
+          # 将标签转换为 JSON 数组格式
+          TAGS_JSON=$(echo "$TAGS" | jq -R -s -c 'split("\n")[:-1]')
+          echo "tags=$TAGS_JSON" >> $GITHUB_OUTPUT
+          echo "Found $TAGS_JSON"
+
+  build_image:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'apache/streampark' && (github.event_name == 'push' || (github.event_name == 'schedule' && needs.get-tags.outputs.tags != '[]')) }}
+    needs: get-tags
+    strategy:
+      matrix:
+        tag: ${{ fromJson(needs.get-tags.outputs.tags) }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.tag }}
 
       - name: Setup Java and Scala
         uses: olafurpg/setup-scala@v13
@@ -79,6 +106,7 @@ jobs:
           tags: |
             type=ref,event=tag
             type=ref,event=branch
+            type=raw,value=${{ matrix.tag }}
 
       - name: Build and push streampark
         uses: docker/build-push-action@v3
