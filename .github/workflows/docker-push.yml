@@ -19,7 +19,7 @@ name: "Build Docker Image"
 
 on:
   schedule:
-    - cron: '20 04 * * *'
+    - cron: '20 06 * * *'
   push:
     tags:
       - 'v[2-9]+.[0-9]+.[0-9]+'
@@ -84,7 +84,7 @@ jobs:
 
       - name: Build project release package
         run: |
-          ./mvnw clean install -DskipTests -Pshaded,dist,webapp
+          ./mvnw clean install -DskipTests -Pscala-2.12,shaded,dist,webapp
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
