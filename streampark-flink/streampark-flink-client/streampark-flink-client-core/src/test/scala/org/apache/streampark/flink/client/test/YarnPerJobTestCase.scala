@@ -65,7 +65,7 @@ object YarnPerJobTestCase extends Logger {
   lazy val flinkDefaultConfiguration: Configuration = {
     require(FLINK_HOME != null)
     // get flink config
-    GlobalConfiguration.loadConfiguration(s"$FLINK_HOME/conf")
+    FlinkGlobalConfiguration.loadConfiguration(s"$FLINK_HOME/conf")
   }
 
   lazy val customCommandLines: util.List[CustomCommandLine] = {

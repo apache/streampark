@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode}
+import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
 import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils, Utils}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -284,7 +284,8 @@ trait FlinkClientTrait extends Logger {
     val configurationDirectory = s"$flinkHome/conf"
     // 2. load the custom command lines
     val flinkConfig =
-      Try(GlobalConfiguration.loadConfiguration(s"$flinkHome/conf")).getOrElse(new Configuration())
+      Try(FlinkGlobalConfiguration.loadConfiguration(s"$flinkHome/conf"))
+        .getOrElse(new Configuration())
     loadCustomCommandLines(flinkConfig, configurationDirectory)
   }
 
@@ -413,7 +414,8 @@ trait FlinkClientTrait extends Logger {
       validateAndGetActiveCommandLine(getCustomCommandLines(flinkHome), commandLine)
 
     val flinkDefaultConfiguration =
-      Try(GlobalConfiguration.loadConfiguration(s"$flinkHome/conf")).getOrElse(new Configuration())
+      Try(FlinkGlobalConfiguration.loadConfiguration(s"$flinkHome/conf"))
+        .getOrElse(new Configuration())
 
     val configuration = new Configuration(flinkDefaultConfiguration)
     configuration.addAll(activeCommandLine.toConfiguration(commandLine))
@@ -449,6 +451,39 @@ trait FlinkClientTrait extends Logger {
         case conf => conf
       }
     }
+  }
+
+  implicit private[client] class EnhanceConfiguration(request: SubmitRequest) {
+    lazy val flinkDefaultConfiguration: Configuration = {
+      Try(
+        FlinkGlobalConfiguration.loadConfiguration(
+          s"${request.flinkVersion.flinkHome}/conf")) match {
+        case Success(value) =>
+          request.executionMode match {
+            case ExecutionMode.YARN_SESSION | ExecutionMode.KUBERNETES_NATIVE_SESSION |
+                ExecutionMode.REMOTE =>
+              value
+            case _ =>
+              value
+                .keySet()
+                .foreach(
+                  k => {
+                    val v = value.getString(k, null)
+                    if (v != null) {
+                      val result = v
+                        .replaceAll(
+                          "\\$\\{job(Name|name)}|\\$job(Name|name)",
+                          request.effectiveAppName)
+                        .replaceAll("\\$\\{job(Id|id)}|\\$job(Id|id)", request.id.toString)
+                      value.setString(k, result)
+                    }
+                  })
+              value
+          }
+        case _ => new Configuration()
+      }
+    }
+
   }
 
   private[client] def cancelJob(

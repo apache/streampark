@@ -18,7 +18,6 @@ package org.apache.streampark.common.util
 
 import com.typesafe.config.ConfigFactory
 import org.apache.commons.lang3.StringUtils
-import org.yaml.snakeyaml.Yaml
 
 import javax.annotation.Nonnull
 
@@ -82,16 +81,8 @@ object PropertiesUtils extends Logger {
   }
 
   def fromYamlText(text: String): Map[String, String] = {
-    try {
-      new Yaml()
-        .load(text)
-        .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachYamlItem(x._1, x._2))
-        .toMap
-    } catch {
-      case e: IOException =>
-        throw new IllegalArgumentException(s"Failed when loading conf error:", e)
-    }
+    val map = YamlParserUtils.loadYamlString(text)
+    map.flatMap(x => eachYamlItem(x._1, x._2)).toMap
   }
 
   def fromHoconText(conf: String): Map[String, String] = {
@@ -146,11 +137,8 @@ object PropertiesUtils extends Logger {
       inputStream != null,
       s"[StreamPark] fromYamlFile: Properties inputStream  must not be null")
     try {
-      new Yaml()
-        .load(inputStream)
-        .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachYamlItem(x._1, x._2))
-        .toMap
+      val map = YamlParserUtils.loadYamlInput(inputStream)
+      map.flatMap(x => eachYamlItem(x._1, x._2)).toMap
     } catch {
       case e: IOException =>
         throw new IllegalArgumentException(s"Failed when loading yaml from inputStream", e)

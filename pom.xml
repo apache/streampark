@@ -113,7 +113,7 @@
         <caffeine.version>2.8.6</caffeine.version>
         <mysql.version>8.0.27</mysql.version>
         <hikariCP.version>3.4.5</hikariCP.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
+        <snakeyaml.version>2.6</snakeyaml.version>
         <typesafe-conf.version>1.4.2</typesafe-conf.version>
         <json4s-jackson.version>4.0.6</json4s-jackson.version>
         <commons-cli.version>1.5.0</commons-cli.version>
@@ -245,8 +245,8 @@
             </dependency>
 
             <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
+                <groupId>org.snakeyaml</groupId>
+                <artifactId>snakeyaml-engine</artifactId>
                 <version>${snakeyaml.version}</version>
             </dependency>
 
