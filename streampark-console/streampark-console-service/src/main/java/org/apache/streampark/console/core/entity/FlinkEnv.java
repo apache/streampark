@@ -23,7 +23,6 @@ import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -35,7 +34,6 @@ import lombok.Setter;
 
 import java.io.File;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
@@ -76,14 +74,7 @@ public class FlinkEnv implements Serializable {
   public void doSetFlinkConf() throws ApiDetailException {
     Float version = getVersionNumber();
     File configFile = resolveConfigFile(version);
-
-    try {
-      String flinkConf = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);
-      this.flinkConf = DeflaterUtils.zipString(flinkConf);
-    } catch (Exception e) {
-      throw new ApiDetailException(
-          "Failed to read Flink configuration file: " + configFile.getAbsolutePath(), e);
-    }
+    this.flinkConf = configFile.getAbsolutePath();
   }
 
   private File resolveConfigFile(Float version) throws ApiAlertException {
