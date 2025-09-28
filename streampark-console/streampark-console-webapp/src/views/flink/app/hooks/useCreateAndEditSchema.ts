@@ -250,7 +250,7 @@ export const useCreateAndEditSchema = (
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder: t('flink.app.addAppTips.serviceAccountPlaceholder'),
-            options: unref(historyRecord)?.k8sNamespace || [],
+            options: unref(historyRecord)?.serviceAccount || [],
           }),
       },
       {

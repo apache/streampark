@@ -103,6 +103,7 @@
         k8sRestExposedType: app.k8sRestExposedType,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
+        serviceAccount: app.serviceAccount,
         alertId: selectAlertId,
         projectName: app.projectName,
         module: app.module,

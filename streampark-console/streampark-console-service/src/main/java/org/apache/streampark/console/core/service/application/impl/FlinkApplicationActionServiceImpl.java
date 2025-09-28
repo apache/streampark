@@ -776,6 +776,7 @@ public class FlinkApplicationActionServiceImpl
             }
         } else if (FlinkDeployMode.isKubernetesMode(application.getDeployModeEnum())) {
             properties.put(ConfigKeys.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
+            properties.putAll(application.getHotParamsMap());
         }
 
         if (FlinkDeployMode.isKubernetesApplicationMode(application.getDeployMode())) {

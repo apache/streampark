@@ -293,6 +293,7 @@ export default {
     yarnQueuePlaceholder: '请输入yarn队列标签名称',
     descriptionPlaceholder: '请输入此作业的描述',
     kubernetesNamespacePlaceholder: '请输入 Kubernetes 命名空间, 如: default',
+    serviceAccountPlaceholder: '请输入 Kubernetes 服务账号, 默认: default',
     kubernetesClusterIdPlaceholder: '请选择 Kubernetes ClusterId',
     kubernetesClusterIdRequire:
       '小写字母、数字、“-”，并且必须以字母数字字符开头和结尾，并且不超过45个字符',
