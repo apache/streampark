@@ -677,7 +677,7 @@ public class FlinkApplicationActionServiceImpl
                 break;
 
             case FLINK_JAR:
-                if (application.isUploadResource()) {
+                if (application.isUploadResource() || application.isImageResource()) {
                     appConf =
                         String.format(
                             "json://{\"%s\":\"%s\"}",

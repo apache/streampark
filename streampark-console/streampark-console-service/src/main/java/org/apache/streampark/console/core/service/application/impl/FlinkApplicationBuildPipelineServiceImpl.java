@@ -278,7 +278,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
                                         "[StreamPark] unsupported ApplicationType of FlinkJar: "
                                             + app.getApplicationType());
                             }
-                        } else {
+                        } else if (!app.isImageResource()) {
                             fsOperator.upload(app.getDistHome(), appHome);
                         }
                     } else {
@@ -542,7 +542,8 @@ public class FlinkApplicationBuildPipelineServiceImpl
                 dockerConfig.getNamespace(),
                 dockerConfig.getUsername(),
                 dockerConfig.getPassword()),
-            app.getIngressTemplate());
+            app.getIngressTemplate(),
+            app.isImageResource());
         return k8sApplicationBuildRequest;
     }
 

@@ -146,6 +146,24 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
+        field: 'jar',
+        label: t('flink.app.programJar'),
+        component: 'Input',
+        componentProps: { placeholder: t('flink.app.addAppTips.programJarPlaceholder') },
+         ifShow: ({ values }) =>
+                  values?.jobType == JobTypeEnum.JAR && values?.resourceFrom == ResourceFromEnum.IMAGE,
+        rules: [{ required: true, message: t('spark.app.addAppTips.mainClassIsRequiredMessage') }],
+      },
+      {
+        field: 'mainClass',
+        label: t('flink.app.mainClass'),
+        component: 'Input',
+        componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
+        ifShow: ({ values }) =>
+          values?.jobType == JobTypeEnum.JAR && values?.resourceFrom == ResourceFromEnum.IMAGE,
+        rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
+      },
+      {
         field: 'project',
         label: t('flink.app.project'),
         component: 'Select',
@@ -170,7 +188,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           },
         },
         ifShow: ({ values }) =>
-          values?.jobType != JobTypeEnum.SQL && values.resourceFrom != ResourceFromEnum.UPLOAD,
+          values?.jobType != JobTypeEnum.SQL && values?.resourceFrom == ResourceFromEnum.Project,
         rules: [{ required: true, message: t('flink.app.addAppTips.projectIsRequiredMessage') }],
       },
       {
@@ -194,7 +212,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         ifShow: ({ values }) =>
-          values?.jobType != JobTypeEnum.SQL && values?.resourceFrom != ResourceFromEnum.UPLOAD,
+          values?.jobType != JobTypeEnum.SQL && values?.resourceFrom == ResourceFromEnum.Project,
         rules: [{ required: true, message: t('flink.app.addAppTips.projectIsRequiredMessage') }],
       },
       {
@@ -225,7 +243,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         ifShow: ({ values }) =>
-          values?.jobType != JobTypeEnum.SQL && values?.resourceFrom != ResourceFromEnum.UPLOAD,
+          values?.jobType != JobTypeEnum.SQL && values?.resourceFrom == ResourceFromEnum.Project,
         dynamicRules: () => [
           { required: true, message: t('flink.app.addAppTips.appTypeIsRequiredMessage') },
         ],
@@ -251,7 +269,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         },
         ifShow: ({ values }) =>
           values?.jobType != JobTypeEnum.SQL &&
-          values?.resourceFrom != ResourceFromEnum.UPLOAD &&
+          values?.resourceFrom == ResourceFromEnum.Project &&
           values.appType == String(AppTypeEnum.APACHE_FLINK),
         rules: [{ required: true, message: t('flink.app.addAppTips.programJarIsRequiredMessage') }],
       },

@@ -261,6 +261,7 @@ export default {
     hadoopEnvInitMessage:
       'Hadoop environment initialization failed, please check the environment settings',
     resourceFromMessage: 'resource from is required',
+    programJarPlaceholder: 'Please enter Program Jar',
     mainClassPlaceholder: 'Please enter Main class',
     mainClassIsRequiredMessage: 'Program Main is required',
     projectPlaceholder: 'Please select project',

@@ -492,7 +492,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         application.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
 
         // 1) jar job jar file changed
-        if (application.isUploadResource()) {
+        if (application.isUploadResource() || application.isImageResource()) {
             if (!Objects.equals(application.getJar(), appParam.getJar())) {
                 application.setBuild(true);
             } else {
@@ -513,7 +513,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         }
 
         // 2) k8s podTemplate changed.
-        if (application.getBuild() && isK8sPodTemplateChanged(application, appParam)) {
+        if (!application.getBuild() && isK8sPodTemplateChanged(application, appParam)) {
             application.setBuild(true);
         }
 

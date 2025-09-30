@@ -525,6 +525,12 @@ public class FlinkApplication extends BaseEntity {
     }
 
     @JsonIgnore
+    public boolean isImageResource() {
+        return isFlinkJarOrPyFlink()
+            && ResourceFromEnum.IMAGE.getValue().equals(this.getResourceFrom());
+    }
+
+    @JsonIgnore
     public boolean isBuildResource() {
         return isFlinkJarOrPyFlink()
             && ResourceFromEnum.BUILD.getValue().equals(this.getResourceFrom());

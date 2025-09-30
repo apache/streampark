@@ -178,6 +178,8 @@ export enum ResourceFromEnum {
   PROJECT = 1,
   /** upload local jar */
   UPLOAD = 2,
+  /** use jar from image */
+  IMAGE = 3,
 }
 
 export enum UseStrategyEnum {

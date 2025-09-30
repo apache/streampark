@@ -51,6 +51,8 @@ export const useEditFlinkSchema = (jars: Ref) => {
             return getAlertSvgIcon('github', 'Project (build from CSV)');
           else if (model.resourceFrom == ResourceFromEnum.UPLOAD)
             return getAlertSvgIcon('upload', 'Upload (upload local job)');
+          else if (model.resourceFrom == ResourceFromEnum.IMAGE)
+            return getAlertSvgIcon('docker', 'Image (From Flink Base Image)');
           else return '';
         },
       },
@@ -96,13 +98,13 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Upload Job Jar',
         component: 'Select',
         slot: 'uploadJobJar',
-        ifShow: ({ model }) => model.resourceFrom != ResourceFromEnum.PROJECT,
+        ifShow: ({ model }) => model.resourceFrom != ResourceFromEnum.PROJECT && model.resourceFrom != ResourceFromEnum.IMAGE,
       },
       {
         field: 'jar',
         label: 'Program Jar',
         component: 'Input',
-        dynamicDisabled: true,
+        dynamicDisabled: ({ model }) => model.resourceFrom != ResourceFromEnum.IMAGE,
         ifShow: ({ model }) => model.resourceFrom != ResourceFromEnum.PROJECT,
       },
       {

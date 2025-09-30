@@ -45,6 +45,7 @@ import {
   RestoreModeEnum,
   ClusterStateEnum,
   DeployMode,
+  JobTypeEnum,
 } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/setting/yarnQueue';
@@ -590,8 +591,7 @@ export const renderResourceFrom = (model: Recordable) => {
     <Select
       onChange={(value: string) => (model.resourceFrom = value)}
       value={model.resourceFrom}
-      placeholder="Please select resource from"
-    >
+      placeholder="Please select resource from">
       <Select.Option value="1">
         <SvgIcon name="github" />
         <span class="pl-10px">Project</span>
@@ -602,6 +602,13 @@ export const renderResourceFrom = (model: Recordable) => {
         <span class="pl-10px">Upload</span>
         <span class="gray"> (upload local job)</span>
       </Select.Option>
+      {model.deployMode == DeployMode.KUBERNETES_APPLICATION && model.jobType == JobTypeEnum.JAR && (
+      <Select.Option value="3">
+          <SvgIcon name="docker" />
+          <span class="pl-10px">Image</span>
+          <span class="gray"> (From Flink Base Image)</span>
+      </Select.Option>
+       )}
     </Select>
   );
 };
