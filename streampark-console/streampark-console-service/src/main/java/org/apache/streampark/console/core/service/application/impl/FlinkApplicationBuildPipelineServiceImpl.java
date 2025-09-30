@@ -453,12 +453,14 @@ public class FlinkApplicationBuildPipelineServiceImpl
      */
     private BuildPipeline createPipelineInstance(@Nonnull FlinkApplication app) {
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
-        String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
-
-        if (!FileUtils.exists(flinkUserJar)) {
-            Resource resource = resourceService.findByResourceName(app.getTeamId(), app.getJar());
-            if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
-                flinkUserJar = resource.getFilePath();
+        String flinkUserJar = app.getJar();
+        if (!app.isImageResource()) {
+            flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
+            if (!FileUtils.exists(flinkUserJar)) {
+                Resource resource = resourceService.findByResourceName(app.getTeamId(), app.getJar());
+                if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                    flinkUserJar = resource.getFilePath();
+                }
             }
         }
 
