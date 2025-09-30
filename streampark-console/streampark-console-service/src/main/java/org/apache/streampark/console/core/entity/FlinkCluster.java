@@ -180,6 +180,7 @@ public class FlinkCluster implements Serializable {
     @JsonIgnore
     public Map<String, Object> getProperties() {
         Map<String, Object> propertyMap = new HashMap<>();
+        propertyMap.put(ConfigKeys.KEY_KERBEROS_SERVICE_ACCOUNT(), this.getServiceAccount());
         Map<String, String> dynamicPropertyMap =
             FlinkConfigurationUtils.extractDynamicPropertiesAsJava(this.getDynamicProperties());
         propertyMap.putAll(this.getOptionMap());
@@ -188,6 +189,7 @@ public class FlinkCluster implements Serializable {
         if (resolveOrder != null) {
             propertyMap.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
         }
+
         return propertyMap;
     }
 

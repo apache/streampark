@@ -20,6 +20,7 @@ package org.apache.streampark.flink.client.`trait`
 import org.apache.streampark.common.enums.{FlinkDeployMode, FlinkK8sRestExposedType}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
+import org.apache.streampark.flink.kubernetes.ingress.IngressClusterDescriptor
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
 
 import org.apache.commons.lang3.StringUtils
@@ -155,15 +156,13 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
   def getK8sClusterDescriptorAndSpecification(
       flinkConfig: Configuration): (KubernetesClusterDescriptor, ClusterSpecification) = {
     val clientFactory = new KubernetesClusterClientFactory()
-    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-    val clusterSpecification =
-      clientFactory.getClusterSpecification(flinkConfig)
+    val clusterDescriptor = IngressClusterDescriptor.createClusterDescriptor(flinkConfig)
+    val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
     (clusterDescriptor, clusterSpecification)
   }
 
   def getK8sClusterDescriptor(flinkConfig: Configuration): KubernetesClusterDescriptor = {
-    val clientFactory = new KubernetesClusterClientFactory()
-    clientFactory.createClusterDescriptor(flinkConfig)
+    IngressClusterDescriptor.createClusterDescriptor(flinkConfig)
   }
 
   protected def flinkConfIdentifierInfo(@Nonnull conf: Configuration): String =

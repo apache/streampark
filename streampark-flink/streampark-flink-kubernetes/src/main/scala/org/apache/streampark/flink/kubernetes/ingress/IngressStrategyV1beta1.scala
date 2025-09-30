@@ -20,10 +20,10 @@ package org.apache.streampark.flink.kubernetes.ingress
 import org.apache.streampark.common.util.Implicits._
 
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.client.program.ClusterClient
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.kubernetes.kubeclient.FlinkKubeClientFactory
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.IntOrString
-import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
-import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.DefaultKubernetesClient
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.networking.v1beta1.{Ingress, IngressBuilder}
 
 import scala.util.{Failure, Success, Try}
 
@@ -32,8 +32,9 @@ class IngressStrategyV1beta1 extends IngressStrategy {
   override def getIngressUrl(
       nameSpace: String,
       clusterId: String,
-      clusterClient: ClusterClient[_]): String = {
-    new DefaultKubernetesClient().using(client => {
+      flinkConfig: Configuration): Option[String] = {
+    val kubernetesClient = FlinkKubeClientFactory.getInstance.createFabric8ioKubernetesClient(flinkConfig)
+    kubernetesClient.using(client => {
       Try {
         Option(
           Try(
@@ -43,12 +44,8 @@ class IngressStrategyV1beta1 extends IngressStrategy {
               .get)
             .getOrElse(null)) match {
           case Some(ingress) =>
-            Option(ingress)
-              .map(ingress => ingress.getSpec.getRules.head)
-              .map(rule => rule.getHost -> rule.getHttp.getPaths.head.getPath)
-              .map { case (host, path) => s"http://$host$path" }
-              .getOrElse(clusterClient.using(_.getWebInterfaceURL))
-          case None => clusterClient.using(_.getWebInterfaceURL)
+            extractIngressURL(ingress)
+          case None => Option.empty[String]
         }
       } match {
         case Success(value) => value
@@ -69,8 +66,9 @@ class IngressStrategyV1beta1 extends IngressStrategy {
     }
   }
 
-  override def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
-    new DefaultKubernetesClient().using(client => {
+  override def configureIngress(domainName: String, clusterId: String, nameSpace: String, flinkConfig: Configuration): String = {
+    val kubernetesClient = FlinkKubeClientFactory.getInstance.createFabric8ioKubernetesClient(flinkConfig)
+    kubernetesClient.using(client => {
       val ownerReference = getOwnerReference(nameSpace, clusterId, client)
       val ingress = new IngressBuilder()
         .withNewMetadata()
@@ -101,8 +99,30 @@ class IngressStrategyV1beta1 extends IngressStrategy {
         .endRule()
         .endSpec()
         .build()
+      client.network.ingress.inNamespace(nameSpace).createOrReplace(ingress)
+      extractIngressURL(ingress).get
+    })
+  }
 
-      client.network.ingress.inNamespace(nameSpace).create(ingress)
+  private def extractIngressURL(ingress: Ingress): Option[String] = {
+    Option(ingress).map(ingress => ingress.getSpec.getRules.head)
+      .map(rule => rule.getHost -> rule.getHttp.getPaths.head.getPath)
+      .map { case (host, path) => s"http://$host$path" }
+  }
+
+  override def deleteIngress(clusterId: String, nameSpace: String, flinkConfig: Configuration): Unit = {
+    val kubernetesClient = FlinkKubeClientFactory.getInstance.createFabric8ioKubernetesClient(flinkConfig)
+    kubernetesClient.using(client => {
+      Try {
+        client.network.v1beta1.ingresses
+          .inNamespace(nameSpace)
+          .withName(clusterId)
+          .delete()
+      } match {
+        case Success(value) => value
+        case Failure(e) =>
+          throw new RuntimeException(s"[StreamPark] delete ingress error: $e")
+      }
     })
   }
 }

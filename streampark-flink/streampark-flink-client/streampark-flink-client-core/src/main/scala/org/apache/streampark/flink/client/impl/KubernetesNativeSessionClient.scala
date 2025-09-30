@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
+import org.apache.streampark.common.conf.ConfigKeys
 import org.apache.streampark.common.enums.FlinkDeployMode
 import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.common.util.Implicits._
@@ -26,6 +27,7 @@ import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 import org.apache.streampark.flink.core.FlinkKubernetesClient
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode
+import org.apache.streampark.flink.kubernetes.ingress.IngressController
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import org.apache.commons.lang3.StringUtils
@@ -150,7 +152,17 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
           .deploySessionCluster(kubernetesClusterDescriptor._2)
           .getClusterClient
       }
-      DeployResponse(address = client.getWebInterfaceURL, clusterId = client.getClusterId)
+      var webInterfaceURL = client.getWebInterfaceURL
+      val ingressDomain = flinkConfig.getString(ConfigKeys.STREAMPARK_INGRESS_MODE, "")
+      if (StringUtils.isNotBlank(ingressDomain)) {
+        webInterfaceURL = IngressController.configureIngress(
+          ingressDomain,
+          deployRequest.clusterId,
+          deployRequest.k8sParam.kubernetesNamespace,
+          flinkConfig)
+        logInfo(s"create ingress with url: $webInterfaceURL with cluster: ${client.getClusterId}")
+      }
+      DeployResponse(address = webInterfaceURL, clusterId = client.getClusterId)
     } catch {
       case e: Exception => DeployResponse(error = e)
     } finally {
@@ -164,13 +176,13 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       val flinkConfig = getFlinkK8sConfig(shutDownRequest)
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
       val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
-
       val stopAndCleanupState =
         shutDownRequest.clusterId != null && kubeClientWrapper
           .getService(shutDownRequest.clusterId)
           .isPresent
       if (stopAndCleanupState) {
         kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
+        IngressController.deleteIngress(shutDownRequest.clusterId, shutDownRequest.k8sParam.kubernetesNamespace, flinkConfig)
         ShutDownResponse(shutDownRequest.clusterId)
       } else {
         null

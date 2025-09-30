@@ -196,7 +196,8 @@
             target="_blank"
             v-if="
               record.deployMode === DeployMode.STANDALONE ||
-              record.deployMode === DeployMode.YARN_SESSION
+              record.deployMode === DeployMode.YARN_SESSION ||
+              record.deployMode === DeployMode.KUBERNETES_SESSION
             "
           >
             {{ record.address }}

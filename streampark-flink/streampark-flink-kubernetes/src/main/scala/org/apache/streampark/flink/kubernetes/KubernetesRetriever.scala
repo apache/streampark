@@ -160,7 +160,7 @@ object KubernetesRetriever extends Logger {
       .newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode)
       .getOrElse(return None)
     val url =
-      IngressController.getIngressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+      IngressController.getIngressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client.getFlinkConfiguration).getOrElse(client.getWebInterfaceURL)
     logger.info(s"retrieve flink jobManager rest url: $url")
     Some(url)
   }

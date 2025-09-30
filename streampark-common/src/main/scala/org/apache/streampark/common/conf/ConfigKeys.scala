@@ -201,4 +201,5 @@ object ConfigKeys {
 
   val KEY_FLINK_TM_PROCESS_MEMORY = "taskmanager.memory.process.size"
 
+  val STREAMPARK_INGRESS_MODE = "streampark.ingress.mode"
 }

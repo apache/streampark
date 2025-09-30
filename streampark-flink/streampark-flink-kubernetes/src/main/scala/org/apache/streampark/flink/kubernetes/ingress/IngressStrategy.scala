@@ -20,9 +20,9 @@ package org.apache.streampark.flink.kubernetes.ingress
 import org.apache.streampark.common.conf.{ConfigKeys, InternalConfigHolder, K8sFlinkConfig}
 import org.apache.streampark.common.util.FileUtils
 
-import org.apache.flink.client.program.ClusterClient
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.{OwnerReference, OwnerReferenceBuilder}
-import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.DefaultKubernetesClient
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.KubernetesClient
 
 import java.io.File
 
@@ -30,12 +30,13 @@ trait IngressStrategy {
 
   val REST_SERVICE_IDENTIFICATION = "rest"
 
-  lazy val ingressClass: String =
-    InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
+  lazy val ingressClass: String = InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
 
-  def getIngressUrl(nameSpace: String, clusterId: String, clusterClient: ClusterClient[_]): String
+  def getIngressUrl(nameSpace: String, clusterId: String, flinkConfig: Configuration): Option[String]
 
-  def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit
+  def configureIngress(domainName: String, clusterId: String, nameSpace: String, flinkConfig: Configuration): String
+
+  def deleteIngress(clusterId: String, nameSpace: String, flinkConfig: Configuration)
 
   def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String = {
     val workspaceDir = new File(buildWorkspace)
@@ -69,7 +70,7 @@ trait IngressStrategy {
   def getOwnerReference(
       nameSpace: String,
       clusterId: String,
-      client: DefaultKubernetesClient): OwnerReference = {
+      client: KubernetesClient): OwnerReference = {
 
     val deployment = client
       .apps()
