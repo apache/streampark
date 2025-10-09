@@ -29,6 +29,13 @@ object K8sFlinkConfig {
     description = "run timeout seconds of single flink-k8s metrics tracking task")
 
   @deprecated
+  val jobStatusTrackCacheTimeoutSec: InternalOption = InternalOption(
+    key = "streampark.flink-k8s.tracking.cache-timeout-sec.job-status",
+    defaultValue = 300,
+    classType = classOf[java.lang.Integer],
+    description = "status cache timeout seconds of single flink-k8s job status tracking task")
+
+  @deprecated
   val metricTrackTaskTimeoutSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric",
     defaultValue = 120L,
