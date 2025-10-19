@@ -27,7 +27,7 @@ import java.util.Objects
 import java.util.concurrent.TimeUnit
 
 /** Tracking info cache pool on flink kubernetes mode. */
-class FlinkK8sWatchController extends Logger with AutoCloseable {
+class FlinkK8sWatchController(conf: JobStatusWatcherConfig = JobStatusWatcherConfig.defaultConf) extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
   lazy val trackIds: TrackIdCache = TrackIdCache.build()
@@ -38,7 +38,7 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
   lazy val endpoints: EndpointCache = EndpointCache.build()
 
   // cache for tracking flink job status
-  lazy val jobStatuses: JobStatusCache = JobStatusCache.build()
+  lazy val jobStatuses: JobStatusCache = JobStatusCache.build(conf.jobStatusCacheTimeOutSec)
 
   // cache for tracking kubernetes events with Deployment kind
   lazy val k8sDeploymentEvents: K8sDeploymentEventCache =
@@ -156,10 +156,10 @@ object TrackIdCache {
   }
 }
 
-class JobStatusCache {
+class JobStatusCache(timeout: Int) {
 
   private[this] lazy val cache: Cache[CacheKey, JobStatusCV] =
-    Caffeine.newBuilder.expireAfterWrite(20, TimeUnit.SECONDS).build()
+    Caffeine.newBuilder.expireAfterWrite(timeout, TimeUnit.SECONDS).build()
 
   def putAll(kvs: Map[TrackId, JobStatusCV]): Unit =
     cache.putAll(kvs.map(t => (CacheKey(t._1.appId), t._2)))
@@ -183,7 +183,7 @@ class JobStatusCache {
 
 object JobStatusCache {
 
-  def build(): JobStatusCache = new JobStatusCache()
+  def build(timeout: Int): JobStatusCache = new JobStatusCache(timeout)
 
 }
 
