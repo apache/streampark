@@ -24,7 +24,7 @@ import java.time.Duration;
 @UtilityClass
 public class Constants {
 
-    public static final Integer DEFAULT_SLEEP_MILLISECONDS = 2000;
+    public static final Integer DEFAULT_SLEEP_MILLISECONDS = 3000;
 
     public static final Duration DEFAULT_WEBDRIVER_WAIT_DURATION = Duration.ofSeconds(10);
 
