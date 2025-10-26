@@ -17,13 +17,8 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.util.CommonUtils;
-import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.base.util.MavenUtils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,11 +37,7 @@ import org.eclipse.jgit.lib.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Getter
@@ -107,8 +98,9 @@ public class Project implements Serializable {
   @JsonIgnore
   public File getAppSource() {
     File sourcePath = new File(Workspace.PROJECT_LOCAL_PATH());
-    if (!sourcePath.exists()) {
-      sourcePath.mkdirs();
+    if (!sourcePath.exists() && !sourcePath.mkdirs()) {
+      throw new IllegalStateException(
+          "Failed to create project source path: " + sourcePath.getAbsolutePath());
     } else if (sourcePath.isFile()) {
       throw new IllegalArgumentException(
           "[StreamPark] project source base path: "
@@ -117,18 +109,12 @@ public class Project implements Serializable {
     }
 
     String sourceDir = getSourceDirName();
-    File srcFile =
-        new File(String.format("%s/%s/%s", sourcePath.getAbsolutePath(), name, sourceDir));
     String newPath = String.format("%s/%s", sourcePath.getAbsolutePath(), id);
-    if (srcFile.exists()) {
-      File newFile = new File(newPath);
-      if (!newFile.exists()) {
-        newFile.mkdirs();
-      }
-      // old project path move to new path
-      srcFile.getParentFile().renameTo(newFile);
+    File file = new File(newPath, sourceDir);
+    if (!file.exists() && !file.mkdirs()) {
+      throw new IllegalStateException("Failed to create directory: " + file.getAbsolutePath());
     }
-    return new File(newPath, sourceDir);
+    return file;
   }
 
   private String getSourceDirName() {
@@ -180,107 +166,19 @@ public class Project implements Serializable {
   }
 
   @JsonIgnore
-  public String getMavenArgs() {
-    StringBuilder mvnArgBuffer = new StringBuilder(" clean package -DskipTests ");
-    if (StringUtils.isNotBlank(this.buildArgs)) {
-      mvnArgBuffer.append(this.buildArgs.trim());
-    }
-
-    // --settings
-    String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
-    if (StringUtils.isNotBlank(setting)) {
-      File file = new File(setting);
-      if (file.exists() && file.isFile()) {
-        mvnArgBuffer.append(" --settings ").append(setting.trim());
-      } else {
-        throw new IllegalArgumentException(
-            String.format(
-                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
-                setting));
-      }
-    }
-
-    // check maven args
-    String mvnArgs = mvnArgBuffer.toString();
-    if (mvnArgs.contains("\n")) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Illegal argument: newline character in maven build parameters: \"%s\"", mvnArgs));
-    }
-
-    String args = getIllegalArgs(mvnArgs);
-    if (args != null) {
-      throw new IllegalArgumentException(
-          String.format("Illegal argument: \"%s\" in maven build parameters: %s", args, mvnArgs));
-    }
-
-    // find mvn
-    boolean windows = Utils.isWindows();
-    String mvn = windows ? "mvn.cmd" : "mvn";
-
-    String mavenHome = System.getenv("M2_HOME");
-    if (mavenHome == null) {
-      mavenHome = System.getenv("MAVEN_HOME");
-    }
-
-    boolean useWrapper = true;
-    if (mavenHome != null) {
-      mvn = mavenHome + "/bin/" + mvn;
-      try {
-        Process process = Runtime.getRuntime().exec(mvn + " --version");
-        process.waitFor();
-        AssertUtils.required(process.exitValue() == 0);
-        useWrapper = false;
-      } catch (Exception ignored) {
-        log.warn("try using user-installed maven failed, now use maven-wrapper.");
-      }
-    }
-
-    if (useWrapper) {
-      if (windows) {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
-      } else {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw");
-      }
-    }
-    return mvn.concat(mvnArgs);
-  }
-
-  private String getIllegalArgs(String param) {
-    Pattern pattern = Pattern.compile("(`(.?|\\s)*`)|(\\$\\((.?|\\s)*\\))");
-    Matcher matcher = pattern.matcher(param);
-    if (matcher.find()) {
-      return matcher.group(1) == null ? matcher.group(3) : matcher.group(1);
-    }
-
-    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">", "<").iterator();
-    String[] argsList = param.split("\\s+");
-    while (iterator.hasNext()) {
-      String chr = iterator.next();
-      for (String arg : argsList) {
-        if (arg.contains(chr)) {
-          return arg;
-        }
-      }
-    }
-    return null;
-  }
-
-  @JsonIgnore
   public String getMavenWorkHome() {
     String buildHome = this.getAppSource().getAbsolutePath();
-    if (CommonUtils.notEmpty(this.getPom())) {
-      buildHome =
-          new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
+    if (StringUtils.isBlank(this.getPom())) {
+      return buildHome;
     }
-    return buildHome;
+    return new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
   }
 
   @JsonIgnore
   public String getLog4BuildStart() {
     return String.format(
         "%sproject : %s\nrefs: %s\ncommand : %s\n\n",
-        getLogHeader("maven install"), getName(), getRefs(), getMavenArgs());
+        getLogHeader("maven install"), getName(), getRefs(), this.getMavenBuildArgs());
   }
 
   @JsonIgnore
@@ -293,5 +191,10 @@ public class Project implements Serializable {
   @JsonIgnore
   private String getLogHeader(String header) {
     return "---------------------------------[ " + header + " ]---------------------------------\n";
+  }
+
+  @JsonIgnore
+  public String getMavenBuildArgs() {
+    return MavenUtils.getMavenArgs(this.buildArgs);
   }
 }
