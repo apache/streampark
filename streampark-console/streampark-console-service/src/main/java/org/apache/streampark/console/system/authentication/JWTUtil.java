@@ -51,7 +51,7 @@ public class JWTUtil {
   private static final String JWT_TYPE = "type";
   private static final String JWT_TIMESTAMP = "timestamp";
 
-  private static byte[] JWT_KEY = JWTSecret.getJWTSecret(); // Used for HMAC256
+  private static byte[] jetKey = JWTSecret.getJWTSecret(); // Used for HMAC256
 
   /** get username from token */
   public static String getUserName(String token) {
@@ -108,7 +108,7 @@ public class JWTUtil {
   public static String sign(User user, AuthenticationType authType, Long expireTime)
       throws Exception {
     Date date = new Date(expireTime);
-    Algorithm algorithm = Algorithm.HMAC256(JWT_KEY);
+    Algorithm algorithm = Algorithm.HMAC256(jetKey);
 
     JWTCreator.Builder builder =
         JWT.create()
@@ -153,7 +153,7 @@ public class JWTUtil {
 
   private static DecodedJWT decode(String token) {
     try {
-      Algorithm algorithm = Algorithm.HMAC256(JWT_KEY);
+      Algorithm algorithm = Algorithm.HMAC256(jetKey);
       JWTVerifier verifier = JWT.require(algorithm).build();
       return verifier.verify(token);
     } catch (Exception e) {
@@ -164,7 +164,7 @@ public class JWTUtil {
   public static boolean verify(String token) {
     try {
       // Decode the signing key using Base64
-      Algorithm algorithm = Algorithm.HMAC256(JWT_KEY);
+      Algorithm algorithm = Algorithm.HMAC256(jetKey);
       JWTVerifier verifier = JWT.require(algorithm).build();
       verifier.verify(token);
       return true;
@@ -188,7 +188,7 @@ public class JWTUtil {
     byte[] iv = new byte[GCM_IV_LENGTH];
     SecureRandom.getInstanceStrong().nextBytes(iv);
 
-    SecretKeySpec keySpec = new SecretKeySpec(JWT_KEY, "AES");
+    SecretKeySpec keySpec = new SecretKeySpec(jetKey, "AES");
 
     // Initialize the cipher
     Cipher cipher = Cipher.getInstance(ALGORITHM);
@@ -214,7 +214,7 @@ public class JWTUtil {
     byte[] encrypted = new byte[buffer.remaining()];
     buffer.get(encrypted);
 
-    SecretKeySpec keySpec = new SecretKeySpec(JWT_KEY, "AES");
+    SecretKeySpec keySpec = new SecretKeySpec(jetKey, "AES");
 
     Cipher cipher = Cipher.getInstance(ALGORITHM);
     GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);

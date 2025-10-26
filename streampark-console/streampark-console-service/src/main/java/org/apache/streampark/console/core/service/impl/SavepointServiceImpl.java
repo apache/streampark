@@ -23,7 +23,6 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -53,6 +52,7 @@ import org.apache.streampark.flink.util.FlinkUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
+import org.apache.flink.util.ExceptionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -383,6 +383,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
       Application application,
       ApplicationLog applicationLog,
       CompletableFuture<SavepointResponse> savepointFuture) {
+    final Date triggerTime = new Date();
     CompletableFutureUtils.runTimeout(
             savepointFuture,
             10L,
@@ -391,12 +392,22 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
               if (savepointResponse != null && savepointResponse.savepointDir() != null) {
                 applicationLog.setSuccess(true);
                 String savepointDir = savepointResponse.savepointDir();
+
+                // savepoint successfully add saved
+                Savepoint savepoint = new Savepoint();
+                savepoint.setAppId(application.getId());
+                savepoint.setLatest(true);
+                savepoint.setType(CheckPointType.SAVEPOINT.get());
+                savepoint.setPath(savepointDir);
+                savepoint.setTriggerTime(triggerTime);
+                savepoint.setCreateTime(new Date());
+                save(savepoint);
                 log.info("Request savepoint successful, savepointDir: {}", savepointDir);
               }
             },
             e -> {
               log.error("Trigger savepoint for flink job failed.", e);
-              String exception = Utils.stringifyException(e);
+              String exception = ExceptionUtils.stringifyException(e);
               applicationLog.setException(exception);
               if (!(e instanceof TimeoutException)) {
                 applicationLog.setSuccess(false);
@@ -405,13 +416,10 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         .whenComplete(
             (t, e) -> {
               applicationLogService.save(applicationLog);
-              if (!application.isKubernetesModeJob()) {
-                application.setOptionState(OptionState.NONE.getValue());
-                application.setOptionTime(new Date());
-                applicationService.update(application);
-                flinkAppHttpWatcher.cleanSavepoint(application);
-                flinkAppHttpWatcher.initialize();
-              }
+              application.setOptionState(OptionState.NONE.getValue());
+              application.setOptionTime(new Date());
+              applicationService.update(application);
+              flinkAppHttpWatcher.initialize();
             });
   }
 
