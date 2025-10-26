@@ -18,6 +18,10 @@ package org.apache.streampark.common.util
 
 import java.io._
 import java.net.URL
+import java.nio.ByteBuffer
+import java.nio.channels.Channels
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.util
 import java.util.Scanner
 
@@ -151,6 +155,44 @@ object FileUtils {
           true
         }
     }
+  }
+
+  @throws[IOException]
+  def readFile(file: File): String = {
+    if (file.length >= Int.MaxValue) {
+      throw new IOException("Too large file, unexpected!")
+    } else {
+      val len = file.length
+      val array = new Array[Byte](len.toInt)
+      val is = Files.newInputStream(file.toPath)
+      readInputStream(is, array)
+      val content = new String(array, StandardCharsets.UTF_8)
+      Utils.close(is)
+      content
+    }
+  }
+
+  @throws[IOException]
+  def readInputStream(in: InputStream, array: Array[Byte]): Unit = {
+    var toRead = array.length
+    var ret = 0
+    var off = 0
+    while (toRead > 0) {
+      ret = in.read(array, off, toRead)
+      if (ret < 0) throw new IOException("Bad inputStream, premature EOF")
+      toRead -= ret
+      off += ret
+    }
+    Utils.close(in)
+  }
+
+  @throws[IOException]
+  def writeFile(content: String, file: File): Unit = {
+    val outputStream = Files.newOutputStream(file.toPath)
+    val channel = Channels.newChannel(outputStream)
+    val buffer = ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8))
+    channel.write(buffer)
+    Utils.close(channel, outputStream)
   }
 
   @throws[IOException]
