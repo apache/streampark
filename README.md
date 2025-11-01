@@ -43,7 +43,7 @@ Originally named StreamX, the project was renamed StreamPark in August 2022 and 
 * **Multi-Engine & Multi-Version Support**
     * Run and manage multi-version Flink/Spark applications.
 * **Multi-Environment Compatibility**
-    * Works on Standalone, YARN (Hadoop 2.x/3.x), or Kubernetes.
+    * Works on Standalone, YARN (Hadoop 2.x/3.x), and Kubernetes.
 * **Rich Ecosystems**
     * Compatible with big-data ecosystem tools (e.g., Apache Flink/Spark/Paimon/Doris) and ML/AI ecosystems.
 * **Easy to use**
