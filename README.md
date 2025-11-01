@@ -41,7 +41,7 @@ Originally named StreamX, the project was renamed StreamPark in August 2022 and 
 * **Unified Batch & Streaming Processing**
     * Supports Apache Flink and Apache Spark, enabling both stream processing and batch processing.
 * **Multi-Engine & Multi-Version Support**
-  * Run and manage multi-version Flink/Spark application.
+    * Run and manage multi-version Flink/Spark applications.
 * **Multi-Environment Compatibility**
     * Works on Standalone, YARN (Hadoop 2.x/3.x), or Kubernetes.
 * **Rich Ecosystems**
