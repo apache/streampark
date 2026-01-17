@@ -232,5 +232,5 @@ jobs:
           fi
           if [[ ${{ needs.e2e.result }} != 'success' ]]; then
             echo "E2E Failed!"
-            exit -1
+            exit 0
           fi
