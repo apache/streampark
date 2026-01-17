@@ -72,7 +72,7 @@ insertIssueLinkInPrDescription:
 # Verifies if commit/PR titles match the regexp specified
 verifyTitles:
   # Regular expression that should be matched by titles of commits or PR
-  titleRegexp: ^\[ISSUE-[0-9]+\].*$|^\[ISSUE-XXXXX\].*$|^\[hotfix].*$
+  titleRegexp: ^\[ISSUE-[0-9]+\].*$|^\[ISSUE-XXXXX\].*$|^\[hotfix\].*$
   # If set to true, it will always check the PR title (as opposed to the individual commits).
   alwaysUsePrTitle: false
   # If set to true, it will only check the commit in case there is a single commit.
