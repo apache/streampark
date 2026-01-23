@@ -33,7 +33,7 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
 
   // cache pool for storage tracking result
   implicit val watchController: FlinkK8sWatchController =
-    new FlinkK8sWatchController()
+    new FlinkK8sWatchController(conf.jobStatusWatcherConf)
 
   // eventBus for change event
   implicit lazy val eventBus: ChangeEventBus = {

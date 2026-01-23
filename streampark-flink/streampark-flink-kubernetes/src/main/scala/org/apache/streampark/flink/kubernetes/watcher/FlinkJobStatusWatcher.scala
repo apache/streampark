@@ -128,11 +128,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
                 case _ =>
                   touchSessionJob(trackId) match {
                     case Some(state) =>
-                      if (FlinkJobState.isEndState(state.jobState)) {
-                        // can't find that job in the k8s cluster.
-                        watchController.unWatching(trackId)
-                      }
-                      eventBus.postSync(FlinkJobStatusChangeEvent(trackId, state))
+                      updateState(trackId, state)
                     case _ =>
                   }
               }
