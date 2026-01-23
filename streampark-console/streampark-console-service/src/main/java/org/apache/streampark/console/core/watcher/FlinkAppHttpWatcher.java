@@ -485,7 +485,6 @@ public class FlinkAppHttpWatcher {
                 doPersistMetrics(application, false);
                 break;
             case CANCELED:
-            case FINISHED:
                 log.info(
                     "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!",
                     currentState.name());
@@ -499,6 +498,24 @@ public class FlinkAppHttpWatcher {
                     }
                     stopCanceledJob(application.getId());
                     doAlert(application, FlinkAppStateEnum.CANCELED);
+                }
+                STOP_FROM_MAP.remove(application.getId());
+                doPersistMetrics(application, true);
+                cleanOptioning(optionState, application.getId());
+                break;
+            case FINISHED:
+                log.info(
+                    "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!",
+                    currentState.name());
+                cleanSavepoint(application);
+                application.setState(currentState.getValue());
+                if (StopFromEnum.NONE.equals(stopFrom) || applicationInfoService.checkAlter(application)) {
+                    if (StopFromEnum.NONE.equals(stopFrom)) {
+                        log.info(
+                            "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job finished is not form StreamPark,savepoint expired!");
+                        savepointService.expire(application.getId());
+                    }
+                    stopCanceledJob(application.getId());
                 }
                 STOP_FROM_MAP.remove(application.getId());
                 doPersistMetrics(application, true);
