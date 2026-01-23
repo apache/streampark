@@ -28,11 +28,11 @@ import scala.language.implicitConversions
 trait FlinkWatcher extends AutoCloseable {
 
   // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
-  lazy val FLINK_CLIENT_TIMEOUT_SEC: Timeout =
+  val FLINK_CLIENT_TIMEOUT_SEC: Timeout =
     Timeout.ofMilliseconds(Duration.ofSeconds(60).toMillis).toTimeout
 
   // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
-  lazy val FLINK_REST_AWAIT_TIMEOUT_SEC: Timeout = Timeout.ofMilliseconds(30000L)
+  val FLINK_REST_AWAIT_TIMEOUT_SEC: Timeout = Timeout.ofMilliseconds(30000L)
 
   private[this] val started: AtomicBoolean = new AtomicBoolean(false)
 
