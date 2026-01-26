@@ -314,8 +314,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     )
     val jobState = trackId match {
       case id
-          if watchController.canceling.has(id) || latest.jobState.equals(
-            FlinkJobState.CANCELLING) =>
+          if watchController.canceling.has(id) || Option(latest).exists(
+            _.jobState == FlinkJobState.CANCELLING) =>
         logger.info(s"trackId ${trackId.toString} is canceling")
         if (deployExists) FlinkJobState.CANCELLING else FlinkJobState.CANCELED
       case _ =>
