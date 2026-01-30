@@ -18,7 +18,6 @@
 package org.apache.streampark.console.base.util;
 
 import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.util.SystemPropertyUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
