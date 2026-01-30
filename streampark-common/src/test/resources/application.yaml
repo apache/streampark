@@ -14,11 +14,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-network:
-  # network interface preferred like eth0, default: empty
-  preferred-interface: ""
-  # network interface restricted like docker0, default: empty
-  restrict-interface: docker0
-  # network IP gets priority, default inner outer
-  priority-strategy: default

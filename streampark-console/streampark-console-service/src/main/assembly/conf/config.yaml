@@ -99,19 +99,3 @@ sso:
         principalNameAttribute:
         # Optional, change by authentication client
         # Please replace and fill in your client config below when enabled SSO
-
-high-availability:
-  enable: false # true
-  # The list of ZooKeeper quorum peers that coordinate the high-availability
-  # setup. This must be a list of the form:
-  # "host1:clientPort,host2:clientPort,..." (default clientPort: 2181)
-  #
-  zookeeper.quorum: 192.168.100.128:2181,192.168.100.129:2181
-
-network:
-  # network interface preferred like eth0, default: empty
-  preferred-interface: ""
-  # network interface restricted like docker0, default: empty
-  restrict-interface: docker0
-  # network IP gets priority, default inner outer
-  priority-strategy: default

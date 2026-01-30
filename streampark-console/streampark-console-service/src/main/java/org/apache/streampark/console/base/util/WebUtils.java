@@ -92,8 +92,4 @@ public final class WebUtils {
         return getAppDir(PLUGINS);
     }
 
-    public static boolean isHaEnable() {
-        return SystemPropertyUtils.getBoolean("high-availability.enable", false);
-    }
-
 }
