@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
+import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkDeployMode;
@@ -267,7 +268,6 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         }
         this.baseMapper.selectPage(page, appParam);
         List<FlinkApplication> records = page.getRecords();
-        long now = System.currentTimeMillis();
 
         List<Long> appIds = records.stream().map(FlinkApplication::getId).collect(Collectors.toList());
         Map<Long, PipelineStatusEnum> pipeStates = appBuildPipeService.listAppIdPipelineStatusMap(appIds);
@@ -280,10 +280,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
                     // in time.
                     if (record.isKubernetesModeJob()) {
                         // set duration
-                        String restUrl = k8SFlinkTrackMonitor
-                            .getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
-                        record.setFlinkRestUrl(restUrl);
-                        setAppDurationIfNeeded(record, now);
+                        fillPropsForK8SModeJob(record);
                     }
                     if (pipeStates.containsKey(record.getId())) {
                         record.setBuildStatus(pipeStates.get(record.getId()).getCode());
@@ -294,6 +291,17 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             .collect(Collectors.toList());
         page.setRecords(newRecords);
         return page;
+    }
+
+    private void fillPropsForK8SModeJob(FlinkApplication record) {
+        String restUrl = k8SFlinkTrackMonitor
+            .getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
+        Object serviceAccount = record.getHotParamsMap().get(ConfigKeys.KEY_KERBEROS_SERVICE_ACCOUNT());
+        if (serviceAccount != null) {
+            record.setServiceAccount(serviceAccount.toString());
+        }
+        record.setFlinkRestUrl(restUrl);
+        setAppDurationIfNeeded(record, System.currentTimeMillis());
     }
 
     private void setAppDurationIfNeeded(FlinkApplication record, long now) {
@@ -760,12 +768,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         }
         // add flink web url info for k8s-mode
         if (application.isKubernetesModeJob()) {
-            String restUrl = k8SFlinkTrackMonitor.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(application));
-            application.setFlinkRestUrl(restUrl);
-
-            // set duration
-            long now = System.currentTimeMillis();
-            setAppDurationIfNeeded(application, now);
+            fillPropsForK8SModeJob(application);
         }
 
         application.setYarnQueueByHotParams();

@@ -302,6 +302,7 @@ export default {
     yarnQueuePlaceholder: 'Please enter yarn queue label',
     descriptionPlaceholder: 'Please enter description for this application',
     kubernetesNamespacePlaceholder: 'Please enter kubernetes Namespace, e.g: default',
+    serviceAccountPlaceholder: 'Please enter kubernetes service account, default: default',
     kubernetesClusterIdPlaceholder: 'Please enter Kubernetes clusterId',
     kubernetesClusterIdRequire:
       "lower case alphanumeric characters, '-', and must start and end with an alphanumeric character,and no more than 45 characters",

@@ -123,6 +123,7 @@
         },
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
+        serviceAccount: app.serviceAccount,
         ...resetParams,
       };
       switch (app.deployMode) {
