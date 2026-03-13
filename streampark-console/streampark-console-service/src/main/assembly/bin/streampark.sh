@@ -149,6 +149,11 @@ elif [[ -r "$APP_HOME/bin/setenv.sh" ]]; then
   . "$APP_HOME/bin/setenv.sh"
 fi
 
+# The user can be specified in the conf/streampark-env.sh.
+if [[ -f "${APP_CONF}/streampark-env.sh" ]]; then
+  . "${APP_CONF}/streampark-env.sh"
+fi
+
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if ${cygwin}; then
   # shellcheck disable=SC2006
