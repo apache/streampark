@@ -162,7 +162,7 @@ jobs:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
       - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@v1.3.1
+        uses: jlumbroso/free-disk-space@21bdaa2c9e347d9d7fdb1bd6124d61c0f335a419 # v1.3.1
         with:
           dotnet: true
           android: true
