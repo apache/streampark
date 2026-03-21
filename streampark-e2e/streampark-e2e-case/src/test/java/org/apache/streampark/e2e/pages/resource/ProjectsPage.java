@@ -80,7 +80,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         createProjectForm.selectCveDropdown.click();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectCve));
+            .until(d -> createProjectForm.selectCve.stream().anyMatch(WebElement::isDisplayed));
 
         createProjectForm.selectCve.stream()
             .filter(e -> e.getText().equalsIgnoreCase("GitHub/GitLab"))
@@ -92,7 +92,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         createProjectForm.selectBranchDropdown.click();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectRefs));
+            .until(d -> createProjectForm.selectRefs.stream().anyMatch(WebElement::isDisplayed));
         createProjectForm.selectRefs.stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectRefs))
             .findFirst()
