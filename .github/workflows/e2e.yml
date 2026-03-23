@@ -161,16 +161,16 @@ jobs:
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
-      - name: Maximize runner space
-        uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c
+      - name: Free Disk Space
+        # refer: https://github.com/jlumbroso/free-disk-space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
-          root-reserve-mb: 30720
-          temp-reserve-mb: 10240
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+          dotnet: true
+          android: true
+          haskell: true
+          codeql: true
+          docker-images: true
+          large-packages: true
       - uses: actions/checkout@v4
         with:
           submodules: true
