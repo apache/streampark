@@ -26,8 +26,6 @@ public class Constants {
 
     public static final Integer DEFAULT_SLEEP_MILLISECONDS = 2000;
 
-    public static final Integer DEFAULT_UI_ANIMATION_SLEEP_MILLISECONDS = 500;
-
     public static final Duration DEFAULT_WEBDRIVER_WAIT_DURATION = Duration.ofSeconds(10);
 
     public static final String LINE_SEPARATOR = "\n";

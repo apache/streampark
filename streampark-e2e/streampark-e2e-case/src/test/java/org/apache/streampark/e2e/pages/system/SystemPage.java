@@ -56,7 +56,7 @@ public final class SystemPage extends NavBarPage implements NavBarItem {
         if (tab == UserManagementPage.class) {
             new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuUserManagement));
-            Thread.sleep(Constants.DEFAULT_UI_ANIMATION_SLEEP_MILLISECONDS);
+            Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
             menuUserManagement.click();
             return tab.cast(new UserManagementPage(driver));
         }
@@ -64,7 +64,7 @@ public final class SystemPage extends NavBarPage implements NavBarItem {
         if (tab == TeamManagementPage.class) {
             new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuTeamManagement));
-            Thread.sleep(Constants.DEFAULT_UI_ANIMATION_SLEEP_MILLISECONDS);
+            Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
             menuTeamManagement.click();
             return tab.cast(new TeamManagementPage(driver));
         }
@@ -72,14 +72,14 @@ public final class SystemPage extends NavBarPage implements NavBarItem {
         if (tab == RoleManagementPage.class) {
             new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuRoleManagement));
-            Thread.sleep(Constants.DEFAULT_UI_ANIMATION_SLEEP_MILLISECONDS);
+            Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
             menuRoleManagement.click();
             return tab.cast(new RoleManagementPage(driver));
         }
         if (tab == TokenManagementPage.class) {
             new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuTokenManagement));
-            Thread.sleep(Constants.DEFAULT_UI_ANIMATION_SLEEP_MILLISECONDS);
+            Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
             menuTokenManagement.click();
             return tab.cast(new TokenManagementPage(driver));
         }
@@ -87,7 +87,7 @@ public final class SystemPage extends NavBarPage implements NavBarItem {
         if (tab == MemberManagementPage.class) {
             new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuMemberManagement));
-            Thread.sleep(Constants.DEFAULT_UI_ANIMATION_SLEEP_MILLISECONDS);
+            Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
             menuMemberManagement.click();
             return tab.cast(new MemberManagementPage(driver));
         }
