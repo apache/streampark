@@ -22,6 +22,7 @@ import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.common.NavBarPage.NavBarItem;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.FindBy;
@@ -44,10 +45,12 @@ public final class ResourcePage extends NavBarPage implements NavBarItem {
         super(driver);
     }
 
+    @SneakyThrows
     public <T extends ResourcePage.Tab> T goToTab(Class<T> tab) {
         if (tab == VariablesPage.class) {
             new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuVariables));
+            Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
             menuVariables.click();
             return tab.cast(new VariablesPage(driver));
         }
@@ -55,6 +58,7 @@ public final class ResourcePage extends NavBarPage implements NavBarItem {
         if (tab == ProjectsPage.class) {
             new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuProjects));
+            Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
             menuProjects.click();
             return tab.cast(new ProjectsPage(driver));
         }
@@ -62,6 +66,7 @@ public final class ResourcePage extends NavBarPage implements NavBarItem {
         if (tab == UploadsPage.class) {
             new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuUploads));
+            Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
             menuUploads.click();
             return tab.cast(new UploadsPage(driver));
         }
