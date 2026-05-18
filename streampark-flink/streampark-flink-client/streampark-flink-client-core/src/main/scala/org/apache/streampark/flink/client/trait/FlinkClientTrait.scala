@@ -613,5 +613,54 @@ trait FlinkClientTrait extends Logger {
         Utils.close(x)
       }
     })
+    cleanupStaleDeploymentFailureHooks();
+  }
+
+  /**
+   * clean DeploymentFailureHook
+   * Forcefully clean up residual DeploymentFailedHooks (Flink bug fallback) by reflecting to remove residual ones in java.lang.ApplicationShutdownHooks
+   */
+  private def cleanupStaleDeploymentFailureHooks(): Unit = {
+    try {
+      val shutdownHooksClass = Class.forName("java.lang.ApplicationShutdownHooks")
+
+      val hooksField = shutdownHooksClass.getDeclaredField("hooks")
+      hooksField.setAccessible(true)
+
+      shutdownHooksClass.synchronized {
+        val hooksObj = hooksField.get(null)
+        if (hooksObj != null) {
+          val hooks = hooksObj.asInstanceOf[java.util.IdentityHashMap[Thread, _]]
+
+          val hooksToRemove = new java.util.ArrayList[Thread]()
+          import scala.collection.JavaConverters._
+
+          hooks.keySet().asScala.foreach {
+            hook =>
+              if (hook.getClass.getName.contains("DeploymentFailureHook")) {
+                hooksToRemove.add(hook)
+              }
+          }
+
+          if (!hooksToRemove.isEmpty) {
+            logInfo(s"Found ${hooksToRemove.size} residual Deployment Failed Hooks, start cleaning up")
+
+            hooksToRemove.asScala.foreach {
+              hook =>
+                try {
+                  Runtime.getRuntime.removeShutdownHook(hook)
+                  logInfo(s"Successfully removed residual DeploymentFailedHook: $hook")
+                } catch {
+                  case e: IllegalStateException =>
+                    logWarn(s"Hook is executing or has been removed: $hook", e)
+                }
+            }
+          }
+        }
+      }
+    } catch {
+      case e: Exception =>
+        logWarn("Exception occurred while cleaning residual hooks", e)
+    }
   }
 }
