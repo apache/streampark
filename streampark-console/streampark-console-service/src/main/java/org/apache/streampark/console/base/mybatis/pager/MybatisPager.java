@@ -28,13 +28,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("unchecked")
 public final class MybatisPager {
 
+  private static final Pattern SORT_FIELD_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
+
   public static <T> Page<T> getPage(RestRequest request) {
-    boolean invalid = request.getSortField().trim().split("\\s+").length > 1;
-    if (invalid) {
+    String sortField = WebUtils.camelToUnderscore(StringUtils.trimToEmpty(request.getSortField()));
+    if (!SORT_FIELD_PATTERN.matcher(sortField).matches()) {
       throw new IllegalArgumentException(
           String.format("Invalid argument sortField: %s", request.getSortField()));
     }
@@ -48,7 +51,6 @@ public final class MybatisPager {
     page.setSize(request.getPageSize());
 
     List<OrderItem> orderItems = new ArrayList<>(2);
-    String sortField = WebUtils.camelToUnderscore(request.getSortField());
     if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_DESC)) {
       orderItems.add(OrderItem.desc(sortField));
     } else if (StringUtils.equalsIgnoreCase(request.getSortOrder(), Constant.ORDER_ASC)) {
