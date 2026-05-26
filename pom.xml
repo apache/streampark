@@ -26,7 +26,7 @@
 
     <groupId>org.apache.streampark</groupId>
     <artifactId>streampark</artifactId>
-    <version>2.2.0-SNAPSHOT</version>
+    <version>${rversion}</version>
     <packaging>pom</packaging>
     <name>StreamPark Project Parent POM</name>
 
@@ -82,6 +82,7 @@
     </issueManagement>
 
     <properties>
+        <rversion>2.2.0-SNAPSHOT</rversion>
         <project.build.jdk>1.8</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
