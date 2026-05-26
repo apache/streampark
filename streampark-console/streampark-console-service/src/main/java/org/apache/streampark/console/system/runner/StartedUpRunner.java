@@ -47,7 +47,7 @@ public class StartedUpRunner implements ApplicationRunner {
       System.out.println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ");
       System.out.println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ");
       System.out.println("                                       /_/                        \n\n");
-      System.out.println("    Version:  2.1.7                                                   ");
+      System.out.println("    Version:  2.1.8                                                   ");
       System.out.println("    WebSite:  https://streampark.apache.org                           ");
       System.out.println("    GitHub :  https://github.com/apache/streampark          ");
       System.out.println("    Info   :  streampark-console start successful                     ");

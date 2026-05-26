@@ -18,7 +18,7 @@
 image:
   repository: "apache/streampark"
   pullPolicy: "IfNotPresent"
-  tag: "2.1.7"
+  tag: "2.1.8"
   pullSecret: ""
 
 rbac:
