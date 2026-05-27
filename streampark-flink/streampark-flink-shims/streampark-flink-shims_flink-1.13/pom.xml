@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink-shims</artifactId>
-        <version>2.1.7</version>
+        <version>2.1.8</version>
     </parent>
 
     <artifactId>streampark-flink-shims_flink-1.13_${scala.binary.version}</artifactId>

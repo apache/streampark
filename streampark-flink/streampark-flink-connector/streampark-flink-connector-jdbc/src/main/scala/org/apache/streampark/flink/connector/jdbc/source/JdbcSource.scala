@@ -27,6 +27,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 import java.util.Properties
 
 import scala.annotation.meta.param
+import scala.collection.JavaConversions._
 import scala.collection.Map
 
 object JdbcSource {
@@ -53,7 +54,7 @@ class JdbcSource(
       filter: R => Boolean = null): DataStream[R] = {
     val jdbc = ConfigUtils.getJdbcProperties(ctx.parameter.toMap, alias)
     if (property != null) {
-      jdbc.putAll(property)
+      property.foreach(c => jdbc.put(c._1, c._2))
     }
     val mysqlFun = new JdbcSourceFunction[R](jdbc, sqlFun, func, filter)
     ctx.addSource(mysqlFun)

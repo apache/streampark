@@ -29,6 +29,7 @@ import org.apache.hadoop.hbase.client._
 import java.util.Properties
 
 import scala.annotation.meta.param
+import scala.collection.JavaConversions._
 
 object HBaseSource {
 
@@ -61,7 +62,7 @@ class HBaseSource(
     }
     val jdbc = ConfigUtils.getHBaseConfig(ctx.parameter.toMap)
     if (property != null) {
-      jdbc.putAll(property)
+      property.foreach(c => jdbc.put(c._1, c._2))
     }
     val hBaseFunc = new HBaseSourceFunction[R](jdbc, query, func, running)
     ctx.addSource(hBaseFunc)
