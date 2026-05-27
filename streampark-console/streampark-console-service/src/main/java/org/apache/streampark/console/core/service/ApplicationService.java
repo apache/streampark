@@ -54,7 +54,7 @@ public interface ApplicationService extends IService<Application> {
 
   void restart(Application application) throws Exception;
 
-  String getYarnName(Application app);
+  String getYarnName(Application app) throws IOException;
 
   AppExistsState checkExists(Application app);
 
@@ -66,7 +66,7 @@ public interface ApplicationService extends IService<Application> {
 
   void clean(Application app);
 
-  String readConf(String config) throws IOException;
+  String readConf(Application application) throws IOException;
 
   Application getApp(Application application);
 

@@ -699,10 +699,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public String getYarnName(Application appParam) {
+  public String getYarnName(Application appParam) throws IOException {
+    File file = getReadableConfFile(appParam);
     String[] args = new String[2];
     args[0] = "--name";
-    args[1] = appParam.getConfig();
+    args[1] = file.getAbsolutePath();
     return ParameterCli.read(args);
   }
 
@@ -1213,10 +1214,60 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public String readConf(String config) throws IOException {
-    File file = new File(config);
+  public String readConf(Application application) throws IOException {
+    File file = getReadableConfFile(application);
     String conf = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
     return Base64.getEncoder().encodeToString(conf.getBytes());
+  }
+
+  @VisibleForTesting
+  File getReadableConfFile(Application application) throws IOException {
+    ApiAlertException.throwIfNull(application, "Invalid application.");
+    ApiAlertException.throwIfNull(application.getProjectId(), "Invalid project.");
+    ApiAlertException.throwIfNull(application.getTeamId(), "Invalid team.");
+    ApiAlertException.throwIfTrue(StringUtils.isBlank(application.getModule()), "Invalid module.");
+    ApiAlertException.throwIfTrue(
+        StringUtils.containsAny(application.getModule(), '/', '\\'), "Invalid module.");
+    ApiAlertException.throwIfTrue(StringUtils.isBlank(application.getConfig()), "Invalid config.");
+
+    Project project = projectService.getById(application.getProjectId());
+    ApiAlertException.throwIfNull(project, "Invalid project.");
+    ApiAlertException.throwIfFalse(
+        application.getTeamId().equals(project.getTeamId()), "Invalid project.");
+
+    File projectDistHome = project.getDistHome().getCanonicalFile();
+    ApiAlertException.throwIfFalse(projectDistHome.isDirectory(), "Invalid project.");
+
+    File moduleArchive = new File(projectDistHome, application.getModule()).getCanonicalFile();
+    File moduleHome =
+        new File(StringUtils.removeEnd(moduleArchive.getAbsolutePath(), ".tar.gz"))
+            .getCanonicalFile();
+    ApiAlertException.throwIfFalse(
+        isDirectChildPath(projectDistHome, moduleArchive), "Invalid module.");
+    ApiAlertException.throwIfFalse(
+        isDirectChildPath(projectDistHome, moduleHome), "Invalid module.");
+    ApiAlertException.throwIfFalse(moduleHome.isDirectory(), "Invalid module.");
+
+    File confHome = new File(moduleHome, "conf").getCanonicalFile();
+    ApiAlertException.throwIfFalse(isDescendantPath(moduleHome, confHome), "Invalid config.");
+    ApiAlertException.throwIfFalse(confHome.isDirectory(), "Invalid config.");
+
+    File configFile = new File(application.getConfig()).getCanonicalFile();
+
+    ApiAlertException.throwIfFalse(configFile.isFile(), "Invalid config.");
+    ApiAlertException.throwIfFalse(isDescendantPath(confHome, configFile), "Invalid config.");
+    return configFile;
+  }
+
+  private boolean isDescendantPath(File parent, File child) throws IOException {
+    String parentPath = parent.getCanonicalPath();
+    String childPath = child.getCanonicalPath();
+    return childPath.startsWith(parentPath.concat(File.separator));
+  }
+
+  private boolean isDirectChildPath(File parent, File child) throws IOException {
+    File childParent = child.getCanonicalFile().getParentFile();
+    return childParent != null && parent.getCanonicalFile().equals(childParent.getCanonicalFile());
   }
 
   @Override

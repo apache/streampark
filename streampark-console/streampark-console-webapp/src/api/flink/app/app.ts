@@ -53,7 +53,7 @@ enum APP_API {
  * read configuration file
  * @returns Promise<any>
  */
-export function fetchAppConf(params?: { config: any }) {
+export function fetchAppConf(params?: { projectId?: any; module?: any; config: any }) {
   return defHttp.post<any>({
     url: APP_API.READ_CONF,
     params,
@@ -226,6 +226,6 @@ export function fetchCancel(data: CancelParam): Promise<boolean> {
   return defHttp.post({ url: APP_API.CANCEL, data });
 }
 
-export function fetchName(data: { config: string }) {
+export function fetchName(data: { projectId?: any; module?: any; config: string }) {
   return defHttp.post({ url: APP_API.NAME, data });
 }
