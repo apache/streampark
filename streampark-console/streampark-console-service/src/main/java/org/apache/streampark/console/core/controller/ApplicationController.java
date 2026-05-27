@@ -177,7 +177,7 @@ public class ApplicationController {
 
   @PostMapping("name")
   @PermissionScope(app = "#app.id", team = "#app.teamId")
-  public RestResponse yarnName(Application app) {
+  public RestResponse yarnName(Application app) throws IOException {
     String yarnName = applicationService.getYarnName(app);
     return RestResponse.success(yarnName);
   }
@@ -190,8 +190,9 @@ public class ApplicationController {
   }
 
   @PostMapping("readConf")
-  public RestResponse readConf(String config) throws IOException {
-    String content = applicationService.readConf(config);
+  @PermissionScope(team = "#app.teamId")
+  public RestResponse readConf(Application app) throws IOException {
+    String content = applicationService.readConf(app);
     return RestResponse.success(content);
   }
 

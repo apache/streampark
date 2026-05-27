@@ -188,6 +188,8 @@
           params['format'] = getAppConfType(configVal);
           if (values.configOverride == null) {
             params['config'] = await fetchAppConf({
+              projectId: params.projectId,
+              module: params.module,
               config: configVal,
             });
           } else {

@@ -263,6 +263,8 @@ export const useCreateSchema = (dependencyRef: Ref) => {
             fieldNames: { children: 'children', label: 'title', key: 'value', value: 'value' },
             onChange: (value: string) => {
               fetchName({
+                projectId: formModel.project,
+                module: formModel.module,
                 config: value,
               }).then((resp) => {
                 formModel.jobName = resp;

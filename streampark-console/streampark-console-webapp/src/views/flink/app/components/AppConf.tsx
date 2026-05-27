@@ -62,9 +62,13 @@ export default defineComponent({
 
     async function handleChangeNewConfig(confFile: string) {
       const appName = await fetchName({
+        projectId: unref(model).project,
+        module: unref(model).module,
         config: confFile,
       });
       const appConf = await fetchAppConf({
+        projectId: unref(model).project,
+        module: unref(model).module,
         config: confFile,
       });
       model.value.config = confFile;
