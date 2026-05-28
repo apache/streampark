@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-console</artifactId>
-        <version>${reversion}</version>
+        <version>${rversion}</version>
     </parent>
 
     <artifactId>streampark-console-service</artifactId>
