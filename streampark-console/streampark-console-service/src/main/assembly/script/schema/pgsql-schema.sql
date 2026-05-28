@@ -665,7 +665,7 @@ create table "public"."t_user" (
   "username" varchar(64) collate "pg_catalog"."default" not null,
   "nick_name" varchar(64) collate "pg_catalog"."default" not null,
   "salt" varchar(26) collate "pg_catalog"."default",
-  "password" varchar(64) collate "pg_catalog"."default" not null,
+  "password" varchar(255) collate "pg_catalog"."default" not null,
   "email" varchar(64) collate "pg_catalog"."default",
   "user_type" int4,
   "login_type" int2 default 0,

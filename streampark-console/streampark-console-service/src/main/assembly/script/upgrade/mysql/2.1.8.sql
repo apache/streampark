@@ -15,19 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.util;
+use streampark;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-/** Test for {@link ShaHashUtils} */
-class ShaHashUtilsTest {
-
-  @Test
-  void testEncrypt() {
-    String randomSalt = "rh8b1ojwog777yrg0daesf04gk";
-    String encryptPassword = ShaHashUtils.encrypt(randomSalt, "streampark");
-    Assertions.assertEquals(
-        "2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f", encryptPassword);
-  }
-}
+ALTER TABLE `t_user`
+    MODIFY COLUMN `password` varchar(255) collate utf8mb4_general_ci not null comment 'password';

@@ -18,14 +18,12 @@
 package org.apache.streampark.console.system.security.impl;
 
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.base.util.PasswordHashUtils;
 import org.apache.streampark.console.core.enums.LoginType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.service.UserService;
-
-import org.apache.commons.lang3.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,16 +48,19 @@ public class AuthenticatorImpl implements Authenticator {
     }
   }
 
-  private User passwordAuthenticate(String username, String password) {
+  private User passwordAuthenticate(String username, String password) throws Exception {
     User user = usersService.findByName(username);
     if (user == null || user.getLoginType() != LoginType.PASSWORD) {
       throw new ApiAlertException(
           String.format("user [%s] does not exist or can not login with PASSWORD", username));
     }
-    String salt = user.getSalt();
-    password = ShaHashUtils.encrypt(salt, password);
-    if (!StringUtils.equals(user.getPassword(), password)) {
+    if (!PasswordHashUtils.matches(password, user.getSalt(), user.getPassword())) {
       return null;
+    }
+    if (PasswordHashUtils.needsRehash(user.getPassword())) {
+      user.setSalt(PasswordHashUtils.PASSWORD_SALT_NOT_REQUIRED);
+      user.setPassword(PasswordHashUtils.encrypt(password));
+      usersService.updateSaltPassword(user);
     }
     return user;
   }
@@ -77,16 +78,12 @@ public class AuthenticatorImpl implements Authenticator {
         throw new ApiAlertException(
             String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
       }
-      String saltPassword = ShaHashUtils.encrypt(user.getSalt(), password);
-
-      // ldap password changed, we should update user password
-      if (!StringUtils.equals(saltPassword, user.getPassword())) {
-
-        // encrypt password again
-        String salt = ShaHashUtils.getRandomSalt();
-        saltPassword = ShaHashUtils.encrypt(salt, password);
-        user.setSalt(salt);
-        user.setPassword(saltPassword);
+      boolean passwordMatched =
+          PasswordHashUtils.matches(password, user.getSalt(), user.getPassword());
+      // ldap password changed, or stored hash uses a legacy format, update user password hash
+      if (!passwordMatched || PasswordHashUtils.needsRehash(user.getPassword())) {
+        user.setSalt(PasswordHashUtils.PASSWORD_SALT_NOT_REQUIRED);
+        user.setPassword(PasswordHashUtils.encrypt(password));
         usersService.updateSaltPassword(user);
       }
       return user;
