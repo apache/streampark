@@ -117,8 +117,8 @@ public class SpringProperties {
         // h2
         springConfig.put("spring.h2.console.path", "/h2-console");
         springConfig.put("spring.h2.console.enabled", true);
-        springConfig.put("spring.h2.console.settings.web-allow-others", true);
-        springConfig.put("spring.h2.console.settings.trace", true);
+        springConfig.put("spring.h2.console.settings.web-allow-others", false);
+        springConfig.put("spring.h2.console.settings.trace", false);
         break;
       default:
         throw new UnsupportedOperationException("Unsupported datasource dialect: " + dialect);
