@@ -21,7 +21,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.base.util.PasswordHashUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Role;
@@ -32,8 +32,6 @@ import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -102,9 +100,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     Date date = new Date();
     user.setCreateTime(date);
     user.setModifyTime(date);
-    String salt = ShaHashUtils.getRandomSalt();
-    String password = ShaHashUtils.encrypt(salt, user.getPassword());
-    user.setSalt(salt);
+    String password = PasswordHashUtils.encrypt(user.getPassword());
+    user.setSalt(PasswordHashUtils.PASSWORD_SALT_NOT_REQUIRED);
     // default team
     user.setLastTeamId(teamService.getSysDefaultTeam().getId());
     user.setPassword(password);
@@ -140,14 +137,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     User user = getById(userParam.getUserId());
     ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
 
-    String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
     ApiAlertException.throwIfFalse(
-        StringUtils.equals(user.getPassword(), saltPassword),
+        PasswordHashUtils.matches(userParam.getOldPassword(), user.getSalt(), user.getPassword()),
         "Old password error. Update password failed.");
 
-    String salt = ShaHashUtils.getRandomSalt();
-    String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
-    user.setSalt(salt);
+    String password = PasswordHashUtils.encrypt(userParam.getPassword());
+    user.setSalt(PasswordHashUtils.PASSWORD_SALT_NOT_REQUIRED);
     user.setPassword(password);
     user.setModifyTime(new Date());
     this.baseMapper.updateById(user);
@@ -167,10 +162,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Transactional(rollbackFor = Exception.class)
   public String resetPassword(String username) {
     User user = new User();
-    String salt = ShaHashUtils.getRandomSalt();
-    String newPassword = ShaHashUtils.getRandomSalt(User.DEFAULT_PASSWORD_LENGTH);
-    String password = ShaHashUtils.encrypt(salt, newPassword);
-    user.setSalt(salt);
+    String newPassword = PasswordHashUtils.getRandomPassword(User.DEFAULT_PASSWORD_LENGTH);
+    String password = PasswordHashUtils.encrypt(newPassword);
+    user.setSalt(PasswordHashUtils.PASSWORD_SALT_NOT_REQUIRED);
     user.setPassword(password);
     LambdaQueryWrapper<User> queryWrapper =
         new LambdaQueryWrapper<User>().eq(User::getUsername, username);

@@ -257,6 +257,6 @@ insert into `t_member` values (100000, 100000, 100000, 100001, now(), now());
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, 100000, '1', now(), now(),null,0,null,null);
+insert into `t_user` values (100000, 'admin', '', '', '$sp$pbkdf2-sha256$600000$beyNAvVb7zMzZIBSG3/Y8Q==$ry679/ES4zIzmv7Cb3DPkhDlJfNTD4B17H9s2cf2afQ=', null, 1, 0, 100000, '1', now(), now(),null,0,null,null);
 
 set foreign_key_checks = 1;

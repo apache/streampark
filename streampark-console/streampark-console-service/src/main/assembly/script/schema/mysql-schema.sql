@@ -357,7 +357,7 @@ create table `t_user` (
   `username` varchar(64) collate utf8mb4_general_ci not null comment 'user name',
   `nick_name` varchar(64) collate utf8mb4_general_ci not null comment 'nick name',
   `salt` varchar(26) collate utf8mb4_general_ci default null comment 'salt',
-  `password` varchar(64) collate utf8mb4_general_ci not null comment 'password',
+  `password` varchar(255) collate utf8mb4_general_ci not null comment 'password',
   `email` varchar(64) collate utf8mb4_general_ci default null comment 'email',
   `user_type` int  not null comment 'user type 1:admin 2:user',
   `login_type` tinyint default 0 comment 'login type 0:password 1:ldap',
