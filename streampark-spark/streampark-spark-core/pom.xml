@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-spark</artifactId>
-        <version>${rversion}</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>streampark-spark-core_2.12</artifactId>

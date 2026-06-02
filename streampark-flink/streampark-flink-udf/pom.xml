@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink</artifactId>
-        <version>${rversion}</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>streampark-flink-udf_${scala.binary.version}</artifactId>

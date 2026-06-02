@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink-client</artifactId>
-        <version>${rversion}</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
