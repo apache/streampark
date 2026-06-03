@@ -133,7 +133,6 @@ APP_CONF="$APP_BASE"/conf
 APP_LIB="$APP_BASE"/lib
 APP_LOG="$APP_BASE"/logs
 APP_PID="$APP_BASE"/.pid
-APP_OUT="$APP_LOG"/streampark.out
 # shellcheck disable=SC2034
 APP_TMPDIR="$APP_BASE"/temp
 
@@ -404,7 +403,7 @@ start() {
     -Dapp.home="${APP_HOME}" \
     -Dlogging.config="${APP_CONF}/logback-spring.xml" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
-    $APP_MAIN "$@" >> "$APP_OUT" 2>&1 "&"
+    $APP_MAIN "$@" > /dev/null 2>&1 "&"
 
     local PID=$!
     local IS_NUMBER="^[0-9]+$"
