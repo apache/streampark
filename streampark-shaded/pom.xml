@@ -25,6 +25,7 @@
     </parent>
 
     <artifactId>streampark-shaded</artifactId>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>StreamPark : Shaded Parent</name>
 
