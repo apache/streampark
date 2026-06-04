@@ -291,6 +291,8 @@ public class FlinkAppHttpWatcher {
      * @param application application
      */
     private void getStateFromFlink(FlinkApplication application) throws Exception {
+        log.debug(
+            "[StreamPark][FlinkAppHttpWatcher] getStateFromFlink appId: {}", application.getId());
         StopFromEnum stopFrom = getStopFrom(application);
         JobsOverview jobsOverview = httpJobsOverview(application);
         Optional<JobsOverview.Job> optional;
@@ -549,7 +551,8 @@ public class FlinkAppHttpWatcher {
      * @param application application
      */
     private void getStateFromYarn(FlinkApplication application) throws Exception {
-        log.debug("[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi starting...");
+        log.debug(
+            "[StreamPark][FlinkAppHttpWatcher] getStateFromYarn appId: {}", application.getId());
         StopFromEnum stopFrom = getStopFrom(application);
         OptionStateEnum optionState = OPTIONING.get(application.getId());
 
@@ -565,7 +568,7 @@ public class FlinkAppHttpWatcher {
             try {
                 YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
                 if (yarnAppInfo != null) {
-                    String state = yarnAppInfo.getApp().getFinalStatus();
+                    String state = yarnAppInfo.getApp().getState();
                     flinkAppState = FlinkAppStateEnum.getState(state);
                 }
             } finally {
@@ -594,7 +597,7 @@ public class FlinkAppHttpWatcher {
                 }
             } else {
                 try {
-                    String state = yarnAppInfo.getApp().getFinalStatus();
+                    String state = yarnAppInfo.getApp().getState();
                     FlinkAppStateEnum flinkAppState = FlinkAppStateEnum.getState(state);
                     if (FlinkAppStateEnum.OTHER.equals(flinkAppState)) {
                         return;
@@ -614,7 +617,7 @@ public class FlinkAppHttpWatcher {
                     }
                     application.setState(flinkAppState.getValue());
                     cleanOptioning(optionState, application.getId());
-                    doPersistMetrics(application, true);
+                    doPersistMetrics(application, false);
                     if (flinkAppState.equals(FlinkAppStateEnum.FAILED)
                         || flinkAppState.equals(FlinkAppStateEnum.LOST)
                         || (flinkAppState.equals(FlinkAppStateEnum.CANCELED)
@@ -817,14 +820,18 @@ public class FlinkAppHttpWatcher {
     }
 
     private <T> T yarnRestRequest(String url, Class<T> clazz) throws IOException {
+        log.debug("[StreamPark][FlinkAppHttpWatcher] yarnRestRequest,url:{}", url);
         String result = YarnUtils.restRequest(url, HTTP_TIMEOUT);
+        log.debug("[StreamPark][FlinkAppHttpWatcher] yarnRestRequest,result:{}", result);
         return JacksonUtils.read(result, clazz);
     }
 
     private <T> T httpRestRequest(String url, Class<T> clazz) throws IOException {
+        log.debug("[StreamPark][FlinkAppHttpWatcher] httpRestRequest,url:{}", url);
         String result =
             HttpClientUtils.httpGetRequest(
                 url, RequestConfig.custom().setConnectTimeout(HTTP_TIMEOUT).build());
+        log.debug("[StreamPark][FlinkAppHttpWatcher] httpRestRequest,result:{}", result);
         if (null == result) {
             return null;
         }
