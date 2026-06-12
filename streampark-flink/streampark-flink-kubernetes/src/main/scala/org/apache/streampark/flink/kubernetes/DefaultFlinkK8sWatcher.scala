@@ -37,7 +37,7 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
 
   // eventBus for change event
   implicit lazy val eventBus: ChangeEventBus = {
-    val eventBus = new ChangeEventBus()
+    val eventBus = new ChangeEventBus(conf.threadNumberConfig)
     eventBus.registerListener(new BuildInEventListener)
     eventBus
   }

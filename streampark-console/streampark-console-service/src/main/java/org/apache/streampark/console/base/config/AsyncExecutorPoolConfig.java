@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.base.config;
 
+import org.apache.streampark.common.util.CpuUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
 
+    private final int CPU_CORES = CpuUtils.getCpuCores();
+
     /**
      * Create a ThreadPoolTaskExecutor for SavePointService.
      *
@@ -41,8 +44,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("triggerSavepointExecutor")
     public Executor savepointExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -58,8 +61,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("flinkRestAPIWatchingExecutor")
     public Executor restAPIWatchingExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -74,8 +77,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("sparkRestAPIWatchingExecutor")
     public Executor sparkRestAPIWatchingExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -90,8 +93,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("flinkClusterWatchingExecutor")
     public Executor clusterWatchingExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -106,8 +109,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkBuildPipelineExecutor")
     public ExecutorService pipelineExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -123,8 +126,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkClusterExecutor")
     public ExecutorService clusterExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -140,8 +143,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkNotifyExecutor")
     public Executor notifyExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             20L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -157,8 +160,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkDeployExecutor")
     public Executor deployExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -174,8 +177,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkBuildExecutor")
     public Executor buildExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -191,8 +194,8 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkDistributedTaskExecutor")
     public Executor distributedTaskExecutor() {
         return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
+            CPU_CORES * 5,
+            CPU_CORES * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),

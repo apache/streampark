@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
-import org.apache.streampark.common.util.{Logger, ThreadUtils}
+import org.apache.streampark.common.util.{CpuUtils, Logger, ThreadUtils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline.executor
 
@@ -187,8 +187,10 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
 object BuildPipeline {
 
+  private val CPU_NUM = CpuUtils.getCpuCores
+
   val execPool = new ThreadPoolExecutor(
-    Runtime.getRuntime.availableProcessors * 2,
+    CPU_NUM * 2,
     300,
     60L,
     TimeUnit.SECONDS,

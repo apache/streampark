@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.packer.pipeline.impl
 
 import org.apache.streampark.common.fs.LfsOperator
-import org.apache.streampark.common.util.ThreadUtils
+import org.apache.streampark.common.util.{CpuUtils, ThreadUtils}
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
 import org.apache.streampark.flink.packer.docker._
 import org.apache.streampark.flink.packer.pipeline._
@@ -231,9 +231,11 @@ class SparkK8sApplicationBuildPipeline(request: SparkK8sApplicationBuildRequest)
 
 object SparkK8sApplicationBuildPipeline {
 
+  private val CPU_NUM = CpuUtils.getCpuCores
+
   val execPool = new ThreadPoolExecutor(
-    Runtime.getRuntime.availableProcessors * 5,
-    Runtime.getRuntime.availableProcessors() * 10,
+    CPU_NUM * 5,
+    CPU_NUM * 10,
     60L,
     TimeUnit.SECONDS,
     new LinkedBlockingQueue[Runnable](2048),

@@ -27,7 +27,8 @@ import org.apache.streampark.common.conf.{InternalConfigHolder, K8sFlinkConfig}
  */
 case class FlinkTrackConfig(
     jobStatusWatcherConf: JobStatusWatcherConfig,
-    metricWatcherConf: MetricWatcherConfig)
+    metricWatcherConf: MetricWatcherConfig,
+    threadNumberConfig: ThreadNumberConfig)
 
 /**
  * configuration for FlinkMetricWatcher
@@ -57,12 +58,14 @@ case class JobStatusWatcherConfig(
     silentStateJobKeepTrackingSec: Int,
     jobStatusCacheTimeOutSec: Int)
 
+case class ThreadNumberConfig(maxK8sEventBusThreadNum: Int)
+
 object FlinkTrackConfig {
   def defaultConf: FlinkTrackConfig =
-    FlinkTrackConfig(JobStatusWatcherConfig.defaultConf, MetricWatcherConfig.defaultConf)
+    FlinkTrackConfig(JobStatusWatcherConfig.defaultConf, MetricWatcherConfig.defaultConf, ThreadNumberConfig.defaultConf)
 
   def debugConf: FlinkTrackConfig =
-    FlinkTrackConfig(JobStatusWatcherConfig.debugConf, MetricWatcherConfig.debugConf)
+    FlinkTrackConfig(JobStatusWatcherConfig.debugConf, MetricWatcherConfig.debugConf, ThreadNumberConfig.debugConf)
 
   /** create from ConfigHub */
   def fromConfigHub: FlinkTrackConfig = FlinkTrackConfig(
@@ -73,7 +76,9 @@ object FlinkTrackConfig {
       InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackCacheTimeoutSec)),
     MetricWatcherConfig(
       InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskTimeoutSec),
-      InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec)))
+      InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec)),
+    ThreadNumberConfig(
+      InternalConfigHolder.get(K8sFlinkConfig.maxK8sEventBusThreadNum)))
 
 }
 
@@ -97,4 +102,10 @@ object MetricWatcherConfig {
 
   def debugConf: MetricWatcherConfig =
     MetricWatcherConfig(requestTimeoutSec = 120, requestIntervalSec = 2)
+}
+
+object ThreadNumberConfig {
+  def defaultConf: ThreadNumberConfig = ThreadNumberConfig(maxK8sEventBusThreadNum = 10)
+
+  def debugConf: ThreadNumberConfig = ThreadNumberConfig(maxK8sEventBusThreadNum = 1)
 }
