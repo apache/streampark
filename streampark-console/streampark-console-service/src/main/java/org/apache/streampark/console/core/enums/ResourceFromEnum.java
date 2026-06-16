@@ -28,7 +28,10 @@ public enum ResourceFromEnum {
     BUILD(1),
 
     /** upload local jar */
-    UPLOAD(2);
+    UPLOAD(2),
+
+    /**local jar from image */
+    IMAGE(3);
 
     private final Integer value;
 

@@ -278,7 +278,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
                                         "[StreamPark] unsupported ApplicationType of FlinkJar: "
                                             + app.getApplicationType());
                             }
-                        } else {
+                        } else if (!app.isImageResource()) {
                             fsOperator.upload(app.getDistHome(), appHome);
                         }
                     } else {
@@ -453,12 +453,14 @@ public class FlinkApplicationBuildPipelineServiceImpl
      */
     private BuildPipeline createPipelineInstance(@Nonnull FlinkApplication app) {
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
-        String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
-
-        if (!FileUtils.exists(flinkUserJar)) {
-            Resource resource = resourceService.findByResourceName(app.getTeamId(), app.getJar());
-            if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
-                flinkUserJar = resource.getFilePath();
+        String flinkUserJar = app.getJar();
+        if (!app.isImageResource()) {
+            flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
+            if (!FileUtils.exists(flinkUserJar)) {
+                Resource resource = resourceService.findByResourceName(app.getTeamId(), app.getJar());
+                if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                    flinkUserJar = resource.getFilePath();
+                }
             }
         }
 
@@ -542,7 +544,8 @@ public class FlinkApplicationBuildPipelineServiceImpl
                 dockerConfig.getNamespace(),
                 dockerConfig.getUsername(),
                 dockerConfig.getPassword()),
-            app.getIngressTemplate());
+            app.getIngressTemplate(),
+            app.isImageResource());
         return k8sApplicationBuildRequest;
     }
 

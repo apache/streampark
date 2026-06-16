@@ -205,6 +205,15 @@
           params['mainClass'] = values.mainClass || null;
         }
         handleCreateApp(params);
+      } else if (resourceFrom == ResourceFromEnum.IMAGE) {
+        // from image
+        Object.assign(params, {
+          resourceFrom: ResourceFromEnum.IMAGE,
+          appType: AppTypeEnum.APACHE_FLINK,
+          jar: values.jar,
+          mainClass: values.mainClass,
+        });
+        handleCreateApp(params);
       } else {
         // from upload
         Object.assign(params, {
