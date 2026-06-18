@@ -68,7 +68,7 @@ public class SavepointController {
     }
 
     @PostMapping("trigger")
-    @Permission(app = "#savepoint.appId", team = "#savepoint.teamId")
+    @Permission(app = "#appId", team = "#teamId")
     @RequiresPermissions("savepoint:trigger")
     public RestResponse trigger(
                                 Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
