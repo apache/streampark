@@ -36,6 +36,8 @@ import lombok.Setter;
 import java.io.File;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
@@ -117,7 +119,7 @@ public class FlinkEnv implements Serializable {
     }
 
     public Map<String, String> convertFlinkYamlAsMap() {
-        String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
+        String flinkYamlString = getFlinkConfYaml();
         if (isLegacyFlinkConf()) {
             return FlinkConfigurationUtils.loadLegacyFlinkConf(flinkYamlString);
         }
@@ -133,7 +135,7 @@ public class FlinkEnv implements Serializable {
     }
 
     public void unzipFlinkConf() {
-        this.flinkConf = DeflaterUtils.unzipString(this.flinkConf);
+        this.flinkConf = getFlinkConfYaml();
     }
 
     public String getLargeVersion() {
@@ -166,11 +168,37 @@ public class FlinkEnv implements Serializable {
 
     @JsonIgnore
     public Properties getFlinkConfig() {
-        String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
+        String flinkYamlString = getFlinkConfYaml();
         Properties flinkConfig = new Properties();
         Map<String, String> config = FlinkConfigurationUtils.loadLegacyFlinkConf(flinkYamlString);
         flinkConfig.putAll(config);
         return flinkConfig;
+    }
+
+    private String getFlinkConfYaml() {
+        try {
+            return DeflaterUtils.unzipString(flinkConf);
+        } catch (IllegalArgumentException e) {
+            if (isStoredFlinkHome()) {
+                doSetFlinkConf();
+                return DeflaterUtils.unzipString(flinkConf);
+            }
+            throw e;
+        }
+    }
+
+    private boolean isStoredFlinkHome() {
+        if (StringUtils.isBlank(flinkConf) || StringUtils.isBlank(flinkHome)) {
+            return false;
+        }
+        if (StringUtils.equals(flinkConf, flinkHome)) {
+            return true;
+        }
+        try {
+            return Paths.get(flinkConf).normalize().equals(Paths.get(flinkHome).normalize());
+        } catch (InvalidPathException e) {
+            return false;
+        }
     }
 
     private Float getVersionNumber() {
