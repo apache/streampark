@@ -66,4 +66,26 @@ class PropertiesUtilsTestCase {
     Assertions.assertEquals(map("diy.param.name"), "apache streampark")
   }
 
+  @Test def testDynamicPropertiesWithMultilineValue(): Unit = {
+    val dynamicProperties =
+      """
+        |-Dexecution.target=yarn-application
+        |-Dyarn.ship-files=/data/module/flink-1.20.2;
+        |/opt/module/flink-cdc-3.5.0/test1.pgsql-to-starrocks.yaml;
+        |/data/module/hadoop/hadoop-3.3.6/etc/hadoop/core-site.xml;
+        |/data/module/hadoop/hadoop-3.3.6/etc/hadoop/hdfs-site.xml
+        |-Dyarn.application.queue=flink
+        |""".stripMargin
+
+    val map = FlinkConfigurationUtils.extractDynamicProperties(dynamicProperties)
+    Assertions.assertEquals(map("execution.target"), "yarn-application")
+    Assertions.assertEquals(
+      map("yarn.ship-files"),
+      "/data/module/flink-1.20.2;" +
+        "/opt/module/flink-cdc-3.5.0/test1.pgsql-to-starrocks.yaml;" +
+        "/data/module/hadoop/hadoop-3.3.6/etc/hadoop/core-site.xml;" +
+        "/data/module/hadoop/hadoop-3.3.6/etc/hadoop/hdfs-site.xml")
+    Assertions.assertEquals(map("yarn.application.queue"), "flink")
+  }
+
 }

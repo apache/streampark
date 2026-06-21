@@ -99,8 +99,9 @@ object FlinkConfigurationUtils extends Logger {
   @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
     if (StringUtils.isEmpty(properties)) Map.empty[String, String]
     else {
+      val normalizedProperties = normalizeDynamicProperties(properties)
       val map = mutable.Map[String, String]()
-      val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
+      val simple = normalizedProperties.replaceAll(MULTI_PROPERTY_REGEXP, "")
       simple.split("\\s?-D") match {
         case d if Utils.isNotEmpty(d) =>
           d.foreach(x => {
@@ -113,7 +114,7 @@ object FlinkConfigurationUtils extends Logger {
           })
         case _ =>
       }
-      val matcher = MULTI_PROPERTY_PATTERN.matcher(properties)
+      val matcher = MULTI_PROPERTY_PATTERN.matcher(normalizedProperties)
       while (matcher.find()) {
         val opts = matcher.group()
         val index = opts.indexOf("=")
@@ -124,6 +125,24 @@ object FlinkConfigurationUtils extends Logger {
       }
       map.toMap
     }
+  }
+
+  private[this] def normalizeDynamicProperties(properties: String): String = {
+    val normalized = new StringBuilder
+    properties.split("\\r?\\n").foreach { line =>
+      val trimmed = line.trim
+      if (trimmed.nonEmpty) {
+        if (trimmed.startsWith("-D")) {
+          if (normalized.nonEmpty) {
+            normalized.append(System.lineSeparator())
+          }
+          normalized.append(trimmed)
+        } else {
+          normalized.append(trimmed)
+        }
+      }
+    }
+    normalized.toString()
   }
 
   @Nonnull def extractArguments(args: String): List[String] = {
