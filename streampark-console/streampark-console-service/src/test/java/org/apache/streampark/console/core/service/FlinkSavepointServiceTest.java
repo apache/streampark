@@ -26,8 +26,10 @@ import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkEffective;
 import org.apache.streampark.console.core.entity.FlinkEnv;
+import org.apache.streampark.console.core.entity.FlinkSavepoint;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
+import org.apache.streampark.console.core.mapper.FlinkSavepointMapper;
 import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.service.impl.FlinkSavepointServiceImpl;
@@ -37,6 +39,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 import static org.apache.flink.configuration.CheckpointingOptions.SAVEPOINT_DIRECTORY;
 import static org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions.CHECKPOINTING_INTERVAL;
@@ -66,6 +70,9 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
     @Autowired
     FlinkApplicationManageService applicationManageService;
 
+    @Autowired
+    private FlinkSavepointMapper savepointMapper;
+
     @AfterEach
     void cleanTestRecordsInDatabase() {
         savepointService.remove(new QueryWrapper<>());
@@ -90,6 +97,19 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
         assertThat(savepointServiceImpl.getSavepointFromDynamicProps(props)).isEqualTo("hdfs:///test");
         assertThat(savepointServiceImpl.getSavepointFromDynamicProps(propsWithEmptyTargetValue))
             .isEmpty();
+    }
+
+    @Test
+    void testGetLatestReturnsNewestSavepointWhenDuplicateLatestRecordsExist() {
+        Long appId = 1L;
+        FlinkSavepoint older = latestSavepoint(appId, "hdfs:///older", new Date(1000));
+        FlinkSavepoint newer = latestSavepoint(appId, "hdfs:///newer", new Date(2000));
+        savepointMapper.insert(older);
+        savepointMapper.insert(newer);
+
+        FlinkSavepoint latest = savepointService.getLatest(appId);
+
+        assertThat(latest.getPath()).isEqualTo("hdfs:///newer");
     }
 
     @Test
@@ -189,5 +209,14 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
         // Test for it with the configured empty target value
         // Test for it with the configured non-empty target value
 
+    }
+
+    private FlinkSavepoint latestSavepoint(Long appId, String path, Date triggerTime) {
+        FlinkSavepoint savepoint = new FlinkSavepoint();
+        savepoint.setAppId(appId);
+        savepoint.setLatest(true);
+        savepoint.setPath(path);
+        savepoint.setTriggerTime(triggerTime);
+        return savepoint;
     }
 }

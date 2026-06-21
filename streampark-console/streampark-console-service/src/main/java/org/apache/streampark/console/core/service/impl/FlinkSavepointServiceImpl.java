@@ -131,6 +131,9 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
         return this.lambdaQuery()
             .eq(FlinkSavepoint::getAppId, id)
             .eq(FlinkSavepoint::getLatest, true)
+            .orderByDesc(FlinkSavepoint::getTriggerTime)
+            .orderByDesc(FlinkSavepoint::getId)
+            .last("limit 1")
             .one();
     }
 
