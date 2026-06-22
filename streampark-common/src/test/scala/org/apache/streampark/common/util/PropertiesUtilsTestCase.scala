@@ -43,6 +43,21 @@ class PropertiesUtilsTestCase {
     Assertions.assertTrue(programArgs.contains("username=root"))
   }
 
+  @Test def testExtractProgramArgsKeepsQuotedKeyValueWithSpaces(): Unit = {
+    val args =
+      "kafka_sync_database " +
+        "--kafka_conf properties.sasl.jaas.config='org.apache.flink.kafka.shaded.org.apache.kafka.common.security.plain.PlainLoginModule required username=\"user\" password=\"pass\";' " +
+        "--kafka_conf topic=zmn_bigdata_market_format"
+    val jaasConfig =
+      "properties.sasl.jaas.config=" +
+        "org.apache.flink.kafka.shaded.org.apache.kafka.common.security.plain.PlainLoginModule " +
+        "required username=\"user\" password=\"pass\";"
+
+    val programArgs = FlinkConfigurationUtils.extractArguments(args)
+
+    Assertions.assertTrue(programArgs.contains(jaasConfig))
+  }
+
   @Test def testDynamicProperties(): Unit = {
     val dynamicProperties =
       """

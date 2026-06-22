@@ -129,9 +129,44 @@ object FlinkConfigurationUtils extends Logger {
   @Nonnull def extractArguments(args: String): List[String] = {
     val programArgs = new ArrayBuffer[String]()
     if (StringUtils.isNotEmpty(args)) {
-      return extractArguments(args.split("\\s+"))
+      return extractArguments(splitQuotedArguments(args).toArray)
     }
     programArgs.toList
+  }
+
+  private[this] def splitQuotedArguments(args: String): List[String] = {
+    val arguments = new ArrayBuffer[String]()
+    val current = new StringBuilder
+    var quote = 0.toChar
+    var escaped = false
+
+    args.foreach {
+      case char if escaped =>
+        current.append(char)
+        escaped = false
+      case '\\' =>
+        current.append('\\')
+        escaped = true
+      case char if quote != 0 =>
+        current.append(char)
+        if (char == quote) {
+          quote = 0.toChar
+        }
+      case char @ ('\'' | '"') =>
+        current.append(char)
+        quote = char
+      case char if char.isWhitespace =>
+        if (current.nonEmpty) {
+          arguments += current.toString()
+          current.clear()
+        }
+      case char =>
+        current.append(char)
+    }
+    if (current.nonEmpty) {
+      arguments += current.toString()
+    }
+    arguments.toList
   }
 
   def extractArguments(array: Array[String]): List[String] = {
