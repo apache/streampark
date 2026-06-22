@@ -37,6 +37,8 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
   private[this] lazy val FLINK_SCALA_VERSION_PATTERN =
     Pattern.compile("^flink-dist_(\\d\\.\\d+).*.jar$")
 
+  private[this] lazy val VERSION_SEGMENT_PATTERN = Pattern.compile("^(\\d+).*$")
+
   private[this] lazy val APACHE_FLINK_VERSION_PATTERN = Pattern.compile("(^\\d+\\.\\d+\\.\\d+)")
 
   private[this] lazy val OTHER_FLINK_VERSION_PATTERN = Pattern.compile("(\\d+\\.\\d+)(-*)")
@@ -125,7 +127,7 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
   }
 
   def checkVersion(throwException: Boolean = true): Boolean = {
-    version.split("\\.").map(_.trim.toInt) match {
+    versionSegments match {
       case Array(1, v, _) if v >= 12 && v <= 20 => true
       case _ =>
         if (throwException) {
@@ -137,9 +139,20 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
   }
 
   def checkVersion(sinceVersion: Int): Boolean = {
-    version.split("\\.").map(_.trim.toInt) match {
+    versionSegments match {
       case Array(1, v, _) if v >= sinceVersion => true
       case _ => false
+    }
+  }
+
+  private[this] def versionSegments: Array[Int] = {
+    version.split("\\.").map { segment =>
+      val matcher = VERSION_SEGMENT_PATTERN.matcher(segment.trim)
+      if (matcher.matches()) {
+        matcher.group(1).toInt
+      } else {
+        throw new NumberFormatException(s"""For input string: "$segment"""")
+      }
     }
   }
 
