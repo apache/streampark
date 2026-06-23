@@ -20,11 +20,10 @@ package org.apache.streampark.flink.core
 import org.apache.streampark.common.conf.ConfigKeys.{KEY_APP_NAME, KEY_FLINK_APP_NAME}
 import org.apache.streampark.common.util.DeflaterUtils
 
-import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.PipelineOptions
 import org.apache.flink.table.api.TableEnvironment
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.table.api.bridge.scala.{StreamTableEnvironment => ScalaStreamTableEnvironment}
+import org.apache.flink.util.ParameterTool
 
 import scala.util.Try
 
@@ -52,30 +51,19 @@ object EnhancerImplicit {
     private[flink] def setAppName(implicit parameter: ParameterTool): TableEnvironment = {
       val appName = parameter.getAppName()
       if (appName != null) {
-        env.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)
+        env.getConfig.getConfiguration.setString(PipelineOptions.NAME.key, appName)
       }
       env
     }
 
   }
 
-  implicit class EnhanceStreamExecutionEnvironment(env: ScalaStreamTableEnvironment) {
-
-    private[flink] def setAppName(implicit parameter: ParameterTool): ScalaStreamTableEnvironment = {
-      val appName = parameter.getAppName()
-      if (appName != null) {
-        env.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)
-      }
-      env
-    }
-  }
-
-  implicit class EnhanceJavaStreamTableEnvironment(env: StreamTableEnvironment) {
+  implicit class EnhanceStreamTableEnvironment(env: StreamTableEnvironment) {
 
     private[flink] def setAppName(implicit parameter: ParameterTool): StreamTableEnvironment = {
       val appName = parameter.getAppName()
       if (appName != null) {
-        env.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)
+        env.getConfig.getConfiguration.setString(PipelineOptions.NAME.key, appName)
       }
       env
     }
