@@ -32,7 +32,8 @@ export default {
     flinkNameTips: 'Flink别名,举例: Flink-1.12',
     flinkNameIsRepeated: 'Flink名称已存在',
     flinkNameIsRequired: 'Flink名称必填',
-    flinkHomeTips: 'Flink所在服务器的绝对路径,举例: /usr/local/flink',
+    flinkHomeTips:
+      'Flink所在服务器的绝对路径,举例: /usr/local/flink。Flink 2.x 运行需 JDK 11+；Flink 2.x shims 需 JDK 11+ 构建 StreamPark 才会打包，详见 script/FLINK_JDK_GUIDE.zh.md',
     flinkHomeIsRequired: 'Flink Home必填',
     flinkHomePathIsInvalid: 'Flink Home路径无效',
     flinkDistNotFound: 'flink/lib 路径下未找到 flink-dist jar文件',

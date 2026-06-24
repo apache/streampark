@@ -38,3 +38,6 @@
 # The java implementation to use. By default, this environment
 # variable is REQUIRED on ALL platforms except OS X!
 # export JAVA_HOME=
+
+# Flink 2.x shims are packaged only when StreamPark is built with JDK 11+.
+# StreamPark Console can still run on JDK 8. See script/FLINK_JDK_GUIDE.md for details.

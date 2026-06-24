@@ -32,7 +32,8 @@ export default {
     flinkNameTips: 'The flink name, e.g: flink-1.12',
     flinkNameIsRepeated: 'Flink name already exists',
     flinkNameIsRequired: 'Flink name is required',
-    flinkHomeTips: 'The absolute path of the FLINK_HOME',
+    flinkHomeTips:
+      'The absolute path of FLINK_HOME. Flink 2.x requires JDK 11+ at runtime; Flink 2.x shims are packaged only when StreamPark is built with JDK 11+. See script/FLINK_JDK_GUIDE.md in the installation package.',
     flinkHomeIsRequired: 'Flink home is required',
     flinkHomePathIsInvalid: 'Flink home path is invalid',
     flinkDistNotFound: 'Can not find flink-dist in FLINK_HOME/lib',

@@ -21,3 +21,10 @@ For example:
 
 - `1.2.3.sql` needs to be executed when StreamPark is upgraded from `1.2.2` to `1.2.3`.
 - `1.2.3.sql` and `2.0.0.sql`  needs to be executed when StreamPark is upgraded from `1.2.2` to `2.0.0`. 
+
+## Flink JDK and Build Guide
+
+If you use Flink 2.x or need to build/package Flink 2.x shims, see:
+
+- English: [FLINK_JDK_GUIDE.md](./FLINK_JDK_GUIDE.md)
+- 中文: [FLINK_JDK_GUIDE.zh.md](./FLINK_JDK_GUIDE.zh.md)
