@@ -19,7 +19,7 @@ package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.SparkDeployMode
-import org.apache.streampark.common.util.{HadoopUtils, YarnUtils}
+import org.apache.streampark.common.util.{HadoopUtils, SparkEnvUtils, YarnUtils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
@@ -126,7 +126,7 @@ object YarnClient extends SparkClientTrait {
     if (StringUtils.isNotBlank(submitRequest.hadoopUser)) {
       env.put("HADOOP_USER_NAME", submitRequest.hadoopUser)
     }
-    new SparkLauncher(env)
+    val sparkLauncher = new SparkLauncher(env)
       .setSparkHome(submitRequest.sparkVersion.sparkHome)
       .setAppResource(submitRequest.userJarPath)
       .setMainClass(submitRequest.appMain)
@@ -141,6 +141,14 @@ object YarnClient extends SparkClientTrait {
         case _ =>
           throw new IllegalArgumentException("[StreamPark][Spark][YarnClient] Invalid spark on yarn deployMode, only support \"client\" and \"cluster\".")
       })
+    SparkEnvUtils
+      .resolveJavaHome(submitRequest.sparkVersion.sparkHome, submitRequest.sparkVersion.version)
+      .foreach { javaHome =>
+        env.put("JAVA_HOME", javaHome)
+        sparkLauncher.setJavaHome(javaHome)
+        logger.info(s"[StreamPark][Spark][YarnClient] Using JAVA_HOME: $javaHome")
+      }
+    sparkLauncher
   }
 
   private def setSparkConfig(submitRequest: SubmitRequest, sparkLauncher: SparkLauncher): Unit = {

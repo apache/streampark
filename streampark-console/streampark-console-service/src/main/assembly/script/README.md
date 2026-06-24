@@ -21,3 +21,10 @@ For example:
 
 - `1.2.3.sql` needs to be executed when StreamPark is upgraded from `1.2.2` to `1.2.3`.
 - `1.2.3.sql` and `2.0.0.sql`  needs to be executed when StreamPark is upgraded from `1.2.2` to `2.0.0`. 
+
+## Spark JDK Guide
+
+If you use Spark 4.x or need to configure a dedicated JDK for Spark job submission, see:
+
+- English: [SPARK_JDK_GUIDE.md](./SPARK_JDK_GUIDE.md)
+- 中文: [SPARK_JDK_GUIDE.zh.md](./SPARK_JDK_GUIDE.zh.md)
