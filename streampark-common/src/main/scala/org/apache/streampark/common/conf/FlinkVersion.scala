@@ -34,19 +34,23 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
 
   private[this] lazy val FLINK_VERSION_PATTERN = Pattern.compile("^Version: (.*), Commit ID: (.*)$")
 
-  private[this] lazy val FLINK_SCALA_VERSION_PATTERN =
-    Pattern.compile("^flink-dist_(\\d\\.\\d+).*.jar$")
+  private[this] lazy val FLINK_DIST_VERSION_PATTERN = Pattern.compile(
+    "^flink-dist_(\\d+\\.\\d+).*\\.jar$|^flink-dist-(\\d+\\.\\d+\\.\\d+)\\.jar$")
 
   private[this] lazy val APACHE_FLINK_VERSION_PATTERN = Pattern.compile("(^\\d+\\.\\d+\\.\\d+)")
 
   private[this] lazy val OTHER_FLINK_VERSION_PATTERN = Pattern.compile("(\\d+\\.\\d+)(-*)")
 
   lazy val scalaVersion: String = {
-    val matcher = FLINK_SCALA_VERSION_PATTERN.matcher(flinkDistJar.getName)
+    val matcher = FLINK_DIST_VERSION_PATTERN.matcher(flinkDistJar.getName)
     if (matcher.matches()) {
-      matcher.group(1)
+      if (matcher.group(1) != null) {
+        matcher.group(1)
+      } else {
+        // flink 2.x doesn't have scala version in jar name, default to 2.12
+        "2.12"
+      }
     } else {
-      // flink 1.15 + on support scala 2.12
       "2.12"
     }
   }
@@ -94,6 +98,14 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
 
     logInfo(buffer.toString())
     if (flinkVersion == null) {
+      // Fallback: parse version from flink-dist JAR filename (e.g. flink-dist-2.2.1.jar)
+      val distMatcher = FLINK_DIST_VERSION_PATTERN.matcher(flinkDistJar.getName)
+      if (distMatcher.matches() && distMatcher.group(2) != null) {
+        flinkVersion = distMatcher.group(2)
+        logInfo(s"Flink version parsed from dist jar name: $flinkVersion")
+      }
+    }
+    if (flinkVersion == null) {
       throw new IllegalStateException(s"[StreamPark] parse flink version failed. $buffer")
     }
     buffer.clear()
@@ -127,7 +139,7 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
   def checkVersion(throwException: Boolean = true): Boolean = {
     version.split("\\.").map(_.trim.toInt) match {
       case Array(1, v, _) if v >= 12 && v <= 20 => true
-      case Array(2, v, _) if v >= 0 => true
+      case Array(2, v, _) if v >= 0 && v <= 2 => true
       case _ =>
         if (throwException) {
           throw new UnsupportedOperationException(s"Unsupported flink version: $version")
@@ -140,7 +152,7 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
   def checkVersion(sinceVersion: Int): Boolean = {
     version.split("\\.").map(_.trim.toInt) match {
       case Array(1, v, _) if v >= sinceVersion => true
-      case Array(2, v, _) if v >= sinceVersion => true
+      case Array(2, _, _) => true
       case _ => false
     }
   }
