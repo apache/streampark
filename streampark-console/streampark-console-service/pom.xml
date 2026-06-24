@@ -587,27 +587,6 @@
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
-                        <!-- flink 2.0 support-->
-                        <dependency>
-                            <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-2.0_${scala.binary.version}</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
-                        <!-- flink 2.1 support-->
-                        <dependency>
-                            <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-2.1_${scala.binary.version}</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
-                        <!-- flink 2.2 support-->
-                        <dependency>
-                            <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-2.2_${scala.binary.version}</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
                         <!-- flink-submit-core -->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
@@ -801,6 +780,53 @@
             <properties>
                 <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
+        </profile>
+
+        <!-- Flink 2.x shims require JDK 11+ to compile and package -->
+        <profile>
+            <id>flink-2.x-shims</id>
+            <activation>
+                <jdk>[11,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-flink-2.x-shims</id>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <phase>package</phase>
+                                <configuration>
+                                    <artifactItems>
+                                        <dependency>
+                                            <groupId>org.apache.streampark</groupId>
+                                            <artifactId>streampark-flink-shims_flink-2.0_${scala.binary.version}</artifactId>
+                                            <version>${project.version}</version>
+                                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                                        </dependency>
+                                        <dependency>
+                                            <groupId>org.apache.streampark</groupId>
+                                            <artifactId>streampark-flink-shims_flink-2.1_${scala.binary.version}</artifactId>
+                                            <version>${project.version}</version>
+                                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                                        </dependency>
+                                        <dependency>
+                                            <groupId>org.apache.streampark</groupId>
+                                            <artifactId>streampark-flink-shims_flink-2.2_${scala.binary.version}</artifactId>
+                                            <version>${project.version}</version>
+                                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                                        </dependency>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
     </profiles>

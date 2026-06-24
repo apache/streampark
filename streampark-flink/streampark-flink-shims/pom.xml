@@ -41,9 +41,21 @@
         <module>streampark-flink-shims_flink-1.18</module>
         <module>streampark-flink-shims_flink-1.19</module>
         <module>streampark-flink-shims_flink-1.20</module>
-        <module>streampark-flink-shims_flink-2.0</module>
-        <module>streampark-flink-shims_flink-2.1</module>
-        <module>streampark-flink-shims_flink-2.2</module>
     </modules>
+
+    <profiles>
+        <!-- Flink 2.x APIs require JDK 11+ to compile against -->
+        <profile>
+            <id>flink-2.x-shims</id>
+            <activation>
+                <jdk>[11,)</jdk>
+            </activation>
+            <modules>
+                <module>streampark-flink-shims_flink-2.0</module>
+                <module>streampark-flink-shims_flink-2.1</module>
+                <module>streampark-flink-shims_flink-2.2</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
