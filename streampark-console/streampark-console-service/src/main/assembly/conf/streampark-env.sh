@@ -38,3 +38,7 @@
 # The java implementation to use. By default, this environment
 # variable is REQUIRED on ALL platforms except OS X!
 # export JAVA_HOME=
+
+# Spark 4.x requires JDK 17+ for job submission. StreamPark resolves JAVA_HOME from each Spark
+# installation's conf/spark-env.sh automatically. Configure JAVA_HOME there when auto-detection
+# fails. See script/SPARK_JDK_GUIDE.md for details.

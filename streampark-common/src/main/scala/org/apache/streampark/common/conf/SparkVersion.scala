@@ -17,10 +17,13 @@
 
 package org.apache.streampark.common.conf
 
-import org.apache.streampark.common.util.{CommandUtils, Logger}
+import org.apache.streampark.common.util.{CommandUtils, Logger, SparkEnvUtils}
 import org.apache.streampark.common.util.Implicits._
 
+import org.apache.commons.io.FileUtils
+
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
@@ -35,10 +38,115 @@ class SparkVersion(val sparkHome: String) extends Serializable with Logger {
 
   private[this] lazy val SPARK_SCALA_VERSION_PATTERN = Pattern.compile("Using\\sScala\\sversion\\s(\\d+\\.\\d+)")
 
+  private[this] lazy val SPARK_RELEASE_VERSION_PATTERN = Pattern.compile("^Spark\\s+(\\d+\\.\\d+\\.\\d+)")
+
+  private[this] lazy val SPARK_CORE_JAR_PATTERN =
+    Pattern.compile("^spark-core_(\\d+\\.\\d+)-(\\d+\\.\\d+\\.\\d+)\\.jar$")
+
   val (version, scalaVersion) = {
+    parseFromSparkCoreJar()
+      .orElse(parseFromReleaseFile())
+      .orElse(parseFromSparkSubmit())
+      .getOrElse(
+        throw new IllegalStateException(
+          s"[StreamPark] parse spark version failed for sparkHome: $sparkHome. " +
+            "Please check whether $SPARK_HOME/jars/spark-core_*.jar or RELEASE exists."))
+  }
+
+  lazy val majorVersion: String = {
+    if (version == null) {
+      null
+    } else {
+      val matcher = SPARK_VER_PATTERN.matcher(version)
+      matcher.matches()
+      matcher.group(1)
+    }
+  }
+
+  lazy val fullVersion: String = s"${version}_$scalaVersion"
+
+  /** Resolved JAVA_HOME for Spark CLI and SparkLauncher, based on spark-env.sh or auto-detection. */
+  lazy val javaHome: Option[String] = SparkEnvUtils.resolveJavaHome(sparkHome, version)
+
+  lazy val sparkLib: File = {
+    require(sparkHome != null, "[StreamPark] sparkHome must not be null.")
+    require(new File(sparkHome).exists(), "[StreamPark] sparkHome must be exists.")
+    val lib = new File(s"$sparkHome/jars")
+    require(
+      lib.exists() && lib.isDirectory,
+      s"[StreamPark] $sparkHome/jars must be exists and must be directory.")
+    lib
+  }
+
+  def checkVersion(throwException: Boolean = true): Boolean = {
+    version.split("\\.").map(_.trim.toInt) match {
+      case Array(v, _, _) if v == 2 || v == 3 || v == 4 => true
+      case _ =>
+        if (throwException) {
+          throw new UnsupportedOperationException(s"Unsupported spark version: $version")
+        } else {
+          false
+        }
+    }
+  }
+
+  private def parseFromSparkCoreJar(): Option[(String, String)] = {
+    val jarsDir = new File(s"$sparkHome/jars")
+    if (!jarsDir.exists() || !jarsDir.isDirectory) {
+      None
+    } else {
+      jarsDir.listFiles().collectFirst {
+        case file if SPARK_CORE_JAR_PATTERN.matcher(file.getName).matches() =>
+          val matcher = SPARK_CORE_JAR_PATTERN.matcher(file.getName)
+          matcher.matches()
+          val parsed = matcher.group(2) -> matcher.group(1)
+          logInfo(s"Spark version parsed from spark-core jar name: ${parsed._1}, scala: ${parsed._2}")
+          parsed
+      }
+    }
+  }
+
+  private def parseFromReleaseFile(): Option[(String, String)] = {
+    val releaseFile = new File(s"$sparkHome/RELEASE")
+    if (!releaseFile.exists()) {
+      None
+    } else {
+      val firstLine = FileUtils.readFileToString(releaseFile, StandardCharsets.UTF_8).trim.split("\n").headOption.getOrElse("")
+      val matcher = SPARK_RELEASE_VERSION_PATTERN.matcher(firstLine)
+      if (matcher.find()) {
+        parseFromSparkCoreJar().map { case (_, scalaVer) =>
+          val parsed = matcher.group(1) -> scalaVer
+          logInfo(s"Spark version parsed from RELEASE file: ${parsed._1}, scala: ${parsed._2}")
+          parsed
+        }
+      } else {
+        None
+      }
+    }
+  }
+
+  private def hintSparkVersion(): String = {
+    parseFromSparkCoreJar().map(_._1).orElse {
+      val releaseFile = new File(s"$sparkHome/RELEASE")
+      if (!releaseFile.exists()) {
+        None
+      } else {
+        val firstLine =
+          FileUtils.readFileToString(releaseFile, StandardCharsets.UTF_8).trim.split("\n").headOption.getOrElse("")
+        val matcher = SPARK_RELEASE_VERSION_PATTERN.matcher(firstLine)
+        if (matcher.find()) Some(matcher.group(1)) else None
+      }
+    }.getOrElse("3.0.0")
+  }
+
+  private def parseFromSparkSubmit(): Option[(String, String)] = {
     var sparkVersion: String = null
     var scalaVersion: String = null
-    val cmd = List(s"export SPARK_HOME=$sparkHome&&$sparkHome/bin/spark-submit --version")
+    val javaHomeExport = SparkEnvUtils
+      .resolveJavaHome(sparkHome, hintSparkVersion())
+      .map(javaHome => s"export JAVA_HOME=$javaHome&&")
+      .getOrElse("")
+    val cmd = List(s"export SPARK_HOME=$sparkHome&&${javaHomeExport}$sparkHome/bin/spark-submit --version")
     val buffer = new mutable.StringBuilder
 
     CommandUtils.execute(
@@ -60,44 +168,12 @@ class SparkVersion(val sparkHome: String) extends Serializable with Logger {
       })
 
     logInfo(buffer.toString())
-    if (sparkVersion == null || scalaVersion == null) {
-      throw new IllegalStateException(s"[StreamPark] parse spark version failed. $buffer")
-    }
-    buffer.clear()
-    (sparkVersion, scalaVersion)
-  }
-
-  lazy val majorVersion: String = {
-    if (version == null) {
-      null
+    if (sparkVersion != null && scalaVersion != null) {
+      logInfo(s"Spark version parsed from spark-submit: $sparkVersion, scala: $scalaVersion")
+      buffer.clear()
+      Some(sparkVersion -> scalaVersion)
     } else {
-      val matcher = SPARK_VER_PATTERN.matcher(version)
-      matcher.matches()
-      matcher.group(1)
-    }
-  }
-
-  lazy val fullVersion: String = s"${version}_$scalaVersion"
-
-  lazy val sparkLib: File = {
-    require(sparkHome != null, "[StreamPark] sparkHome must not be null.")
-    require(new File(sparkHome).exists(), "[StreamPark] sparkHome must be exists.")
-    val lib = new File(s"$sparkHome/jars")
-    require(
-      lib.exists() && lib.isDirectory,
-      s"[StreamPark] $sparkHome/lib must be exists and must be directory.")
-    lib
-  }
-
-  def checkVersion(throwException: Boolean = true): Boolean = {
-    version.split("\\.").map(_.trim.toInt) match {
-      case Array(v, _, _) if v == 2 || v == 3 => true
-      case _ =>
-        if (throwException) {
-          throw new UnsupportedOperationException(s"Unsupported spark version: $version")
-        } else {
-          false
-        }
+      None
     }
   }
 
@@ -107,6 +183,7 @@ class SparkVersion(val sparkHome: String) extends Serializable with Logger {
        |     sparkHome    : $sparkHome
        |     sparkVersion : $version
        |     scalaVersion : $scalaVersion
+       |     javaHome       : ${javaHome.getOrElse("not resolved")}
        |-------------------------------------------------------------------------------------------
        |""".stripMargin
 

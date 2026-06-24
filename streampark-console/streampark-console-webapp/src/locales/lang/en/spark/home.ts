@@ -27,7 +27,7 @@ export default {
     setDefault: 'Successfully set the default spark home.',
     sparkName: 'Spark alias, for example: Spark-1.12',
     sparkHome:
-      'The absolute path of the server where Spark is located, for example: /usr/local/spark',
+      'The absolute path of the server where Spark is located, for example: /usr/local/spark. Spark 4.x requires JDK 17+. StreamPark service JDK upgrade is usually not required. See script/SPARK_JDK_GUIDE.md in the installation package.',
     sparkNameIsRequired: 'Spark name is required',
     sparkHomeIsRequired: 'Spark Home is required',
     sparkNameIsRepeated: 'Spark name already exists',
