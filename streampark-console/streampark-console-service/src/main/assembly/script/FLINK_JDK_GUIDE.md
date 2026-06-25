@@ -16,10 +16,12 @@ Flink 2.x introduces a higher JDK requirement for both **building** and **runnin
 ## What StreamPark Does Automatically
 
 1. **Flink environment registration**
-   - Parses Flink version from `$FLINK_HOME/lib/flink-dist*.jar` or falls back to
-     `flink-dist --version`.
+   - Parses Flink version from `$FLINK_HOME/lib/flink-dist*.jar` first (no Flink CLI required when Console runs on JDK 8).
+   - Falls back to `CliFrontend --version` only when the JAR name cannot be parsed (uses `JAVA_HOME` from `$FLINK_HOME/conf/flink-env.sh`).
    - Registration does not require StreamPark to be built with Flink 2.x shims.
-2. **Flink 2.x shims packaging**
+2. **Flink 2.x job submission**
+   - Resolves `JAVA_HOME` from `$FLINK_HOME/conf/flink-env.sh` via `FlinkEnvUtils` and applies it as Flink `env.java.home` for cluster-side JVMs.
+3. **Flink 2.x shims packaging**
    - Flink 2.0/2.1/2.2 shims are packaged only when StreamPark is **built with JDK 11+**
      (Maven profile `flink-2.x-shims`).
 

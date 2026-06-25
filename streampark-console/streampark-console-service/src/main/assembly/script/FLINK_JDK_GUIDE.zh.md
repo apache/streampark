@@ -16,10 +16,12 @@ Flink 作业提出了更高的 JDK 要求。
 ## StreamPark 自动处理的内容
 
 1. **注册 Flink 环境**
-   - 从 `$FLINK_HOME/lib/flink-dist*.jar` 解析版本，或 fallback 到
-     `flink-dist --version`。
+   - 优先从 `$FLINK_HOME/lib/flink-dist*.jar` 文件名解析版本（Console 运行在 JDK 8 时无需执行 Flink CLI）。
+   - 仅在无法从 JAR 名解析时，才 fallback 到 `CliFrontend --version`（此时会使用 `$FLINK_HOME/conf/flink-env.sh` 中的 `JAVA_HOME`）。
    - 注册 Flink 环境不要求 StreamPark 发行包中已包含 Flink 2.x shims。
-2. **Flink 2.x shims 打包**
+2. **提交 Flink 2.x 作业**
+   - 通过 `FlinkEnvUtils` 解析 `$FLINK_HOME/conf/flink-env.sh` 中的 `JAVA_HOME`，并写入 Flink 配置项 `env.java.home`，供集群侧 JVM 使用。
+3. **Flink 2.x shims 打包**
    - 仅当 StreamPark 使用 **JDK 11+** 构建时，才会打包 Flink 2.0/2.1/2.2 shims
      （Maven profile：`flink-2.x-shims`）。
 

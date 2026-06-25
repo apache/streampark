@@ -139,20 +139,49 @@ object ClassLoaderUtils extends Logger {
 
   @throws[Exception]
   private[this] def addURL(file: File): Unit = {
-    val classLoader = ClassLoader.getSystemClassLoader
+    val url = file.toURI.toURL
+    val classLoaders = Seq(
+      Option(Thread.currentThread().getContextClassLoader),
+      Option(ClassLoader.getSystemClassLoader)).flatten.distinct
+
+    var lastError: Exception = null
+    classLoaders.foreach { classLoader =>
+      try {
+        addURLToClasspath(classLoader, url)
+        return
+      } catch {
+        case e: Exception => lastError = e
+      }
+    }
+    throw lastError
+  }
+
+  private[this] def addURLToClasspath(classLoader: ClassLoader, url: URL): Unit = {
     classLoader match {
-      case c if c.isInstanceOf[URLClassLoader] =>
-        val addURL = classOf[URLClassLoader].getDeclaredMethod("addURL", Array(classOf[URL]): _*)
+      case urlClassLoader: URLClassLoader =>
+        val addURL =
+          classOf[URLClassLoader].getDeclaredMethod("addURL", Array(classOf[URL]): _*)
         addURL.setAccessible(true)
-        addURL.invoke(c, file.toURI.toURL)
+        addURL.invoke(urlClassLoader, url)
       case _ =>
-        val field = classLoader.getClass.getDeclaredField("ucp")
-        field.setAccessible(true)
-        val ucp = field.get(classLoader)
+        var clazz: Class[_] = classLoader.getClass
+        var ucpField: java.lang.reflect.Field = null
+        while (clazz != null && ucpField == null) {
+          try {
+            ucpField = clazz.getDeclaredField("ucp")
+          } catch {
+            case _: NoSuchFieldException => clazz = clazz.getSuperclass
+          }
+        }
+        if (ucpField == null) {
+          throw new NoSuchFieldException("ucp")
+        }
+        ucpField.setAccessible(true)
+        val ucp = ucpField.get(classLoader)
         val addURL =
           ucp.getClass.getDeclaredMethod("addURL", Array(classOf[URL]): _*)
         addURL.setAccessible(true)
-        addURL.invoke(ucp, file.toURI.toURL)
+        addURL.invoke(ucp, url)
     }
   }
 }

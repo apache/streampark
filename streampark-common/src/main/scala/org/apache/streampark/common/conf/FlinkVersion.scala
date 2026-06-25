@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.conf
 
-import org.apache.streampark.common.util.{CommandUtils, Logger}
+import org.apache.streampark.common.util.{CommandUtils, FlinkEnvUtils, Logger}
 import org.apache.streampark.common.util.Implicits._
 
 import java.io.File
@@ -34,28 +34,15 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
 
   private[this] lazy val FLINK_VERSION_PATTERN = Pattern.compile("^Version: (.*), Commit ID: (.*)$")
 
-  private[this] lazy val FLINK_DIST_VERSION_PATTERN = Pattern.compile(
-    "^flink-dist_(\\d+\\.\\d+).*\\.jar$|^flink-dist-(\\d+\\.\\d+\\.\\d+)\\.jar$")
-
   private[this] lazy val APACHE_FLINK_VERSION_PATTERN = Pattern.compile("(^\\d+\\.\\d+\\.\\d+)")
 
   private[this] lazy val OTHER_FLINK_VERSION_PATTERN = Pattern.compile("(\\d+\\.\\d+)(-*)")
 
-  lazy val scalaVersion: String = {
-    val matcher = FLINK_DIST_VERSION_PATTERN.matcher(flinkDistJar.getName)
-    if (matcher.matches()) {
-      if (matcher.group(1) != null) {
-        matcher.group(1)
-      } else {
-        // flink 2.x doesn't have scala version in jar name, default to 2.12
-        "2.12"
-      }
-    } else {
-      "2.12"
-    }
-  }
+  private[this] lazy val FLINK_DIST_UNDERSCORE_PATTERN =
+    Pattern.compile("^flink-dist_(\\d+\\.\\d+)-(\\d+\\.\\d+(?:\\.\\d+)?(?:-SNAPSHOT)?)\\.jar$")
 
-  lazy val fullVersion: String = s"${version}_$scalaVersion"
+  private[this] lazy val FLINK_DIST_DASH_PATTERN =
+    Pattern.compile("^flink-dist-(\\d+\\.\\d+(?:\\.\\d+)?(?:-SNAPSHOT)?)\\.jar$")
 
   lazy val flinkLib: File = {
     require(flinkHome != null, "[StreamPark] flinkHome must not be null.")
@@ -65,62 +52,6 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
       lib.exists() && lib.isDirectory,
       s"[StreamPark] $flinkHome/lib must be exists and must be directory.")
     lib
-  }
-
-  lazy val flinkLibs: List[URL] = flinkLib.listFiles().map(_.toURI.toURL).toList
-
-  lazy val version: String = {
-    val cmd = List(
-      s"java -classpath ${flinkDistJar.getName} org.apache.flink.client.cli.CliFrontend --version")
-    var flinkVersion: String = null
-    val buffer = new mutable.StringBuilder
-    CommandUtils.execute(
-      flinkLib.getAbsolutePath,
-      cmd,
-      new Consumer[String]() {
-        override def accept(out: String): Unit = {
-          buffer.append(out).append("\n")
-          val matcher = FLINK_VERSION_PATTERN.matcher(out)
-          if (matcher.find) {
-            val version = matcher.group(1)
-            val matcher1 = APACHE_FLINK_VERSION_PATTERN.matcher(version)
-            if (matcher1.find) {
-              flinkVersion = version
-            } else {
-              val matcher2 = OTHER_FLINK_VERSION_PATTERN.matcher(version)
-              if (matcher2.find) {
-                flinkVersion = version
-              }
-            }
-          }
-        }
-      })
-
-    logInfo(buffer.toString())
-    if (flinkVersion == null) {
-      // Fallback: parse version from flink-dist JAR filename (e.g. flink-dist-2.2.1.jar)
-      val distMatcher = FLINK_DIST_VERSION_PATTERN.matcher(flinkDistJar.getName)
-      if (distMatcher.matches() && distMatcher.group(2) != null) {
-        flinkVersion = distMatcher.group(2)
-        logInfo(s"Flink version parsed from dist jar name: $flinkVersion")
-      }
-    }
-    if (flinkVersion == null) {
-      throw new IllegalStateException(s"[StreamPark] parse flink version failed. $buffer")
-    }
-    buffer.clear()
-    flinkVersion
-  }
-
-  // flink major version, like "1.13", "1.14"
-  lazy val majorVersion: String = {
-    if (version == null) {
-      null
-    } else {
-      val matcher = FLINK_VER_PATTERN.matcher(version)
-      matcher.matches()
-      matcher.group(1)
-    }
   }
 
   lazy val flinkDistJar: File = {
@@ -134,6 +65,37 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
       case _ =>
     }
     distJar.head
+  }
+
+  lazy val flinkLibs: List[URL] = flinkLib.listFiles().map(_.toURI.toURL).toList
+
+  private lazy val parsedVersion: (String, String) = {
+    parseFromDistJar()
+      .orElse(parseFromCliFrontend())
+      .getOrElse(
+        throw new IllegalStateException(
+          s"[StreamPark] parse flink version failed for flinkHome: $flinkHome. " +
+            "Please check whether $FLINK_HOME/lib/flink-dist*.jar exists."))
+  }
+
+  lazy val version: String = parsedVersion._1
+
+  lazy val scalaVersion: String = parsedVersion._2
+
+  lazy val fullVersion: String = s"${version}_$scalaVersion"
+
+  /** Resolved JAVA_HOME for Flink CLI and cluster-side JVM options. */
+  lazy val javaHome: Option[String] = FlinkEnvUtils.resolveJavaHome(flinkHome, version)
+
+  // flink major version, like "1.13", "2.2"
+  lazy val majorVersion: String = {
+    if (version == null) {
+      null
+    } else {
+      val matcher = FLINK_VER_PATTERN.matcher(version)
+      matcher.matches()
+      matcher.group(1)
+    }
   }
 
   def checkVersion(throwException: Boolean = true): Boolean = {
@@ -159,6 +121,72 @@ class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
 
   // StreamPark flink shims version, like "streampark-flink-shims_flink-1.13"
   private lazy val shimsVersion: String = s"streampark-flink-shims_flink-$majorVersion"
+
+  private def parseFromDistJar(): Option[(String, String)] = {
+    val jarName = flinkDistJar.getName
+    val underscoreMatcher = FLINK_DIST_UNDERSCORE_PATTERN.matcher(jarName)
+    if (underscoreMatcher.matches()) {
+      val parsed = underscoreMatcher.group(2) -> underscoreMatcher.group(1)
+      logInfo(s"Flink version parsed from dist jar name: ${parsed._1}, scala: ${parsed._2}")
+      Some(parsed)
+    } else {
+      val dashMatcher = FLINK_DIST_DASH_PATTERN.matcher(jarName)
+      if (dashMatcher.matches()) {
+        val parsed = dashMatcher.group(1) -> "2.12"
+        logInfo(s"Flink version parsed from dist jar name: ${parsed._1}, scala: ${parsed._2}")
+        Some(parsed)
+      } else {
+        None
+      }
+    }
+  }
+
+  private def hintFlinkVersion(): String = parseFromDistJar().map(_._1).getOrElse("1.20.0")
+
+  private def parseFromCliFrontend(): Option[(String, String)] = {
+    var flinkVersion: String = null
+    val buffer = new mutable.StringBuilder
+    val javaHomeExport = FlinkEnvUtils
+      .resolveJavaHome(flinkHome, hintFlinkVersion())
+      .map(javaHome => s"export JAVA_HOME=$javaHome&&")
+      .getOrElse("")
+    val javaCmd = FlinkEnvUtils
+      .resolveJavaHome(flinkHome, hintFlinkVersion())
+      .map(_ + "/bin/java")
+      .getOrElse("java")
+    val cmd = List(
+      s"${javaHomeExport}$javaCmd -classpath ${flinkDistJar.getName} org.apache.flink.client.cli.CliFrontend --version")
+    CommandUtils.execute(
+      flinkLib.getAbsolutePath,
+      cmd,
+      new Consumer[String]() {
+        override def accept(out: String): Unit = {
+          buffer.append(out).append("\n")
+          val matcher = FLINK_VERSION_PATTERN.matcher(out)
+          if (matcher.find) {
+            val parsedVersion = matcher.group(1)
+            val matcher1 = APACHE_FLINK_VERSION_PATTERN.matcher(parsedVersion)
+            if (matcher1.find) {
+              flinkVersion = parsedVersion
+            } else {
+              val matcher2 = OTHER_FLINK_VERSION_PATTERN.matcher(parsedVersion)
+              if (matcher2.find) {
+                flinkVersion = parsedVersion
+              }
+            }
+          }
+        }
+      })
+
+    logInfo(buffer.toString())
+    if (flinkVersion == null) {
+      None
+    } else {
+      val scalaVer = parseFromDistJar().map(_._2).getOrElse("2.12")
+      logInfo(s"Flink version parsed from CliFrontend: $flinkVersion, scala: $scalaVer")
+      Some(flinkVersion -> scalaVer)
+    }
+  }
 
   override def toString: String =
     s"""
