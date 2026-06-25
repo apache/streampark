@@ -204,11 +204,6 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
         assertThatThrownBy(() -> savepointServiceImpl.getSavepointFromDeployLayer(application))
             .isInstanceOf(NullPointerException.class);
 
-        // Ignored.
-        // Test for it with empty config
-        // Test for it with the configured empty target value
-        // Test for it with the configured non-empty target value
-
     }
 
     private FlinkSavepoint latestSavepoint(Long appId, String path, Date triggerTime) {
