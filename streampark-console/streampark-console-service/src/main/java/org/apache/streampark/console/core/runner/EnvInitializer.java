@@ -156,9 +156,7 @@ public class EnvInitializer implements ApplicationRunner {
 
     private static void createMvnLocalRepoDir() {
         String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
-        if (FsOperator.lfs().exists(localMavenRepo)) {
-            FsOperator.lfs().mkdirs(localMavenRepo);
-        }
+        FsOperator.lfs().mkdirsIfNotExists(localMavenRepo);
     }
 
     private void uploadClientJar(Workspace workspace, FsOperator fsOperator) {
