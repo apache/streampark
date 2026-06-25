@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.YarnUtils;
@@ -29,6 +30,7 @@ import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
+import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
@@ -60,6 +62,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -89,6 +92,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Autowired
     private YarnQueueService yarnQueueService;
+
+    @Autowired
+    private SettingService settingService;
 
     @Autowired
     private FlinkClusterWatcher flinkClusterWatcher;
@@ -179,9 +185,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                 flinkCluster.setJobManagerUrl(deployResponse.address());
             } else {
                 flinkCluster.setAddress(deployResponse.address());
+                flinkCluster.setJobManagerUrl(deployResponse.address());
             }
             flinkCluster.setClusterId(deployResponse.clusterId());
-            flinkCluster.setClusterState(ClusterState.RUNNING.getState());
+            flinkCluster.setClusterState(ClusterState.STARTING.getState());
             flinkCluster.setException(null);
             flinkCluster.setEndTime(null);
             updateById(flinkCluster);
@@ -421,16 +428,24 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     private DeployResponse deployInternal(FlinkCluster flinkCluster) throws InterruptedException, ExecutionException, TimeoutException {
+
+        Map<String, Object> properties = flinkCluster.getProperties();
+        if (FlinkDeployMode.isKubernetesMode(flinkCluster.getDeployMode())) {
+            String ingressMode = settingService.getIngressModeDefault();
+            if (StringUtils.isNotBlank(ingressMode)) {
+                properties.putIfAbsent(ConfigKeys.STREAMPARK_INGRESS_MODE(), ingressMode);
+            }
+        }
         DeployRequest deployRequest = new DeployRequest(
             flinkEnvService.getById(flinkCluster.getVersionId()).getFlinkVersion(),
             flinkCluster.getFlinkDeployModeEnum(),
-            flinkCluster.getProperties(),
+            properties,
             flinkCluster.getClusterId(),
             flinkCluster.getId(),
             getKubernetesDeployDesc(flinkCluster, "start"));
         log.info("Deploy cluster request {}", deployRequest);
         Future<DeployResponse> future = executorService.submit(() -> FlinkClient.deploy(deployRequest));
-        return future.get(60, TimeUnit.SECONDS);
+        return future.get(5, TimeUnit.MINUTES);
     }
 
     private void checkActiveIfNeeded(FlinkCluster flinkCluster) {

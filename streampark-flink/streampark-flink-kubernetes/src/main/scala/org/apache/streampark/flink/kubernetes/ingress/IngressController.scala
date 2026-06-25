@@ -20,7 +20,7 @@ package org.apache.streampark.flink.kubernetes.ingress
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Logger
 
-import org.apache.flink.client.program.ClusterClient
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.DefaultKubernetesClient
 
 object IngressController extends Logger {
@@ -39,15 +39,19 @@ object IngressController extends Logger {
     }
   }
 
-  def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
-    ingressStrategy.configureIngress(domainName, clusterId, nameSpace)
+  def configureIngress(domainName: String, clusterId: String, nameSpace: String, flinkConfig: Configuration): String = {
+    ingressStrategy.configureIngress(domainName, clusterId, nameSpace, flinkConfig)
+  }
+
+  def deleteIngress(clusterId: String, nameSpace: String, flinkConfig: Configuration): Unit = {
+    ingressStrategy.deleteIngress(clusterId, nameSpace, flinkConfig)
   }
 
   def getIngressUrlAddress(
       nameSpace: String,
       clusterId: String,
-      clusterClient: ClusterClient[_]): String = {
-    ingressStrategy.getIngressUrl(nameSpace, clusterId, clusterClient)
+      flinkConfig: Configuration): Option[String] = {
+    ingressStrategy.getIngressUrl(nameSpace, clusterId, flinkConfig)
   }
 
   def prepareIngressTemplateFiles(buildWorkspace: String, ingressTemplates: String): String = {

@@ -17,9 +17,11 @@
 
 package org.apache.streampark.flink.client.impl
 
+import org.apache.streampark.common.conf.ConfigKeys
 import org.apache.streampark.common.enums.FlinkDeployMode
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
+import org.apache.streampark.flink.kubernetes.ingress.IngressController
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
 
 import com.google.common.collect.Lists
@@ -41,8 +43,10 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     // require parameters
     require(
       StringUtils.isNotBlank(submitRequest.clusterId),
-      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig
-          .get(DeploymentOptions.TARGET)}")
+      s"[flink-submit] submit flink job failed, clusterId is null, mode=${
+          flinkConfig
+            .get(DeploymentOptions.TARGET)
+        }")
 
     // check the last building result
     submitRequest.checkBuildResult()
@@ -69,11 +73,18 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
       .getClusterClient
 
     val clusterId = clusterClient.getClusterId
+
+    var webInterfaceURL = clusterClient.getWebInterfaceURL
+    val ingressDomain = flinkConfig.getString(ConfigKeys.STREAMPARK_INGRESS_MODE, "")
+    if (StringUtils.isNotBlank(ingressDomain)) {
+      webInterfaceURL = IngressController.configureIngress(ingressDomain, clusterId, submitRequest.kubernetesNamespace, flinkConfig)
+    }
+
     val result = SubmitResponse(
       clusterId,
       flinkConfig.toMap,
       submitRequest.jobId,
-      clusterClient.getWebInterfaceURL)
+      webInterfaceURL)
     logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
 
     closeSubmit(submitRequest, clusterDescriptor, clusterClient)
@@ -90,6 +101,7 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
       (jobId, client) => {
         val resp = super.cancelJob(cancelRequest, jobId, client)
         client.shutDownCluster()
+        IngressController.deleteIngress(cancelRequest.clusterId, cancelRequest.kubernetesNamespace, flinkConf)
         CancelResponse(resp)
       })
   }
