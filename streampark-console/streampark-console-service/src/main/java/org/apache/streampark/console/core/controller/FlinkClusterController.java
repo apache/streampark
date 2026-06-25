@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -48,30 +49,35 @@ public class FlinkClusterController {
     private FlinkClusterService flinkClusterService;
 
     @PostMapping("page")
+    @RequiresPermissions(value = {"cluster:create", "cluster:update"}, logical = Logical.OR)
     public RestResponse findPage(FlinkCluster flinkCluster, RestRequest restRequest) {
         IPage<FlinkCluster> flinkClusters = flinkClusterService.findPage(flinkCluster, restRequest);
         return RestResponse.success(flinkClusters);
     }
 
     @PostMapping("alive")
+    @RequiresPermissions(value = {"cluster:create", "cluster:update", "app:add", "app:update"}, logical = Logical.OR)
     public RestResponse listAvailableCluster() {
         List<FlinkCluster> flinkClusters = flinkClusterService.listAvailableCluster();
         return RestResponse.success(flinkClusters);
     }
 
     @PostMapping("list")
+    @RequiresPermissions(value = {"cluster:create", "cluster:update", "app:add", "app:update"}, logical = Logical.OR)
     public RestResponse list() {
         List<FlinkCluster> flinkClusters = flinkClusterService.list();
         return RestResponse.success(flinkClusters);
     }
 
     @PostMapping("remote_url")
+    @RequiresPermissions(value = {"cluster:create", "cluster:update"}, logical = Logical.OR)
     public RestResponse remoteUrl(Long id) {
         FlinkCluster cluster = flinkClusterService.getById(id);
         return RestResponse.success(cluster.getAddress());
     }
 
     @PostMapping("check")
+    @RequiresPermissions(value = {"cluster:create", "cluster:update"}, logical = Logical.OR)
     public RestResponse check(FlinkCluster cluster) {
         ResponseResult checkResult = flinkClusterService.check(cluster);
         return RestResponse.success(checkResult);
@@ -93,12 +99,14 @@ public class FlinkClusterController {
     }
 
     @PostMapping("get")
+    @RequiresPermissions(value = {"cluster:create", "cluster:update"}, logical = Logical.OR)
     public RestResponse get(Long id) throws InternalException {
         FlinkCluster cluster = flinkClusterService.getById(id);
         return RestResponse.success(cluster);
     }
 
     @PostMapping("start")
+    @RequiresPermissions("cluster:update")
     public RestResponse start(FlinkCluster cluster) {
         flinkClusterService.updateClusterState(cluster.getId(), ClusterState.STARTING);
         flinkClusterService.start(cluster);
@@ -106,6 +114,7 @@ public class FlinkClusterController {
     }
 
     @PostMapping("shutdown")
+    @RequiresPermissions("cluster:update")
     public RestResponse shutdown(FlinkCluster cluster) {
         if (flinkClusterService.allowShutdownCluster(cluster)) {
             flinkClusterService.updateClusterState(cluster.getId(), ClusterState.CANCELLING);
@@ -115,6 +124,7 @@ public class FlinkClusterController {
     }
 
     @PostMapping("delete")
+    @RequiresPermissions("cluster:update")
     public RestResponse delete(FlinkCluster cluster) {
         flinkClusterService.remove(cluster.getId());
         return RestResponse.success();

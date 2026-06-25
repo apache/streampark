@@ -23,6 +23,7 @@ import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.service.VariableService;
 
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -75,6 +76,7 @@ public class VariableController {
      * @return
      */
     @PostMapping("list")
+    @RequiresPermissions("variable:view")
     public RestResponse variableList(@RequestParam Long teamId, String keyword) {
         List<Variable> variableList = variableService.listByTeamId(teamId, keyword);
         for (Variable v : variableList) {
@@ -119,6 +121,7 @@ public class VariableController {
     }
 
     @PostMapping("check/code")
+    @RequiresPermissions(value = {"variable:view", "variable:add", "variable:update"}, logical = Logical.OR)
     public RestResponse checkVariableCode(
                                           @RequestParam Long teamId,
                                           @NotBlank(message = "{required}") String variableCode) {
