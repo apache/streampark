@@ -228,7 +228,11 @@ object K8sDeploymentEventCache {
 class MetricCache {
 
   private[this] lazy val cache: Cache[ClusterKey, FlinkMetricCV] =
-    Caffeine.newBuilder().build()
+    Caffeine
+      .newBuilder()
+      .expireAfterWrite(6, TimeUnit.HOURS)
+      .maximumSize(10_000)
+      .build()
 
   def put(k: ClusterKey, v: FlinkMetricCV): Unit = cache.put(k, v)
 
