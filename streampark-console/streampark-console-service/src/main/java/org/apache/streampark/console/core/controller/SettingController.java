@@ -56,6 +56,7 @@ public class SettingController {
     }
 
     @PostMapping("get")
+    @RequiresPermissions("setting:view")
     public RestResponse get(String key) {
         Setting setting = settingService.get(key);
         return RestResponse.success(setting);
@@ -111,6 +112,7 @@ public class SettingController {
     }
 
     @PostMapping("check/hadoop")
+    @RequiresPermissions("setting:view")
     public RestResponse checkHadoop() throws IOException {
         HadoopUtils.hdfs().getStatus();
         return RestResponse.success(true);
