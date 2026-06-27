@@ -70,6 +70,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /** This implementation is currently used for tracing flink job on yarn,standalone,remote mode */
@@ -130,6 +131,9 @@ public class FlinkAppHttpWatcher {
 
     /** tracking task list */
     private static final Map<Long, FlinkApplication> WATCHING_APPS = new ConcurrentHashMap<>(0);
+
+    /** Skip scheduling a new watch while a previous watch for the same app is still running. */
+    private static final Map<Long, AtomicBoolean> WATCH_IN_FLIGHT = new ConcurrentHashMap<>(0);
 
     /**
      *
@@ -215,6 +219,10 @@ public class FlinkAppHttpWatcher {
     }
 
     private void watch(Long id, FlinkApplication application) {
+        AtomicBoolean inFlight = WATCH_IN_FLIGHT.computeIfAbsent(id, ignored -> new AtomicBoolean(false));
+        if (!inFlight.compareAndSet(false, true)) {
+            return;
+        }
         watchExecutor.execute(
             () -> {
                 try {
@@ -229,6 +237,8 @@ public class FlinkAppHttpWatcher {
                     } catch (Exception yarnException) {
                         doStateFailed(application);
                     }
+                } finally {
+                    inFlight.set(false);
                 }
             });
     }
@@ -700,6 +710,7 @@ public class FlinkAppHttpWatcher {
         }
         log.info("[StreamPark][FlinkAppHttpWatcher] stop app,appId:{}", appId);
         WATCHING_APPS.remove(appId);
+        WATCH_IN_FLIGHT.remove(appId);
     }
 
     public static void stopCanceledJob(Long appId) {
