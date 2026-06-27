@@ -103,7 +103,7 @@ public class FlinkClusterWatcher {
         flinkClusters.forEach(cluster -> WATCHER_CLUSTERS.put(cluster.getId(), cluster));
     }
 
-    @Scheduled(fixedDelay = 1, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 30, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     private void start() {
         Long timeMillis = System.currentTimeMillis();
         if (immediateWatch || timeMillis - lastWatchTime >= WATCHER_INTERVAL.toMillis()) {

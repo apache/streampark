@@ -62,6 +62,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Component
@@ -100,6 +101,8 @@ public class SparkAppHttpWatcher {
 
     /** tracking task list */
     private static final Map<Long, SparkApplication> WATCHING_APPS = new ConcurrentHashMap<>(0);
+
+    private static final Map<Long, AtomicBoolean> WATCH_IN_FLIGHT = new ConcurrentHashMap<>(0);
 
     /**
      *
@@ -153,16 +156,25 @@ public class SparkAppHttpWatcher {
      *
      * <p><strong>2) Normal information obtain, once every 5 seconds</strong>
      */
-    @Scheduled(fixedDelay = 1, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
-    public void start() {
-        Long timeMillis = System.currentTimeMillis();
-        if (lastWatchTime == null
-            || !OPTIONING.isEmpty()
-            || timeMillis - lastOptionTime <= OPTION_INTERVAL.toMillis()
-            || timeMillis - lastWatchTime >= WATCHING_INTERVAL.toMillis()) {
-            lastWatchTime = timeMillis;
-            WATCHING_APPS.forEach(this::watch);
+    @Scheduled(fixedDelay = 5, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    public void scheduledWatch() {
+        if (WATCHING_APPS.isEmpty()) {
+            return;
         }
+        lastWatchTime = System.currentTimeMillis();
+        WATCHING_APPS.forEach(this::watch);
+    }
+
+    @Scheduled(fixedDelay = 1, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    public void fastWatchDuringOption() {
+        if (WATCHING_APPS.isEmpty()) {
+            return;
+        }
+        long timeMillis = System.currentTimeMillis();
+        if (OPTIONING.isEmpty() && timeMillis - lastOptionTime > OPTION_INTERVAL.toMillis()) {
+            return;
+        }
+        WATCHING_APPS.forEach(this::watch);
     }
 
     @VisibleForTesting
@@ -172,12 +184,21 @@ public class SparkAppHttpWatcher {
     }
 
     private void watch(Long id, SparkApplication application) {
+        AtomicBoolean inFlight = WATCH_IN_FLIGHT.computeIfAbsent(id, ignored -> new AtomicBoolean(false));
+        if (!inFlight.compareAndSet(false, true)) {
+            return;
+        }
         executorService.execute(
             () -> {
                 try {
                     getStateFromYarn(application);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    log.warn(
+                        "[StreamPark][SparkAppHttpWatcher] Failed to watch application id={}",
+                        application.getId(),
+                        e);
+                } finally {
+                    inFlight.set(false);
                 }
             });
     }
@@ -296,6 +317,7 @@ public class SparkAppHttpWatcher {
     public static void unWatching(Long appId) {
         log.info("[StreamPark][SparkAppHttpWatcher] stop app, appId:{}", appId);
         WATCHING_APPS.remove(appId);
+        WATCH_IN_FLIGHT.remove(appId);
     }
 
     public static void addCanceledApp(Long appId, Long userId) {
