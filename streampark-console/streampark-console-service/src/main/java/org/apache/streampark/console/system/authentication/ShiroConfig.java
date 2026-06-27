@@ -42,8 +42,11 @@ public class ShiroConfig {
         shiroFilterFactoryBean.setFilters(filters);
 
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
-        filterChainDefinitionMap.put("/actuator/**", "anon");
-        filterChainDefinitionMap.put("/h2-console/**", "anon");
+        filterChainDefinitionMap.put("/actuator/health", "anon");
+        filterChainDefinitionMap.put("/actuator/health/**", "anon");
+        filterChainDefinitionMap.put("/actuator/info", "anon");
+        filterChainDefinitionMap.put("/actuator/**", "jwt");
+        filterChainDefinitionMap.put("/h2-console/**", "jwt");
 
         filterChainDefinitionMap.put("/doc.html", "anon");
         filterChainDefinitionMap.put("/swagger-ui.html", "anon");
@@ -58,7 +61,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/user/check/**", "anon");
         filterChainDefinitionMap.put("/user/initTeam", "anon");
         filterChainDefinitionMap.put("/websocket/**", "anon");
-        filterChainDefinitionMap.put("/metrics/**", "anon");
+        filterChainDefinitionMap.put("/metrics/**", "jwt");
 
         filterChainDefinitionMap.put("/index.html", "anon");
         filterChainDefinitionMap.put("/assets/**", "anon");
