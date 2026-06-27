@@ -21,8 +21,10 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
@@ -54,6 +56,9 @@ public class PermissionAspect {
 
     @Autowired
     private FlinkApplicationManageService applicationManageService;
+
+    @Autowired
+    private SparkApplicationManageService sparkApplicationManageService;
 
     @Pointcut("@annotation(org.apache.streampark.console.core.annotation.Permission)")
     public void permissionPointcut() {
@@ -89,17 +94,27 @@ public class PermissionAspect {
             Long appId = getId(joinPoint, methodSignature, permission.app());
             if (appId != null) {
                 FlinkApplication app = applicationManageService.getById(appId);
-                ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
-                if (!currentUser.getUserId().equals(app.getUserId())) {
-                    Member member = memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());
+                if (app != null) {
+                    checkAppTeamAccess(currentUser, app.getUserId(), app.getTeamId());
+                } else {
+                    SparkApplication sparkApp = sparkApplicationManageService.getById(appId);
                     ApiAlertException.throwIfTrue(
-                        member == null,
-                        "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+                        sparkApp == null, "Invalid operation, application is null");
+                    checkAppTeamAccess(currentUser, sparkApp.getUserId(), sparkApp.getTeamId());
                 }
             }
         }
 
         return (RestResponse) joinPoint.proceed();
+    }
+
+    private void checkAppTeamAccess(User currentUser, Long ownerId, Long teamId) {
+        if (!currentUser.getUserId().equals(ownerId)) {
+            Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
+            ApiAlertException.throwIfTrue(
+                member == null,
+                "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+        }
     }
 
     private Long getId(ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String expr) {
