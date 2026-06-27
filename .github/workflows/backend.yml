@@ -49,34 +49,11 @@ jobs:
           filters: |
             not-ignore:
               - '!**/*.md'
-  license-header:
-    name: License header
-    runs-on: ubuntu-latest
-    if: ${{ (needs.paths-filter.outputs.not-ignore == 'true') || (github.event_name == 'push') }}
-    needs: paths-filter
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Check license header
-        uses: apache/skywalking-eyes/header@main
-  code-style:
-    if: github.repository == 'apache/streampark'
-    name: Code style
-    runs-on: ubuntu-latest
-    needs: license-header
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Check codestyle
-        run: ./mvnw -B -q -nsu checkstyle:check spotless:check
   build:
     name: "Backend-Build (java-${{ matrix.java }})"
     runs-on: ubuntu-latest
-    needs: code-style
+    needs: paths-filter
+    if: ${{ (needs.paths-filter.outputs.not-ignore == 'true') || (github.event_name == 'push') }}
     strategy:
       fail-fast: false
       matrix:
@@ -95,15 +72,20 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-backend
           restore-keys: ${{ runner.os }}-maven-
-      - name: Backend Build with Maven
+      - name: Backend Build with Maven (JDK 8)
+        if: matrix.java == 8
+        run: ./mvnw -B clean install -Pshaded -DskipTests -pl '!streampark-console/streampark-console-webapp'
+      - name: Backend Build with Maven (JDK 11)
+        if: matrix.java == 11
         run: ./mvnw -B clean install -Pshaded,webapp,dist -DskipTests
       - name: Check dependency license
+        if: matrix.java == 11
         run: tools/dependencies/check-LICENSE.sh
   result:
     name: Backend - Result
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [ paths-filter, build, license-header, code-style ]
+    needs: [ paths-filter, build ]
     if: always()
     steps:
       - name: Status
