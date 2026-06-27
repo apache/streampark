@@ -90,9 +90,23 @@ export default async ({ command, mode }: ConfigEnv): Promise<UserConfig> => {
       rollupOptions: {
         maxParallelFileOps: 3,
         output: {
-          manualChunks: {
-            vue: ['vue', 'pinia', 'vue-router'],
-            antd: ['ant-design-vue', '@ant-design/icons-vue'],
+          manualChunks(id) {
+            if (id.includes('node_modules/monaco-editor')) {
+              return 'monaco-editor';
+            }
+            if (
+              id.includes('node_modules/vue/') ||
+              id.includes('node_modules/pinia/') ||
+              id.includes('node_modules/vue-router/')
+            ) {
+              return 'vue';
+            }
+            if (
+              id.includes('node_modules/ant-design-vue/') ||
+              id.includes('node_modules/@ant-design/icons-vue/')
+            ) {
+              return 'antd';
+            }
           },
         },
       },

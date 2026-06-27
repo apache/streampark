@@ -57,6 +57,7 @@
   import { useAppTableColumns } from './hooks/useAppTableColumns';
   import AppTableResize from './components/AppResize.vue';
   import { useRouter } from 'vue-router';
+  import { getAppListPollInterval } from '/@/settings/pollingSetting';
 
   defineOptions({
     name: 'AppView',
@@ -242,8 +243,8 @@
     if (!getLoading()) {
       handlePageDataReload(true);
     }
-    start();
-  }, 2000);
+    start(getAppListPollInterval(optionApps));
+  }, getAppListPollInterval(optionApps));
 
   onMounted(() => {
     // If there is a page, jump to the page number of the record

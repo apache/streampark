@@ -54,6 +54,7 @@
   import { SparkApplication } from '/@/api/spark/app.type';
   import { handleView } from './utils';
   import { useRouter } from 'vue-router';
+  import { getAppListPollInterval } from '/@/settings/pollingSetting';
   defineOptions({
     name: 'SparkApplication',
   });
@@ -221,14 +222,14 @@
 
   const { start, stop } = useTimeoutFn(() => {
     if (errorCount.value <= 3) {
-      start();
+      start(getAppListPollInterval(optionApps));
     } else {
       return;
     }
     if (!getLoading()) {
       handlePageDataReload(true);
     }
-  }, 2000);
+  }, getAppListPollInterval(optionApps));
 
   onMounted(() => {
     // If there is a page, jump to the page number of the record
