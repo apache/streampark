@@ -26,6 +26,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -39,38 +45,34 @@ public class ApplicationBackUpCleanTask {
     @Scheduled(cron = "${streampark.backup-clean.exec-cron:0 0 1 * * ?}")
     public void backUpClean() {
         log.info("Start to clean application backup");
-        // select all application backup which count > maxBackupNum group by app_id
-        backUpService.lambdaQuery()
-            .select(FlinkApplicationBackup::getAppId)
-            .groupBy(FlinkApplicationBackup::getAppId)
-            .having("COUNT(*) > {0}", maxBackupNum)
-            .list()
-            .stream()
-            .map(FlinkApplicationBackup::getAppId)
-            .forEach(
-                appId -> {
-                    // order by create_time desc and skip first maxBackupNum records and delete
-                    // others
-                    backUpService.lambdaQuery()
-                        .eq(FlinkApplicationBackup::getAppId, appId)
-                        .orderByDesc(FlinkApplicationBackup::getCreateTime)
-                        .list()
-                        .stream()
-                        .skip(maxBackupNum)
-                        .forEach(
-                            backUp -> {
-                                try {
-                                    backUpService.removeById(
-                                        backUp.getId());
-                                } catch (Exception e) {
-                                    log.error(
-                                        "Clean application backup failed for app id: {} , backup id: {}",
-                                        appId,
-                                        backUp.getId(),
-                                        e);
-                                }
-                            });
-                });
+        List<FlinkApplicationBackup> allBackups =
+            backUpService.lambdaQuery().orderByDesc(FlinkApplicationBackup::getCreateTime).list();
+        if (allBackups.isEmpty()) {
+            log.info("Clean application backup finished");
+            return;
+        }
+
+        Map<Long, List<FlinkApplicationBackup>> backupsByApp =
+            allBackups.stream().collect(Collectors.groupingBy(FlinkApplicationBackup::getAppId));
+
+        List<Long> toDelete = new ArrayList<>();
+        for (List<FlinkApplicationBackup> appBackups : backupsByApp.values()) {
+            appBackups.sort(Comparator.comparing(FlinkApplicationBackup::getCreateTime).reversed());
+            appBackups.stream()
+                .skip(maxBackupNum)
+                .map(FlinkApplicationBackup::getId)
+                .forEach(toDelete::add);
+        }
+
+        if (!toDelete.isEmpty()) {
+            try {
+                backUpService.removeByIds(toDelete);
+                log.info("Clean application backup finished, deleted {} records", toDelete.size());
+            } catch (Exception e) {
+                log.error("Clean application backup failed", e);
+            }
+            return;
+        }
         log.info("Clean application backup finished");
     }
 }
