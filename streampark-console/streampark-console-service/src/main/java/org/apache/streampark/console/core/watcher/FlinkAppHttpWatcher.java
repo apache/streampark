@@ -565,8 +565,7 @@ public class FlinkAppHttpWatcher {
             try {
                 YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
                 if (yarnAppInfo != null) {
-                    String state = yarnAppInfo.getApp().getFinalStatus();
-                    flinkAppState = FlinkAppStateEnum.getState(state);
+                    flinkAppState = resolveYarnAppState(yarnAppInfo);
                 }
             } finally {
                 if (StopFromEnum.NONE.equals(stopFrom)) {
@@ -594,8 +593,7 @@ public class FlinkAppHttpWatcher {
                 }
             } else {
                 try {
-                    String state = yarnAppInfo.getApp().getFinalStatus();
-                    FlinkAppStateEnum flinkAppState = FlinkAppStateEnum.getState(state);
+                    FlinkAppStateEnum flinkAppState = resolveYarnAppState(yarnAppInfo);
                     if (FlinkAppStateEnum.OTHER.equals(flinkAppState)) {
                         return;
                     }
@@ -634,6 +632,16 @@ public class FlinkAppHttpWatcher {
                 }
             }
         }
+    }
+
+    static FlinkAppStateEnum resolveYarnAppState(YarnAppInfo yarnAppInfo) {
+        if (yarnAppInfo == null || yarnAppInfo.getApp() == null) {
+            return FlinkAppStateEnum.OTHER;
+        }
+        FlinkAppStateEnum finalStatus = FlinkAppStateEnum.getState(yarnAppInfo.getApp().getFinalStatus());
+        return FlinkAppStateEnum.OTHER.equals(finalStatus)
+            ? FlinkAppStateEnum.getState(yarnAppInfo.getApp().getState())
+            : finalStatus;
     }
 
     private void doAlert(FlinkApplication application, FlinkAppStateEnum flinkAppState) {
