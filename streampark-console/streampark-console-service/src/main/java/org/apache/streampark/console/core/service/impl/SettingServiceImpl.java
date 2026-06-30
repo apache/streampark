@@ -225,14 +225,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public ResponseResult checkEmail(SenderEmail senderEmail) {
         ResponseResult result = new ResponseResult();
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        if (senderEmail.isSsl()) {
-            props.put("mail.smtp.starttls.enable", "true");
-        }
-        props.put("mail.smtp.host", senderEmail.getHost());
-        props.put("mail.smtp.port", senderEmail.getPort());
-
+        Properties props = buildEmailProperties(senderEmail);
         Session session = Session.getInstance(props);
         try {
             Transport transport = session.getTransport("smtp");
@@ -245,6 +238,17 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             result.setMsg("connect to target mail server failed: " + e.getMessage());
         }
         return result;
+    }
+
+    static Properties buildEmailProperties(SenderEmail senderEmail) {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.host", senderEmail.getHost());
+        props.put("mail.smtp.port", senderEmail.getPort().toString());
+        if (senderEmail.isSsl()) {
+            props.put("mail.smtp.ssl.enable", "true");
+        }
+        return props;
     }
 
     @Override
