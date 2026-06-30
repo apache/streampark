@@ -107,8 +107,7 @@ public class ShiroRealm extends AuthorizingRealm {
                 // Check whether the token belongs to the api and whether the permission is valid
                 AccessToken accessToken = accessTokenService.getByUserId(userId);
                 try {
-                    String encryptToken = JWTUtil.encrypt(credential);
-                    if (accessToken == null || !accessToken.getToken().equals(encryptToken)) {
+                    if (accessToken == null || !credential.equals(JWTUtil.decrypt(accessToken.getToken()))) {
                         throw new AuthenticationException("the openapi authorization token is invalid");
                     }
                 } catch (Exception e) {

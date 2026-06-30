@@ -31,6 +31,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 
 public class AccessTokenServiceTest extends SpringUnitTestBase {
 
@@ -39,6 +47,31 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
 
     @Autowired
     private UserService userService;
+
+    @Test
+    void testOpenApiTokenCanAuthenticate() throws Exception {
+        Long mockUserId = 100001L;
+        RestResponse restResponse = accessTokenService.create(mockUserId, "");
+        AccessToken accessToken = (AccessToken) restResponse.get("data");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set(HttpHeaders.AUTHORIZATION, accessToken.getToken());
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("id", "100000");
+        body.add("teamId", "100000");
+
+        try {
+            ResponseEntity<String> response = new RestTemplate().postForEntity(
+                "http://localhost:10000/openapi/app/start",
+                new HttpEntity<>(body, headers),
+                String.class);
+            Assertions.assertNotEquals(401, response.getStatusCodeValue());
+        } catch (HttpStatusCodeException e) {
+            Assertions.assertNotEquals(401, e.getRawStatusCode());
+        }
+        Assertions.assertTrue(accessTokenService.removeById(accessToken.getId()));
+    }
 
     @Test
     void testCrudToken() throws Exception {
