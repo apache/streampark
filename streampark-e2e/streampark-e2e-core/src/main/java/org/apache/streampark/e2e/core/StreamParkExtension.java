@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.Testcontainers;
@@ -59,6 +60,8 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
 
     private final boolean M1_CHIP_FLAG = Objects.equals(System.getProperty("m1_chip"), "true");
 
+    private final boolean LOCAL_BROWSER = Objects.equals(System.getProperty("local_browser"), "true");
+
     private final int LOCAL_PORT = 10001;
 
     private final int DOCKER_PORT = 10000;
@@ -87,15 +90,19 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
             runInDockerContainer(context);
         }
 
-        setBrowserContainerByOsName();
+        if (LOCAL_BROWSER) {
+            driver = new ChromeDriver(new ChromeOptions());
+        } else {
+            setBrowserContainerByOsName();
 
-        if (compose != null) {
-            Testcontainers.exposeHostPorts(compose.getServicePort(serviceName, DOCKER_PORT));
-            browser.withAccessToHost(true);
+            if (compose != null) {
+                Testcontainers.exposeHostPorts(compose.getServicePort(serviceName, DOCKER_PORT));
+                browser.withAccessToHost(true);
+            }
+            browser.start();
+
+            driver = new RemoteWebDriver(browser.getSeleniumAddress(), new ChromeOptions());
         }
-        browser.start();
-
-        driver = new RemoteWebDriver(browser.getSeleniumAddress(), new ChromeOptions());
 
         driver
             .manage()
@@ -106,7 +113,9 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
 
         driver.get(new URL("http", address.getHost(), address.getPort(), rootPath).toString());
 
-        browser.beforeTest(new TestDescription(context));
+        if (!LOCAL_BROWSER) {
+            browser.beforeTest(new TestDescription(context));
+        }
 
         final Class<?> clazz = context.getRequiredTestClass();
         Stream.of(clazz.getDeclaredFields())
@@ -117,7 +126,7 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
 
     private void runInLocal() {
         Testcontainers.exposeHostPorts(LOCAL_PORT);
-        address = HostAndPort.fromParts("host.testcontainers.internal", LOCAL_PORT);
+        address = HostAndPort.fromParts(browserHost(), LOCAL_PORT);
         rootPath = "/";
     }
 
@@ -126,8 +135,12 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
         compose.start();
 
         address = HostAndPort.fromParts(
-            "host.testcontainers.internal", compose.getServicePort(serviceName, DOCKER_PORT));
+            browserHost(), compose.getServicePort(serviceName, DOCKER_PORT));
         rootPath = "/";
+    }
+
+    private String browserHost() {
+        return LOCAL_BROWSER ? "localhost" : "host.testcontainers.internal";
     }
 
     private void setBrowserContainerByOsName() {
@@ -172,8 +185,13 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
 
     @Override
     public void afterAll(ExtensionContext context) {
-        browser.afterTest(new TestDescription(context), Optional.empty());
-        browser.stop();
+        if (driver != null) {
+            driver.quit();
+        }
+        if (!LOCAL_BROWSER && browser != null) {
+            browser.afterTest(new TestDescription(context), Optional.empty());
+            browser.stop();
+        }
         if (compose != null) {
             compose.stop();
         }

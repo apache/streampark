@@ -201,7 +201,7 @@ if [ ! -e "$javaSource" ]; then
 fi
 
 log " - Compiling $javaSource starting ..."
-"$JAVA_HOME/bin/javac" "$javaSource"
+"$JAVA_HOME/bin/javac" --release 11 "$javaSource"
 
 if [ -r "$wrapperJarPath" ]; then
   log "Found $wrapperJarPath"

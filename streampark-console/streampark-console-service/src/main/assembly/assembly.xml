@@ -49,6 +49,9 @@
             <directory>${project.build.directory}/../../../.mvn</directory>
             <outputDirectory>bin/.mvn</outputDirectory>
             <fileMode>0755</fileMode>
+            <excludes>
+                <exclude>**/*.class</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/../src/main/assembly/bin</directory>

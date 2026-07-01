@@ -202,9 +202,9 @@ if [ ! -e "$javaSource" ]; then
   exit 1
 fi
 
-if [ ! -e "$javaClass" ]; then
+if [ ! -e "$javaClass" ] || [ "$javaSource" -nt "$javaClass" ]; then
   log " - Compiling $javaClass starting ..."
-  ("$JAVA_HOME/bin/javac" "$javaSource")
+  ("$JAVA_HOME/bin/javac" --release 11 "$javaSource")
 fi
 
 if [ -r "$wrapperJarPath" ]; then
