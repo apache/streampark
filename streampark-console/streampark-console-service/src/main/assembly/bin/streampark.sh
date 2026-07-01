@@ -270,7 +270,11 @@ fi
 
 JVM_OPTS=${JVM_OPTS:-"${JVM_ARGS}"}
 JVM_OPTS="$JVM_OPTS -XX:HeapDumpPath=${APP_HOME}/logs/dump.hprof"
-JVM_OPTS="$JVM_OPTS -Xloggc:${APP_HOME}/logs/gc.log"
+JVM_OPTS="$JVM_OPTS -Xlog:gc*:file=${APP_HOME}/logs/gc.log:time,uptime,level,tags:filecount=10,filesize=50M"
+
+build_java_classpath_prefix() {
+  echo ".:${JAVA_HOME}/lib"
+}
 
 # ----- Execute The Requested Command -----------------------------------------
 
@@ -370,13 +374,13 @@ start() {
     echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
   fi
 
-  #
   # classpath options:
-  # 1): java env (lib and jre/lib)
+  # 1): java lib (JDK 11+ layout)
   # 2): StreamPark
   # 3): hadoop conf
   # shellcheck disable=SC2091
-  local APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
+  local APP_CLASSPATH
+  APP_CLASSPATH=$(build_java_classpath_prefix)
   # shellcheck disable=SC2206
   # shellcheck disable=SC2010
   local JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streampark-flink-shims_.*.jar$")
@@ -437,11 +441,12 @@ start_docker() {
   fi
 
   # classpath options:
-  # 1): java env (lib and jre/lib)
+  # 1): java lib (JDK 11+ layout)
   # 2): StreamPark
   # 3): hadoop conf
   # shellcheck disable=SC2091
-  local APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
+  local APP_CLASSPATH
+  APP_CLASSPATH=$(build_java_classpath_prefix)
   # shellcheck disable=SC2206
   # shellcheck disable=SC2155
   # shellcheck disable=SC2010
