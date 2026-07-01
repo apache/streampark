@@ -34,6 +34,8 @@ services:
       - e2e
     volumes:
       - ${HOME}/streampark_build_logs:/tmp/streampark/logs/build_logs/
+      - ${HOME}/.m2:/root/.m2
+      - ./gitconfig:/root/.gitconfig:ro
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:10000" ]
       interval: 5s

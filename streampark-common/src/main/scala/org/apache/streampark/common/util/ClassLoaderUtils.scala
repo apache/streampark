@@ -146,9 +146,20 @@ object ClassLoaderUtils extends Logger {
         addURL.setAccessible(true)
         addURL.invoke(c, file.toURI.toURL)
       case _ =>
-        val field = classLoader.getClass.getDeclaredField("ucp")
-        field.setAccessible(true)
-        val ucp = field.get(classLoader)
+        var clazz: Class[_] = classLoader.getClass
+        var ucpField: java.lang.reflect.Field = null
+        while (clazz != null && ucpField == null) {
+          try {
+            ucpField = clazz.getDeclaredField("ucp")
+          } catch {
+            case _: NoSuchFieldException => clazz = clazz.getSuperclass
+          }
+        }
+        require(
+          ucpField != null,
+          "[StreamPark] ClassLoaderUtils.addURL: cannot locate ucp field on classloader chain")
+        ucpField.setAccessible(true)
+        val ucp = ucpField.get(classLoader)
         val addURL =
           ucp.getClass.getDeclaredMethod("addURL", Array(classOf[URL]): _*)
         addURL.setAccessible(true)

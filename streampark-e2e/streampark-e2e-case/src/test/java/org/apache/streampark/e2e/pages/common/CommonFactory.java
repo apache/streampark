@@ -18,7 +18,10 @@
 package org.apache.streampark.e2e.pages.common;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -33,15 +36,34 @@ public class CommonFactory {
         element.sendKeys(value);
     }
 
+    public static void WebElementDeleteAndInput(WebDriver driver, WebElement element, String value) {
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.visibilityOf(element));
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(element));
+        WebElementDelete(element);
+        element.sendKeys(value);
+    }
+
     public static void WebElementDelete(WebElement element) {
-        element.sendKeys(Keys.CONTROL + "a");
+        element.sendKeys(Keys.chord(selectAllKey(), "a"));
         element.sendKeys(Keys.BACK_SPACE);
     }
 
     public static void WebElementClick(WebDriver driver, WebElement clickableElement) {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(clickableElement));
-        clickableElement.click();
+        try {
+            clickableElement.click();
+        } catch (ElementClickInterceptedException ex) {
+            JavascriptExecutor executor = (JavascriptExecutor) driver;
+            executor.executeScript("arguments[0].scrollIntoView({block: 'center'});", clickableElement);
+            executor.executeScript("arguments[0].click();", clickableElement);
+        }
+    }
+
+    private static CharSequence selectAllKey() {
+        return Platform.getCurrent().is(Platform.MAC) ? Keys.COMMAND : Keys.CONTROL;
     }
 
     public static void WebDriverWaitForElementVisibilityAndInvisibility(WebDriver driver, String msg) {

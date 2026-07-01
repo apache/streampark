@@ -31,6 +31,8 @@
 ###
 
 # Technically, the only required environment variable is JAVA_HOME.
+# StreamPark 3.0 requires JDK 11 or later for the Console process.
+# Flink/Spark job JDK is configured separately via flink-env.sh / spark-env.sh.
 # All others are optional.  However, the defaults are probably not
 # preferred.  Many sites configure these options outside of streampark,
 # such as in /etc/profile.d

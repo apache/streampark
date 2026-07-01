@@ -23,7 +23,6 @@ import org.apache.streampark.e2e.pages.common.NavBarPage;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.FindBy;
@@ -33,6 +32,9 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
+
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementClick;
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDeleteAndInput;
 
 @Getter
 public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
@@ -67,14 +69,12 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                                       String projectDescription) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(buttonCreateProject));
-
-        buttonCreateProject.click();
+        WebElementClick(driver, buttonCreateProject);
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/project/add"));
 
+        createProjectForm = new CreateProjectForm();
         createProjectForm.inputProjectName.sendKeys(projectName);
 
         createProjectForm.selectCveDropdown.click();
@@ -103,6 +103,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         createProjectForm.inputDescription.sendKeys(projectDescription);
         createProjectForm.buttonSubmit.click();
 
+        waitForListPageAfterSubmit();
         return this;
     }
 
@@ -111,7 +112,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                                     String newProjectName) {
         waitForPageLoading();
 
-        projectList.stream()
+        WebElement editButton = projectList.stream()
             .filter(it -> it.getText().contains(projectName))
             .flatMap(
                 it -> it.findElements(
@@ -119,17 +120,17 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException("No edit button in project list"))
-            .click();
+            .orElseThrow(() -> new RuntimeException("No edit button in project list"));
+        WebElementClick(driver, editButton);
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/project/edit"));
 
-        createProjectForm.inputProjectName.sendKeys(Keys.CONTROL + "a");
-        createProjectForm.inputProjectName.sendKeys(Keys.BACK_SPACE);
-        createProjectForm.inputProjectName.sendKeys(newProjectName);
+        createProjectForm = new CreateProjectForm();
+        WebElementDeleteAndInput(driver, createProjectForm.inputProjectName, newProjectName);
         createProjectForm.buttonSubmit.click();
 
+        waitForListPageAfterSubmit();
         return this;
     }
 
@@ -137,14 +138,14 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
     public ProjectsPage buildProject(String projectName) {
         waitForPageLoading();
 
-        projectList.stream()
+        WebElement buildBtn = projectList.stream()
             .filter(it -> it.getText().contains(projectName))
             .flatMap(
                 it -> it.findElements(By.className("e2e-project-build-btn")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException("No build button in project list"))
-            .click();
+            .orElseThrow(() -> new RuntimeException("No build button in project list"));
+        WebElementClick(driver, buildBtn);
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buildConfirmButton));
@@ -157,7 +158,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
     @SneakyThrows
     public ProjectsPage deleteProject(String projectName) {
         waitForPageLoading();
-        projectList.stream()
+        WebElement deleteBtn = projectList.stream()
             .filter(it -> it.getText().contains(projectName))
             .flatMap(
                 it -> it
@@ -165,19 +166,38 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException("No delete button in project list"))
-            .click();
+            .orElseThrow(() -> new RuntimeException("No delete button in project list"));
+        WebElementClick(driver, deleteBtn);
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
+        PageFactory.initElements(driver, this);
         return this;
     }
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.urlContains("/resource/project"));
+            .until(d -> isProjectListPage(d.getCurrentUrl()));
+        PageFactory.initElements(driver, this);
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateProject));
+        createProjectForm = new CreateProjectForm();
+    }
+
+    private void waitForListPageAfterSubmit() {
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(d -> isProjectListPage(d.getCurrentUrl()));
+        PageFactory.initElements(driver, this);
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateProject));
+        createProjectForm = new CreateProjectForm();
+    }
+
+    private boolean isProjectListPage(String url) {
+        return url.contains("/resource/project")
+            || (url.contains("/project") && !url.contains("/project/add") && !url.contains("/project/edit"));
     }
 
     @Getter

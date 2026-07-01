@@ -281,7 +281,7 @@ cat > $name/pom.xml <<EOF
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <project.build.jdk>1.8</project.build.jdk>
+        <project.build.jdk>11</project.build.jdk>
 
 
         <PermGen>64m</PermGen>
