@@ -70,7 +70,7 @@ jobs:
       - name: Setup Java and Scala
         uses: olafurpg/setup-scala@v13
         with:
-          java-version: adopt@1.8
+          java-version: adopt@11
 
       - uses: actions/setup-node@v3
         with:

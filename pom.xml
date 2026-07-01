@@ -82,7 +82,7 @@
     </issueManagement>
 
     <properties>
-        <project.build.jdk>1.8</project.build.jdk>
+        <project.build.jdk>11</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -697,8 +697,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>${project.build.jdk}</source>
-                        <target>${project.build.jdk}</target>
+                        <release>${project.build.jdk}</release>
                         <encoding>UTF-8</encoding>
                         <!-- The semantics of this option are reversed, see MCOMPILER-209. -->
                         <useIncrementalCompilation>false</useIncrementalCompilation>
@@ -715,7 +714,7 @@
                     <artifactId>scala-maven-plugin</artifactId>
                     <version>${scala-maven-plugin.version}</version>
                     <configuration>
-                        <addScalacArgs>-target:jvm-${project.build.jdk}</addScalacArgs>
+                        <addScalacArgs>-target:${project.build.jdk}</addScalacArgs>
                         <target>${project.build.jdk}</target>
                         <source>${project.build.jdk}</source>
                         <args>
@@ -1008,6 +1007,24 @@
                 <owasp.skip>true</owasp.skip>
                 <spotless.skip>true</spotless.skip>
             </properties>
+        </profile>
+
+        <profile>
+            <id>jdk9-plus-test-opens</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>--add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
