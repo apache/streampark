@@ -104,3 +104,12 @@ fi
 if [[ -z "$JAVA_HOME" ]]; then
   echo "Warning: JAVA_HOME environment variable is not set."
 fi
+
+REQUIRED_JAVA_MAJOR=11
+# shellcheck disable=SC2006
+java_version=`"$JAVACMD" -version 2>&1 | awk -F '"' '/version/ {print $2}'`
+java_major=$(echo "$java_version" | awk -F '.' '{if ($1 == 1) {print $2} else {print $1}}')
+if [[ "$java_major" -lt "$REQUIRED_JAVA_MAJOR" ]]; then
+  echo "Error: StreamPark requires JDK ${REQUIRED_JAVA_MAJOR} or later (current: ${java_version})." >&2
+  exit 1
+fi
