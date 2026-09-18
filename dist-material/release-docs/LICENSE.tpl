@@ -9,6 +9,15 @@ subcomponents is subject to the terms and conditions of the following
 licenses.
 ========================================================================
 
+The GitHub icon in streampark-console-webapp/src/assets/icons/github.svg is from
+Ant Design Icons (https://github.com/ant-design/ant-design-icons) and is provided
+under the MIT License.
+Copyright (c) 2018-present Ant UED, https://xtech.antfin.com/
+The text of the license is included in licenses/ui-licenses/license-ant-design-icons.txt.
+
+The GitHub mark is a trademark of GitHub, Inc. The MIT License does not grant
+permission to use GitHub trademarks.
+
 {{ range .Groups }}
 ========================================================================
 {{ .LicenseID }} licenses

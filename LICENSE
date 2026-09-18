@@ -213,6 +213,8 @@ streampark-console/streampark-console-webapp/tsconfig.json
 streampark-console/streampark-console-webapp/public/favicon.ico
 streampark-console/streampark-console-webapp/src/assets/*
 
+The assets entry above excludes icons/github.svg; see the MIT License section below.
+
 
 The following components are provided under the Apache License. See project link for details.
 The text of each license is the standard Apache 2.0 license.
@@ -223,6 +225,18 @@ streampark-console/streampark-console-service/src/main/assembly/bin/setclasspath
 ========================================================================
 MIT License
 ========================================================================
+
+The following file is from Ant Design Icons (https://github.com/ant-design/ant-design-icons)
+and is provided under the MIT License:
+
+streampark-console/streampark-console-webapp/src/assets/icons/github.svg
+
+Copyright (c) 2018-present Ant UED, https://xtech.antfin.com/
+The text of the license is included in
+dist-material/release-docs/licenses/ui-licenses/license-ant-design-icons.txt
+
+The GitHub mark is a trademark of GitHub, Inc. The MIT License does not grant
+permission to use GitHub trademarks.
 
 The following components are provided under the MIT License
 These files from https://github.com/vbenjs/vue-vben-admin
