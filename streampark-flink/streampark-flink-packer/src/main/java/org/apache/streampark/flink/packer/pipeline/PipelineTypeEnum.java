@@ -67,10 +67,10 @@ public enum PipelineTypeEnum {
         "flink yarn application mode task building pipeline",
         ImmutableMap.<Integer, String>builder()
             .put(1, "Prepare hadoop yarn environment and building workspace")
-            .put(2, "Resolve maven dependencies")
-            .put(3, "upload jar to yarn.provided.lib.dirs")
+            .put(2, "Resolve dependencies and build application jar")
+            .put(3, "Upload application dependencies")
             .build(),
-        SimpleBuildResponse.class),
+        ShadedBuildResponse.class),
 
     FLINK_K8S_APPLICATION_V2(
         5,

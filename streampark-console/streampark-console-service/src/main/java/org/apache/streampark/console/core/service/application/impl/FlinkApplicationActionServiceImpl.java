@@ -642,7 +642,8 @@ public class FlinkApplicationActionServiceImpl
                                                     FlinkApplication application,
                                                     BuildResult buildResult,
                                                     String flinkUserJar) {
-        if (FlinkDeployMode.YARN_APPLICATION == application.getDeployModeEnum()) {
+        if (FlinkDeployMode.YARN_APPLICATION == application.getDeployModeEnum()
+            && !application.isFlinkSqlJob()) {
             return new ShadedBuildResponse(null, flinkUserJar, true);
         }
         if (!(buildResult instanceof ShadedBuildResponse)) {
