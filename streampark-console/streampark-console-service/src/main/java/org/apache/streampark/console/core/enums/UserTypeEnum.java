@@ -42,7 +42,6 @@ public enum UserTypeEnum {
         "resource:*",
         "savepoint:*",
         "sql:*",
-        "token:*",
         "variable:*")));
 
     @EnumValue

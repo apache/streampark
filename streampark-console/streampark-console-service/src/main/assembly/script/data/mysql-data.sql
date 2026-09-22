@@ -194,7 +194,7 @@ insert into `t_menu` values (150504, 150500, 'member delete', null, null, 'membe
 -- ----------------------------
 delete from `t_menu`
 where `type` = '1'
-   or `path` in ('/system/menu', '/system/role', '/system/team', '/system/member', '/system/token');
+   or `path` in ('/system/menu', '/system/role', '/system/team', '/system/member');
 
 insert into `t_setting` values (1, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml full path', 1);
 insert into `t_setting` values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven private server address', 1);

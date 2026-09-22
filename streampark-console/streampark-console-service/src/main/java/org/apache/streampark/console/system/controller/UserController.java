@@ -22,6 +22,7 @@ import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.assembler.UserAssembler;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.request.user.UserCheckNameRequest;
@@ -33,8 +34,10 @@ import org.apache.streampark.console.system.request.user.UserResetPasswordReques
 import org.apache.streampark.console.system.request.user.UserTeamIdRequest;
 import org.apache.streampark.console.system.request.user.UserTransferResourceRequest;
 import org.apache.streampark.console.system.request.user.UserUpdateRequest;
+import org.apache.streampark.console.system.response.team.TeamResponse;
 import org.apache.streampark.console.system.response.user.UserResponse;
 import org.apache.streampark.console.system.response.user.UserUpdateResponse;
+import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.shiro.authz.annotation.Logical;
@@ -62,6 +65,22 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TeamService teamService;
+
+    @PostMapping("teams")
+    @RequiresPermissions("app:view")
+    public RestResponseBody<List<TeamResponse>> teams() {
+        return RestResponseBody.success(UserAssembler.toTeamList(teamService.list()));
+    }
+
+    @PostMapping("set_team")
+    @RequiresPermissions("app:view")
+    public RestResponseBody<Void> setTeam(@Valid @FormOrJson UserTeamIdRequest request) {
+        userService.setLastTeam(request.getTeamId(), ServiceHelper.getUserId());
+        return RestResponseBody.success();
+    }
 
     @PostMapping("list")
     @RequiresPermissions(value = {"user:view", "app:view"}, logical = Logical.OR)
@@ -102,6 +121,7 @@ public class UserController {
     }
 
     @PostMapping("getNoTokenUser")
+    @RequiresPermissions("token:add")
     public RestResponseBody<List<UserResponse>> getNoTokenUser() {
         return RestResponseBody.success(UserAssembler.toResponseList(this.userService.listNoTokenUser()));
     }

@@ -40,6 +40,7 @@ export interface UserInfo {
   homePath?: string;
   roles?: RoleInfo[];
   userType?: 'ADMIN' | 'EDITOR';
+  lastTeamId?: string;
 }
 
 export interface BeforeMiniState {

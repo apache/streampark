@@ -15,17 +15,30 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.request.user;
-
-import org.apache.streampark.console.core.request.common.TeamIdRequest;
+package org.apache.streampark.console.system.response.team;
 
 import lombok.Getter;
 import lombok.Setter;
 
-/** Request body for team selection and application owner queries. */
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * API response for a team record, aligned with webapp {@code TeamListRecord}.
+ */
 @Getter
 @Setter
-public class UserTeamIdRequest extends TeamIdRequest {
+public class TeamResponse implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private Long id;
+
+    private String teamName;
+
+    private String description;
+
+    private Date createTime;
+
+    private Date modifyTime;
 }

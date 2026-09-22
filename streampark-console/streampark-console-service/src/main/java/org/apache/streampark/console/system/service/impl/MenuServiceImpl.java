@@ -45,10 +45,10 @@ import java.util.Set;
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
     private static final Set<String> REMOVED_PERMISSION_MENU_PATHS = new HashSet<>(Arrays.asList(
-        "/system/member", "/system/menu", "/system/role", "/system/team", "/system/token"));
+        "/system/member", "/system/menu", "/system/role", "/system/team"));
 
     private static final Set<String> ADMIN_MENU_PATHS = new HashSet<>(Arrays.asList(
-        "/setting/system", "/system", "/system/user"));
+        "/setting/system", "/system", "/system/user", "/system/token"));
 
     @Autowired
     private UserService userService;

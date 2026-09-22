@@ -182,6 +182,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void setLastTeam(Long teamId, Long userId) {
+        ApiAlertException.throwIfNull(userId, "Current login user is null.");
+        ApiAlertException.throwIfNull(teamService.getById(teamId), "TeamId is invalid, set team failed.");
+        User update = new User();
+        update.setUserId(userId);
+        update.setLastTeamId(teamId);
+        ApiAlertException.throwIfFalse(baseMapper.updateById(update) == 1, "User not found, set team failed.");
+    }
+
+    @Override
     public List<User> listByTeamId(Long teamId) {
         return baseMapper.selectUsersByAppOwner(teamId);
     }

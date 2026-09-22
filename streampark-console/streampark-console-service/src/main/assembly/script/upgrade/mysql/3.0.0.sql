@@ -25,7 +25,11 @@ where m.`role_id` = 100002;
 
 delete from `t_menu`
 where `type` = '1'
-   or `path` in ('/system/menu', '/system/role', '/system/team', '/system/member', '/system/token');
+   or `path` in ('/system/menu', '/system/role', '/system/team', '/system/member');
+
+update `t_menu`
+set `component` = 'system/token/View'
+where `path` = '/system/token';
 
 drop table if exists `t_role_menu`;
 drop table if exists `t_member`;

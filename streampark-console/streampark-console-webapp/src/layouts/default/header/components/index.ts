@@ -17,3 +17,5 @@ export const LockScreen = createAsyncComponent(() => import('./LockScreen.vue'))
 export const ErrorAction = createAsyncComponent(() => import('./ErrorAction.vue'));
 
 export { FullScreen };
+
+export const UserTeam = createAsyncComponent(() => import('./UserTeam.vue'));

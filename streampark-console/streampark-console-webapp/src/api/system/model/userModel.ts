@@ -69,3 +69,8 @@ export interface UserListRecord {
   teamId: string;
   loginType: string;
 }
+
+export interface UserTeam {
+  id: string | number;
+  teamName: string;
+}

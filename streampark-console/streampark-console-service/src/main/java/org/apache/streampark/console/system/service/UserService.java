@@ -125,5 +125,8 @@ public interface UserService extends IService<User> {
      */
     UserLoginResult getLoginUserInfo(User user) throws Exception;
 
+    /** Select an existing team namespace for the current user. */
+    void setLastTeam(Long teamId, Long userId);
+
     void deleteUser(Long userId);
 }

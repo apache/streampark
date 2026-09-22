@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.handler.GlobalExceptionHandler;
+import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,9 @@ class UserControllerMvcTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private TeamService teamService;
 
     @Test
     void checkUserNameShouldRejectBlankUsername() throws Exception {

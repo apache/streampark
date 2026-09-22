@@ -17,7 +17,7 @@
 import { UserInfo } from '/#/store';
 import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
-import { GetUserInfoModel, UserListRecord } from './model/userModel';
+import { GetUserInfoModel, UserListRecord, UserTeam } from './model/userModel';
 
 import { Result } from '/#/axios';
 import { BasicTableParams } from '../model/baseModel';
@@ -33,6 +33,8 @@ enum Api {
   Password = '/user/password',
   CheckName = '/user/check/name',
   APP_OWNERS = '/user/appOwners',
+  TEAMS = '/user/teams',
+  SET_TEAM = '/user/set_team',
   TransferUserResource = '/user/transferResource',
 }
 
@@ -99,4 +101,12 @@ export function transferUserResource(data: {
   targetUserId: string;
 }): Promise<boolean> {
   return defHttp.put({ url: Api.TransferUserResource, data });
+}
+
+export function fetchUserTeams(): Promise<UserTeam[]> {
+  return defHttp.post({ url: Api.TEAMS });
+}
+
+export function setUserTeam(teamId: string): Promise<void> {
+  return defHttp.post({ url: Api.SET_TEAM, data: { teamId } });
 }

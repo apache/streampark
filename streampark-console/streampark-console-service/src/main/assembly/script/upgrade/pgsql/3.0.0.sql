@@ -24,7 +24,11 @@ where u.user_id = m.user_id
 
 delete from "public"."t_menu"
 where "type" = '1'
-   or "path" in ('/system/menu', '/system/role', '/system/team', '/system/member', '/system/token');
+   or "path" in ('/system/menu', '/system/role', '/system/team', '/system/member');
+
+update "public"."t_menu"
+set "component" = 'system/token/View'
+where "path" = '/system/token';
 
 drop table if exists "public"."t_role_menu";
 drop table if exists "public"."t_member";

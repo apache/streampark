@@ -20,11 +20,13 @@ package org.apache.streampark.console.system.assembler;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.core.assembler.DtoAssembler;
+import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.request.user.UserCreateRequest;
 import org.apache.streampark.console.system.request.user.UserListQueryRequest;
 import org.apache.streampark.console.system.request.user.UserPasswordUpdateRequest;
 import org.apache.streampark.console.system.request.user.UserUpdateRequest;
+import org.apache.streampark.console.system.response.team.TeamResponse;
 import org.apache.streampark.console.system.response.user.UserBriefResponse;
 import org.apache.streampark.console.system.response.user.UserResponse;
 import org.apache.streampark.console.system.response.user.UserSessionResponse;
@@ -80,6 +82,10 @@ public final class UserAssembler {
         response.setLastTeamId(user.getLastTeamId());
         response.setId(user.getId());
         return response;
+    }
+
+    public static List<TeamResponse> toTeamList(List<Team> teams) {
+        return DtoAssembler.toList(teams, team -> DtoAssembler.toDto(team, TeamResponse.class));
     }
 
     public static List<UserResponse> toResponseList(List<User> users) {
