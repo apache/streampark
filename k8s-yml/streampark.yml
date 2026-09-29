@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streampark
+  namespace: k8s-streampark
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streampark
+  template:
+    metadata:
+      labels:
+        app: streampark
+    spec:
+      containers:
+      - name: streampark-docker
+        image: ccr.ccs.tencentyun.com/huanghuanhui/streampark:2.1.5
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 10000
+        command:
+        - /bin/sh
+        - -c
+        - |
+          export JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
+          /apache-streampark_2.12-2.1.5/bin/startup.sh
+          sleep 9999d
+        livenessProbe:
+          tcpSocket:
+            port: 10000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          tcpSocket:
+            port: 10000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run
+#       - name: kubeconfig
+#         mountPath: /root/.kube/config
+#         subPath: config
+#       - name: flink-data
+#         mountPath: /data
+      - name: dockerd
+        image: registry.cn-hangzhou.aliyuncs.com/jingsocial/docker:27.1.1-dind
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run
+      volumes:
+      - name: docker-socket
+        emptyDir: {}
+#     - name: kubeconfig
+#       configMap:
+#         name: kubeconfig
+#     - name: flink-data
+#       persistentVolumeClaim:
+#         claimName: flink-data        
+---
+#apiVersion: v1
+#kind:  PersistentVolumeClaim
+#metadata:
+#  name: flink-data
+#  namespace: streampark
+#spec:
+#  storageClassName: "streampark-sc"
+#  accessModes: [ReadWriteMany]
+#  resources:
+#    requests:
+#      storage: 2Ti
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: streampark
+  namespace: k8s-streampark
+  labels:
+    app: streampark
+spec:
+  type: NodePort
+  ports:
+  - port: 10000
+    targetPort: 10000
+    nodePort: 30100
+  selector:
+    app: streampark
