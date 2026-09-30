@@ -27,3 +27,9 @@
 # Required for dynamic classpath (ClassLoaderUtils) on JDK 9+. Ignored on JDK 8.
 --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
 --add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED
+
+# Required for FlinkClient#submit's ExitSecurityManager (used to intercept System.exit()
+# calls made by the Flink CLI during in-process job submission) on JDK 18+, where
+# System.setSecurityManager() throws UnsupportedOperationException unless explicitly
+# allowed (JEP 411). Ignored on JDK 17 and earlier.
+-Djava.security.manager=allow
