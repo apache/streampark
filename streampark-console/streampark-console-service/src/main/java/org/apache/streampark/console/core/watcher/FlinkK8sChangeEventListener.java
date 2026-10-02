@@ -186,8 +186,10 @@ public class FlinkK8sChangeEventListener {
         app.setStartTime(new Date(startTime > 0 ? startTime : 0));
         app.setEndTime(endTime > 0 && endTime >= startTime ? new Date(endTime) : null);
         app.setDuration(duration > 0 ? duration : 0);
-        // when a flink job status change event can be received, it means
-        // that the operation command sent by streampark has been completed.
-        app.setOptionState(OptionStateEnum.NONE.getValue());
+        // A non-terminal event can race with an in-flight cancellation. Keep the operation state
+        // until the watcher observes a terminal job state.
+        if (state != FlinkJobState.CANCELLING()) {
+            app.setOptionState(OptionStateEnum.NONE.getValue());
+        }
     }
 }

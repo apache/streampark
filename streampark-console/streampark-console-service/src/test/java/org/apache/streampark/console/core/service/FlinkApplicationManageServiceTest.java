@@ -21,6 +21,8 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.YarnQueue;
+import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.service.application.impl.FlinkApplicationManageServiceImpl;
@@ -145,5 +147,199 @@ class FlinkApplicationManageServiceTest extends SpringUnitTestBase {
         app1.setDeployMode(FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION.getMode());
         app2.setYarnQueue(nonExistedQueue);
         assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isFalse();
+    }
+
+    @Test
+    void testPersistMetricsPreservesInFlightCancellation() {
+        assertNonTerminalMetricsPreserveOperation(OptionStateEnum.CANCELLING);
+        assertNonTerminalMetricsPreserveOperation(OptionStateEnum.SAVEPOINTING);
+    }
+
+    @Test
+    void testPersistMetricsRecoversInterruptedCancellation() {
+        assertInterruptedCancellationRecovers(FlinkAppStateEnum.RUNNING);
+        assertInterruptedCancellationRecovers(FlinkAppStateEnum.FAILING);
+    }
+
+    @Test
+    void testPersistMetricsUpdatesUnprotectedNonTerminalState() {
+        FlinkApplication persisted = createApplication(
+            FlinkAppStateEnum.RUNNING, OptionStateEnum.NONE);
+
+        FlinkApplication snapshot = new FlinkApplication();
+        snapshot.setId(persisted.getId());
+        snapshot.setState(FlinkAppStateEnum.FAILING.getValue());
+        snapshot.setOptionState(OptionStateEnum.NONE.getValue());
+        applicationManageService.persistMetrics(snapshot);
+
+        FlinkApplication actual = applicationManageService.getById(persisted.getId());
+        assertThat(actual.getState()).isEqualTo(FlinkAppStateEnum.FAILING.getValue());
+        assertThat(actual.getOptionState()).isEqualTo(OptionStateEnum.NONE.getValue());
+    }
+
+    @Test
+    void testPersistMetricsDoesNotBlockStandaloneSavepointCompletion() {
+        FlinkApplication persisted = createApplication(
+            FlinkAppStateEnum.RUNNING, OptionStateEnum.SAVEPOINTING);
+
+        FlinkApplication completedSnapshot = new FlinkApplication();
+        completedSnapshot.setId(persisted.getId());
+        completedSnapshot.setState(FlinkAppStateEnum.RUNNING.getValue());
+        completedSnapshot.setOptionState(OptionStateEnum.NONE.getValue());
+        applicationManageService.persistMetrics(completedSnapshot);
+
+        FlinkApplication actual = applicationManageService.getById(persisted.getId());
+        assertThat(actual.getState()).isEqualTo(FlinkAppStateEnum.RUNNING.getValue());
+        assertThat(actual.getOptionState()).isEqualTo(OptionStateEnum.NONE.getValue());
+    }
+
+    @Test
+    void testPersistMetricsConvergesCancellationOnTerminalState() {
+        FlinkApplication persisted = createApplication(
+            FlinkAppStateEnum.CANCELLING, OptionStateEnum.CANCELLING);
+
+        FlinkApplication terminalSnapshot = new FlinkApplication();
+        terminalSnapshot.setId(persisted.getId());
+        terminalSnapshot.setState(FlinkAppStateEnum.CANCELED.getValue());
+        terminalSnapshot.setOptionState(OptionStateEnum.NONE.getValue());
+        applicationManageService.persistMetrics(terminalSnapshot);
+
+        FlinkApplication actual = applicationManageService.getById(persisted.getId());
+        assertThat(actual.getState()).isEqualTo(FlinkAppStateEnum.CANCELED.getValue());
+        assertThat(actual.getOptionState()).isEqualTo(OptionStateEnum.NONE.getValue());
+    }
+
+    @Test
+    void testPersistMetricsRejectsLateNonTerminalSnapshotAfterCancellationCompletes() {
+        assertCompletedCancellationRejectsLateSnapshot(
+            FlinkAppStateEnum.FAILING, OptionStateEnum.NONE);
+        assertCompletedCancellationRejectsLateSnapshot(
+            FlinkAppStateEnum.RUNNING, OptionStateEnum.NONE);
+        assertCompletedCancellationRejectsLateSnapshot(
+            FlinkAppStateEnum.CANCELLING, OptionStateEnum.CANCELLING);
+    }
+
+    @Test
+    void testPersistMetricsAllowsExplicitRestartAfterCancellationCompletes() {
+        FlinkApplication persisted = createApplication(
+            FlinkAppStateEnum.CANCELED, OptionStateEnum.NONE);
+
+        FlinkApplication starting = new FlinkApplication();
+        starting.setId(persisted.getId());
+        starting.setState(FlinkAppStateEnum.STARTING.getValue());
+        assertThat(applicationManageService.updateById(starting)).isTrue();
+
+        FlinkApplication runningSnapshot = new FlinkApplication();
+        runningSnapshot.setId(persisted.getId());
+        runningSnapshot.setState(FlinkAppStateEnum.RUNNING.getValue());
+        runningSnapshot.setOptionState(OptionStateEnum.NONE.getValue());
+        runningSnapshot.setTotalTask(2);
+        applicationManageService.persistMetrics(runningSnapshot);
+
+        FlinkApplication actual = applicationManageService.getById(persisted.getId());
+        assertThat(actual.getState()).isEqualTo(FlinkAppStateEnum.RUNNING.getValue());
+        assertThat(actual.getOptionState()).isEqualTo(OptionStateEnum.NONE.getValue());
+        assertThat(actual.getTotalTask()).isEqualTo(2);
+    }
+
+    @Test
+    void testPersistMetricsAllowsTerminalCorrectionAfterCancellationCompletes() {
+        FlinkApplication persisted = createApplication(
+            FlinkAppStateEnum.CANCELED, OptionStateEnum.NONE);
+
+        FlinkApplication failedSnapshot = new FlinkApplication();
+        failedSnapshot.setId(persisted.getId());
+        failedSnapshot.setState(FlinkAppStateEnum.FAILED.getValue());
+        failedSnapshot.setOptionState(OptionStateEnum.NONE.getValue());
+        applicationManageService.persistMetrics(failedSnapshot);
+
+        FlinkApplication actual = applicationManageService.getById(persisted.getId());
+        assertThat(actual.getState()).isEqualTo(FlinkAppStateEnum.FAILED.getValue());
+        assertThat(actual.getOptionState()).isEqualTo(OptionStateEnum.NONE.getValue());
+    }
+
+    @Test
+    void testPersistMetricsDoesNotFreezeRecoverableLostState() {
+        FlinkApplication persisted = createApplication(
+            FlinkAppStateEnum.LOST, OptionStateEnum.NONE);
+
+        FlinkApplication recoveredSnapshot = new FlinkApplication();
+        recoveredSnapshot.setId(persisted.getId());
+        recoveredSnapshot.setState(FlinkAppStateEnum.RUNNING.getValue());
+        recoveredSnapshot.setOptionState(OptionStateEnum.NONE.getValue());
+        applicationManageService.persistMetrics(recoveredSnapshot);
+
+        FlinkApplication actual = applicationManageService.getById(persisted.getId());
+        assertThat(actual.getState()).isEqualTo(FlinkAppStateEnum.RUNNING.getValue());
+        assertThat(actual.getOptionState()).isEqualTo(OptionStateEnum.NONE.getValue());
+    }
+
+    private void assertCompletedCancellationRejectsLateSnapshot(
+                                                                FlinkAppStateEnum lateState,
+                                                                OptionStateEnum lateOptionState) {
+        FlinkApplication persisted = createApplication(
+            FlinkAppStateEnum.CANCELLING, OptionStateEnum.CANCELLING);
+
+        FlinkApplication terminalSnapshot = new FlinkApplication();
+        terminalSnapshot.setId(persisted.getId());
+        terminalSnapshot.setState(FlinkAppStateEnum.CANCELED.getValue());
+        terminalSnapshot.setOptionState(OptionStateEnum.NONE.getValue());
+        applicationManageService.persistMetrics(terminalSnapshot);
+
+        FlinkApplication lateSnapshot = new FlinkApplication();
+        lateSnapshot.setId(persisted.getId());
+        lateSnapshot.setState(lateState.getValue());
+        lateSnapshot.setOptionState(lateOptionState.getValue());
+        lateSnapshot.setTotalTask(7);
+        applicationManageService.persistMetrics(lateSnapshot);
+
+        FlinkApplication actual = applicationManageService.getById(persisted.getId());
+        assertThat(actual.getState()).isEqualTo(FlinkAppStateEnum.CANCELED.getValue());
+        assertThat(actual.getOptionState()).isEqualTo(OptionStateEnum.NONE.getValue());
+        assertThat(actual.getTotalTask()).isNull();
+    }
+
+    private void assertInterruptedCancellationRecovers(FlinkAppStateEnum currentState) {
+        FlinkApplication persisted = createApplication(
+            FlinkAppStateEnum.CANCELLING, OptionStateEnum.NONE);
+
+        FlinkApplication currentSnapshot = new FlinkApplication();
+        currentSnapshot.setId(persisted.getId());
+        currentSnapshot.setState(currentState.getValue());
+        currentSnapshot.setOptionState(OptionStateEnum.NONE.getValue());
+        currentSnapshot.setTotalTask(4);
+        applicationManageService.persistMetrics(currentSnapshot);
+
+        FlinkApplication actual = applicationManageService.getById(persisted.getId());
+        assertThat(actual.getState()).isEqualTo(currentState.getValue());
+        assertThat(actual.getOptionState()).isEqualTo(OptionStateEnum.NONE.getValue());
+        assertThat(actual.getTotalTask()).isEqualTo(4);
+    }
+
+    private void assertNonTerminalMetricsPreserveOperation(OptionStateEnum optionState) {
+        FlinkApplication persisted = createApplication(FlinkAppStateEnum.CANCELLING, optionState);
+
+        FlinkApplication staleSnapshot = new FlinkApplication();
+        staleSnapshot.setId(persisted.getId());
+        staleSnapshot.setState(FlinkAppStateEnum.FAILING.getValue());
+        staleSnapshot.setOptionState(OptionStateEnum.NONE.getValue());
+        staleSnapshot.setTotalTask(3);
+        applicationManageService.persistMetrics(staleSnapshot);
+
+        FlinkApplication actual = applicationManageService.getById(persisted.getId());
+        assertThat(actual.getState()).isEqualTo(FlinkAppStateEnum.CANCELLING.getValue());
+        assertThat(actual.getOptionState()).isEqualTo(optionState.getValue());
+        assertThat(actual.getTotalTask()).isEqualTo(3);
+    }
+
+    private FlinkApplication createApplication(
+                                               FlinkAppStateEnum state,
+                                               OptionStateEnum optionState) {
+        FlinkApplication application = new FlinkApplication();
+        application.setTeamId(1L);
+        application.setState(state.getValue());
+        application.setOptionState(optionState.getValue());
+        assertThat(applicationManageService.save(application)).isTrue();
+        return application;
     }
 }
