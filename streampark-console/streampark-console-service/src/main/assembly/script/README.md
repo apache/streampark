@@ -5,7 +5,8 @@
 Currently, StreamPark supports MySQL and PostgreSQL. The schema directory is the current database schema, it includes mysql and pgsql
 schema. The data directory is the current complete data, it includes mysql and pgsql data.
 
-If you use MySQL as the StreamPark database, please execute `mysql-schema.sql` first, then execute `mysql-data.sql` to initialize data.
+If you use MySQL as the StreamPark database, please create a database named `streampark` first execute "create database if not exists `streampark` character set utf8mb4 collate utf8mb4_general_ci"
+then under the database `streampark` execute `mysql-schema.sql`, then execute `mysql-data.sql` to initialize data.
 
 If you use PostgreSQL as the StreamPark database, please execute `pgsql-schema.sql` first, then execute `pgsql-data.sql` to initialize data.
 
