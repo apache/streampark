@@ -84,10 +84,18 @@ public final class SpringProperties {
                                 + "Notice: The MySQL Connector/J is incompatible with the Apache 2.0 license, You need to download and put it into $streampark/lib");
                     }
                 }
+                springConfig.put("spring.sql.init.schema-locations", "classpath:db/schema-mysql.sql");
+                springConfig.put("spring.sql.init.data-locations", "classpath:db/data-mysql.sql");
+                springConfig.put("spring.sql.init.continue-on-error", "true");
+                springConfig.put("spring.sql.init.mode", "always");
                 break;
             case "postgresql":
             case "pgsql":
                 springConfig.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
+                springConfig.put("spring.sql.init.schema-locations", "classpath:db/schema-pgsql.sql");
+                springConfig.put("spring.sql.init.data-locations", "classpath:db/data-pgsql.sql");
+                springConfig.put("spring.sql.init.continue-on-error", "true");
+                springConfig.put("spring.sql.init.mode", "always");
                 break;
             case "h2":
                 String h2DataDir = userConfig.getProperty("datasource.h2-data-dir", null);
