@@ -89,6 +89,7 @@
         jar: app.jar,
         description: app.description,
         hadoopUser: app.hadoopUser,
+        lineageEnable: app.lineageEnable ?? false,
         dynamicProperties: app.dynamicProperties,
         resolveOrder: app.resolveOrder,
         deployMode: app.deployMode,

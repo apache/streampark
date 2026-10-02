@@ -85,6 +85,12 @@
             <artifactId>hadoop-client-runtime</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- lineage: parses Flink CompiledPlan JSON to extract source/sink dataset identity -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

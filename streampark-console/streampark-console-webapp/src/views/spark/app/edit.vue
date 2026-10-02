@@ -85,6 +85,7 @@
       appProperties: values.appProperties,
       appArgs: values.args,
       hadoopUser: values.hadoopUser,
+      lineageEnable: values.lineageEnable ?? false,
       description: values.description,
     };
     await handleUpdateAction(params);
@@ -108,6 +109,7 @@
       appProperties: values.appProperties,
       appArgs: values.args,
       hadoopUser: values.hadoopUser,
+      lineageEnable: values.lineageEnable ?? false,
       description: values.description,
     });
   }

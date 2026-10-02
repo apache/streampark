@@ -69,6 +69,9 @@ export default {
   startTime: 'Start Time',
   endTime: 'End Time',
   hadoopUser: 'Hadoop User',
+  lineageEnable: 'Data Lineage',
+  lineageEnableTip:
+    "Report this job's table-level lineage to Gravitino; takes effect only once Gravitino Address is configured in System Setting",
   restoreModeTip:
     'restore mode is supported since flink 1.15, usually, you do not have to set this parameter',
   release: {

@@ -326,6 +326,10 @@ insert into `t_setting` values (12, 'docker.register.user', null, 'Docker Regist
 insert into `t_setting` values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
 insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker namespace', 'Namespace for docker image used in docker building env and target image register', 1);
 insert into `t_setting` values (15, 'ingress.mode.default', null, 'Ingress domain address', 'Automatically generate an nginx-based ingress by passing in a domain name', 1);
+insert into `t_setting` values (16, 'lineage.gravitino.address', null, 'Gravitino Address', 'Base URL of the Gravitino server lineage events are reported to, e.g. http://host:8090', 1);
+insert into `t_setting` values (17, 'lineage.gravitino.token', null, 'Gravitino Auth Token', 'Bearer token forwarded to Gravitino, required once Gravitino oauth authentication is enabled', 1);
+insert into `t_setting` values (18, 'lineage.gravitino.namespace', null, 'Gravitino Lineage Namespace', 'OpenLineage job/dataset namespace StreamPark reports under', 1);
+insert into `t_setting` values (19, 'lineage.flink.native.listener.enable', 'true', 'Enable Flink Native OpenLineage Listener', 'Whether to also inject the official openlineage-flink job-status-changed-listener config; only takes effect once Gravitino Address is set', 2);
 
 -- ----------------------------
 -- Records of t_user

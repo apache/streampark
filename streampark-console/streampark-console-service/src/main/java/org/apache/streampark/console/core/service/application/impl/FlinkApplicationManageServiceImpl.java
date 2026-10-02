@@ -399,6 +399,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         newApp.setK8sJmPodTemplate(persist.getK8sJmPodTemplate());
         newApp.setK8sTmPodTemplate(persist.getK8sTmPodTemplate());
         newApp.setK8sHadoopIntegration(persist.getK8sHadoopIntegration());
+        newApp.setLineageEnable(persist.getLineageEnable());
         newApp.setDescription(persist.getDescription());
         newApp.setAlertId(persist.getAlertId());
         newApp.setCpFailureAction(persist.getCpFailureAction());
@@ -542,6 +543,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         application.setCpFailureRateInterval(appParam.getCpFailureRateInterval());
         application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
         application.setTags(appParam.getTags());
+        application.setLineageEnable(appParam.getLineageEnable());
 
         switch (appParam.getDeployModeEnum()) {
             case YARN_APPLICATION:

@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.LineageConfig;
 import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
@@ -54,6 +55,12 @@ public interface SettingService extends IService<Setting> {
 
     String KEY_DEFAULT_ENGINE = "engine.default";
 
+    // lineage
+    String KEY_LINEAGE_GRAVITINO_ADDRESS = "lineage.gravitino.address";
+    String KEY_LINEAGE_GRAVITINO_TOKEN = "lineage.gravitino.token";
+    String KEY_LINEAGE_GRAVITINO_NAMESPACE = "lineage.gravitino.namespace";
+    String KEY_LINEAGE_FLINK_NATIVE_LISTENER_ENABLE = "lineage.flink.native.listener.enable";
+
     /**
      * Retrieves the value of the setting associated with the specified key.
      *
@@ -83,6 +90,13 @@ public interface SettingService extends IService<Setting> {
      * @return The DockerConfig object representing the configuration for Docker.
      */
     DockerConfig getDockerConfig();
+
+    /**
+     * Retrieves the Gravitino lineage configuration settings.
+     *
+     * @return The LineageConfig object containing the Gravitino lineage configuration settings.
+     */
+    LineageConfig getLineageConfig();
 
     /**
      * Retrieves the StreamPark address.

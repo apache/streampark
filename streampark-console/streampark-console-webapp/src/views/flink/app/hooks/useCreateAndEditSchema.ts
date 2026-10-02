@@ -485,6 +485,14 @@ export const useCreateAndEditSchema = (
         component: 'Input',
       },
       {
+        field: 'lineageEnable',
+        label: t('flink.app.lineageEnable'),
+        component: 'Switch',
+        defaultValue: false,
+        componentProps: { checkedChildren: 'ON', unCheckedChildren: 'OFF' },
+        afterItem: () => h('span', { class: 'pop-tip' }, t('flink.app.lineageEnableTip')),
+      },
+      {
         field: 'description',
         label: t('common.description'),
         component: 'InputTextArea',

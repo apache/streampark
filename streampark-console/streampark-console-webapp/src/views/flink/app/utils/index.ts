@@ -280,6 +280,7 @@ export function handleSubmitParams(
     k8sRestExposedType: values.k8sRestExposedType,
     restartSize: values.restartSize,
     alertId: values.alertId,
+    lineageEnable: values.lineageEnable ?? false,
     description: values.description,
     k8sNamespace: values.k8sNamespace || null,
     clusterId: values.clusterId || null,

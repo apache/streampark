@@ -61,6 +61,12 @@
         isPassword: () => false,
         data: filterValue('ingress.mode'),
       },
+      {
+        key: 5,
+        title: t('setting.system.systemSettingItems.lineageSetting.name'),
+        isPassword: (item: SystemSetting) => item.settingKey === 'lineage.gravitino.token',
+        data: filterValue('lineage.'),
+      },
     ];
   });
   const collapseActive = ref(['1', '2', '3', '4', '5']);

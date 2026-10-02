@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.LineageConfig;
 import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
@@ -122,6 +123,23 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             }
         });
         return dockerConfig;
+    }
+
+    @Override
+    public LineageConfig getLineageConfig() {
+        LineageConfig lineageConfig = new LineageConfig();
+        lineageConfig.setGravitinoAddress(
+            SETTINGS.getOrDefault(SettingService.KEY_LINEAGE_GRAVITINO_ADDRESS, emptySetting).getSettingValue());
+        lineageConfig.setGravitinoToken(
+            SETTINGS.getOrDefault(SettingService.KEY_LINEAGE_GRAVITINO_TOKEN, emptySetting).getSettingValue());
+        lineageConfig.setGravitinoNamespace(
+            SETTINGS.getOrDefault(SettingService.KEY_LINEAGE_GRAVITINO_NAMESPACE, emptySetting).getSettingValue());
+        lineageConfig.setFlinkNativeListenerEnable(
+            Boolean.parseBoolean(
+                SETTINGS
+                    .getOrDefault(SettingService.KEY_LINEAGE_FLINK_NATIVE_LISTENER_ENABLE, emptySetting)
+                    .getSettingValue()));
+        return lineageConfig;
     }
 
     @Override

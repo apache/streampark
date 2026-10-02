@@ -68,6 +68,8 @@ export default {
   startTime: '启动时间',
   endTime: '结束时间',
   hadoopUser: 'Hadoop User',
+  lineageEnable: '数据血缘',
+  lineageEnableTip: '上报该作业的表级血缘到 Gravitino；仅在系统设置中配置了 Gravitino 地址后生效',
   restoreModeTip: 'flink 1.15开始支持restore模式，一般情况下不用设置该参数',
   release: {
     releaseTitle: '该作业正在启动中.',

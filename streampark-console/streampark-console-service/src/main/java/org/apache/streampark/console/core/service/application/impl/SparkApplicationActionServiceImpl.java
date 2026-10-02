@@ -31,6 +31,7 @@ import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.SparkConfigurationUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
+import org.apache.streampark.console.core.bean.LineageConfig;
 import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.Resource;
@@ -46,6 +47,7 @@ import org.apache.streampark.console.core.enums.SparkOperationEnum;
 import org.apache.streampark.console.core.enums.SparkOptionStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.VariableService;
@@ -85,6 +87,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -130,6 +133,12 @@ public class SparkApplicationActionServiceImpl
 
     @Autowired
     private ResourceService resourceService;
+
+    private final SettingService settingService;
+
+    public SparkApplicationActionServiceImpl(SettingService settingService) {
+        this.settingService = settingService;
+    }
 
     private final Map<Long, CompletableFuture<SubmitResponse>> startJobFutureMap = new ConcurrentHashMap<>();
 
@@ -314,6 +323,10 @@ public class SparkApplicationActionServiceImpl
         // Get the args after placeholder replacement
         String applicationArgs = variableService.replaceVariable(application.getTeamId(), application.getAppArgs());
 
+        Map<String, String> sparkProperties =
+            SparkConfigurationUtils.extractPropertiesAsJava(application.getAppProperties());
+        applyLineageConfig(application, sparkProperties);
+
         SubmitRequest submitRequest = new SubmitRequest(
             sparkEnv.getSparkVersion(),
             SparkDeployMode.of(application.getDeployMode()),
@@ -323,7 +336,7 @@ public class SparkApplicationActionServiceImpl
             application.getAppName(),
             application.getMainClass(),
             appConf,
-            SparkConfigurationUtils.extractPropertiesAsJava(application.getAppProperties()),
+            sparkProperties,
             SparkConfigurationUtils.extractArgumentsAsJava(applicationArgs),
             application.getApplicationType(),
             application.getHadoopUser(),
@@ -408,6 +421,38 @@ public class SparkApplicationActionServiceImpl
         application.setState(SparkAppStateEnum.STARTING.getValue());
         application.setOptionTime(new Date());
         updateById(application);
+    }
+
+    /**
+     * Injects the official openlineage-spark listener config so this run reports OpenLineage
+     * events to Gravitino. Fail-open by design: a missing Gravitino address, a disabled
+     * application-level switch, or any lookup failure here must never block job submission — it
+     * just means this run reports no lineage. Keys already present in {@code sparkProperties} (the
+     * user's own {@code appProperties}) are left untouched rather than overridden.
+     */
+    void applyLineageConfig(SparkApplication application, Map<String, String> sparkProperties) {
+        if (!Boolean.TRUE.equals(application.getLineageEnable())) {
+            return;
+        }
+        LineageConfig lineageConfig = settingService.getLineageConfig();
+        if (!lineageConfig.enabled()) {
+            return;
+        }
+        Map<String, String> lineageProperties = new LinkedHashMap<>();
+        lineageProperties.put("spark.extraListeners", "io.openlineage.spark.agent.OpenLineageSparkListener");
+        lineageProperties.put("spark.openlineage.transport.type", "http");
+        lineageProperties.put("spark.openlineage.transport.url", lineageConfig.getGravitinoAddress());
+        lineageProperties.put("spark.openlineage.transport.endpoint", LineageConfig.LINEAGE_ENDPOINT_PATH);
+        if (StringUtils.isNotBlank(lineageConfig.getGravitinoToken())) {
+            lineageProperties.put("spark.openlineage.transport.auth.type", "api_key");
+            lineageProperties.put("spark.openlineage.transport.auth.apiKey", lineageConfig.getGravitinoToken());
+        }
+        // Always set, defaulted the same way the Flink path defaults it: leaving it unset would let
+        // OpenLineage pick its own default and land Spark's datasets in a different namespace from
+        // Flink's, in the same StreamPark install reporting to the same Gravitino.
+        lineageProperties.put("spark.openlineage.namespace", lineageConfig.namespaceOrDefault());
+        lineageProperties.put("spark.openlineage.columnLineage.datasetLineageEnabled", "true");
+        lineageProperties.forEach(sparkProperties::putIfAbsent);
     }
 
     private Tuple2<String, String> getUserJarAndAppConf(

@@ -86,6 +86,8 @@ public class SparkAppCreateRequest implements Serializable {
 
     private String hadoopUser;
 
+    private Boolean lineageEnable;
+
     private Integer restartSize;
 
     private Long alertId;

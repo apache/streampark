@@ -102,6 +102,9 @@ export default {
   startTime: 'Start Time',
   endTime: 'End Time',
   hadoopUser: 'Hadoop User',
+  lineageEnable: 'Data Lineage',
+  lineageEnableTip:
+    "Report this job's lineage to Gravitino; takes effect only once Gravitino Address is configured in System Setting",
   success: 'Submission Successful',
   appidCheck: 'appId cannot be empty!',
   release: {

@@ -149,6 +149,9 @@ public class SparkApplication extends BaseEntity implements ApplicationEntitySup
     @TableField("HADOOP_USER")
     private String hadoopUser;
 
+    /** Whether to report OpenLineage data lineage for this application to Gravitino. */
+    private Boolean lineageEnable;
+
     /** max restart retries after job failed */
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Integer restartSize;

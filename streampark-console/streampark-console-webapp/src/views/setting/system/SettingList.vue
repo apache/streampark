@@ -40,6 +40,10 @@
     'docker.register.address': 'docker',
     'alert.email.from': 'mail',
     'ingress.mode.default': 'nginx',
+    'lineage.gravitino.address': 'net',
+    'lineage.gravitino.token': 'keys',
+    'lineage.gravitino.namespace': 'namespace',
+    'lineage.flink.native.listener.enable': 'connector',
   };
 
   const settingTitles = {
@@ -50,6 +54,10 @@
     'docker.register.address': t('setting.system.title.docker'),
     'alert.email.from': t('setting.system.title.email'),
     'ingress.mode.default': t('setting.system.title.ingress'),
+    'lineage.gravitino.address': t('setting.system.lineage.address.label'),
+    'lineage.gravitino.token': t('setting.system.lineage.token.label'),
+    'lineage.gravitino.namespace': t('setting.system.lineage.namespace.label'),
+    'lineage.flink.native.listener.enable': t('setting.system.lineage.nativeListenerEnable.label'),
   };
 
   const settingDesc = {
@@ -60,6 +68,10 @@
     'docker.register.address': t('setting.system.desc.docker'),
     'alert.email.from': t('setting.system.desc.email'),
     'ingress.mode.default': t('setting.system.desc.ingress'),
+    'lineage.gravitino.address': t('setting.system.lineage.address.desc'),
+    'lineage.gravitino.token': t('setting.system.lineage.token.desc'),
+    'lineage.gravitino.namespace': t('setting.system.lineage.namespace.desc'),
+    'lineage.flink.native.listener.enable': t('setting.system.lineage.nativeListenerEnable.desc'),
   };
 
   const ListItem = List.Item;

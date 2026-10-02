@@ -91,6 +91,7 @@ create table if not exists `t_flink_app` (
   `default_mode_ingress` text ,
   `tags` varchar(500) default null,
   `hadoop_user` varchar(500) default null,
+  `lineage_enable` tinyint default 0,
   primary key(`id`)
 );
 
@@ -564,6 +565,7 @@ create table if not exists `t_spark_app` (
   `k8s_executor_pod_template` text,
   `k8s_hadoop_integration` tinyint default 0,
   `hadoop_user` varchar(64) default null,
+  `lineage_enable` tinyint default 0,
   `restart_size` int default null,
   `restart_count` int default null,
   `state` int default null,

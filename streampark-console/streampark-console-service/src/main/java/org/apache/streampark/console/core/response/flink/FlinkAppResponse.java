@@ -152,6 +152,8 @@ public class FlinkAppResponse implements Serializable {
 
     private Boolean k8sHadoopIntegration;
 
+    private Boolean lineageEnable;
+
     private JobsOverview.Task overview;
 
     private String teamResource;

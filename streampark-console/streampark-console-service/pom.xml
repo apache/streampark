@@ -295,6 +295,12 @@
             <version>${commons-email.version}</version>
         </dependency>
 
+        <!-- lineage: emits OpenLineage RunEvents to Gravitino's POST /api/lineage -->
+        <dependency>
+            <groupId>io.openlineage</groupId>
+            <artifactId>openlineage-java</artifactId>
+        </dependency>
+
         <!-- jwt -->
         <dependency>
             <groupId>com.auth0</groupId>

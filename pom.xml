@@ -119,6 +119,7 @@
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <enumeratum.version>1.6.1</enumeratum.version>
         <assertj.version>3.23.1</assertj.version>
+        <openlineage.version>1.29.0</openlineage.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
@@ -136,7 +137,7 @@
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
-        <httpclient5.version>5.1</httpclient5.version>
+        <httpclient5.version>5.4.2</httpclient5.version>
         <okhttp.version>4.11.0</okhttp.version>
         <okio.version>3.5.0</okio.version>
         <lombok.version>1.18.24</lombok.version>
@@ -327,6 +328,12 @@
             </dependency>
 
             <dependency>
+                <groupId>io.openlineage</groupId>
+                <artifactId>openlineage-java</artifactId>
+                <version>${openlineage.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.httpcomponents.client5</groupId>
                 <artifactId>httpclient5</artifactId>
                 <version>${httpclient5.version}</version>
@@ -336,6 +343,21 @@
                 <groupId>org.apache.httpcomponents.client5</groupId>
                 <artifactId>httpclient5-fluent</artifactId>
                 <version>${httpclient5.version}</version>
+            </dependency>
+
+            <!-- httpclient5 5.4.2 requires httpcore5 5.4.x; without pinning this explicitly, an
+                 unrelated older transitive declaration wins dependency mediation and httpclient5
+                 fails at runtime with NoSuchMethodError against the mismatched httpcore5. -->
+            <dependency>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5</artifactId>
+                <version>5.4.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5-h2</artifactId>
+                <version>5.4.3</version>
             </dependency>
 
             <dependency>
