@@ -29,9 +29,10 @@ import org.apache.streampark.shaded.org.slf4j.ILoggerFactory;
 import org.apache.streampark.shaded.org.slf4j.spi.LoggerFactoryBinder;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 /** Shaded logback SLF4J logger factory binder. */
 public final class StreamParkLoggerFactory implements LoggerFactoryBinder {
@@ -83,12 +84,15 @@ public final class StreamParkLoggerFactory implements LoggerFactoryBinder {
         return CONTEXT_SELECTOR_BINDER.getClass().getName();
     }
 
-    private static final class ShadedContextInitializer extends ContextInitializer {
+    static final class ShadedContextInitializer extends ContextInitializer {
 
         private static final String SHADED_PACKAGE = "org.apache.streampark.shaded";
+        private static final Pattern LOGGING_PACKAGE = Pattern.compile(
+            "(?<!org\\.apache\\.streampark\\.shaded\\.)"
+                + "(org\\.slf4j|ch\\.qos\\.logback|org\\.apache\\.log4j)(?=\\.)");
         private final LoggerContext loggerContext;
 
-        private ShadedContextInitializer(LoggerContext loggerContext) {
+        ShadedContextInitializer(LoggerContext loggerContext) {
             super(loggerContext);
             this.loggerContext = loggerContext;
         }
@@ -100,15 +104,15 @@ public final class StreamParkLoggerFactory implements LoggerFactoryBinder {
             if (path.endsWith("xml")) {
                 JoranConfigurator configurator = new JoranConfigurator();
                 configurator.setContext(loggerContext);
-                try {
+                try (InputStream resource = url.openStream()) {
                     String text =
-                        FileUtils.readFile(new File(path))
-                            .replaceAll("org.slf4j", SHADED_PACKAGE + ".org.slf4j")
-                            .replaceAll("ch.qos.logback", SHADED_PACKAGE + ".ch.qos.logback")
-                            .replaceAll("org.apache.log4j", SHADED_PACKAGE + ".org.apache.log4j");
-                    ByteArrayInputStream input =
-                        new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
-                    configurator.doConfigure(input);
+                        LOGGING_PACKAGE.matcher(new String(resource.readAllBytes(), StandardCharsets.UTF_8))
+                            .replaceAll(SHADED_PACKAGE + ".$1");
+                    try (
+                        ByteArrayInputStream input =
+                            new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8))) {
+                        configurator.doConfigure(input);
+                    }
                 } catch (Exception e) {
                     throw new LogbackException("Failed to configure logger context from " + url, e);
                 }

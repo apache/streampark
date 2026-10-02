@@ -197,6 +197,7 @@ public class FlinkClusterWatcher {
     private ClusterState httpClusterState(FlinkCluster flinkCluster) {
         switch (flinkCluster.getFlinkDeployModeEnum()) {
             case REMOTE:
+            case KUBERNETES_NATIVE_SESSION:
                 return httpRemoteClusterState(flinkCluster);
             case YARN_SESSION:
                 return httpYarnSessionClusterState(flinkCluster);
