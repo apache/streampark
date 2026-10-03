@@ -33,5 +33,4 @@ public class Constant {
 
     public static final Long DEFAULT_TEAM_ID = 100000L;
 
-    public static final Long DEFAULT_ROLE_ID = 100001L;
 }

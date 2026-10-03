@@ -22,7 +22,6 @@ import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.web.FormOrJson;
-import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.SparkSqlAssembler;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.request.spark.SparkSqlCompleteRequest;
@@ -91,7 +90,6 @@ public class SparkSqlController {
     }
 
     @PostMapping("list")
-    @Permission(app = "#request.appId", team = "#request.teamId")
     public RestResponseBody<IPage<SparkSqlResponse>> list(@Valid SparkSqlListQueryRequest request,
                                                           RestRequest restRequest) {
         IPage<SparkSql> page = sparkSqlService.getPage(request.getAppId(), restRequest);
@@ -100,7 +98,6 @@ public class SparkSqlController {
 
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
-    @Permission(app = "#request.appId", team = "#request.teamId")
     public RestResponseBody<Boolean> delete(@Valid @FormOrJson SparkSqlDeleteRequest request) {
         SparkSql sparkSql = SparkSqlAssembler.toDeleteEntity(request);
         ApiAlertException.throwIfNull(sparkSql, "Spark SQL delete request cannot be null.");
@@ -111,7 +108,6 @@ public class SparkSqlController {
     /** {@code data} is {@link SparkSqlResponse} for one id, or {@link SparkSqlResponse}{@code []} for two ids (legacy compare). */
     @SuppressWarnings("java:S1452")
     @PostMapping("get")
-    @Permission(app = "#request.appId", team = "#request.teamId")
     public RestResponseBody<?> get(@Valid SparkSqlGetRequest request) throws InternalException {
         ApiAlertException.throwIfTrue(
             request.getAppId() == null || request.getTeamId() == null,
@@ -130,7 +126,6 @@ public class SparkSqlController {
     }
 
     @PostMapping("history")
-    @Permission(app = "#request.id", team = "#request.teamId")
     public RestResponseBody<List<SparkSqlResponse>> history(@Valid SparkSqlHistoryRequest request) {
         List<SparkSql> sqlList = sparkSqlService.listSparkSqlHistory(request.getId());
         return RestResponseBody.success(SparkSqlAssembler.toListResponse(sqlList));

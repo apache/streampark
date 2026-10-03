@@ -76,7 +76,6 @@
       </Button>
     </FormItem>
   </Form>
-  <TeamModal v-model:visible="modelVisible" :userId="userId" @success="handleTeamSuccess" />
 </template>
 <script lang="ts" setup>
   import { reactive, ref, unref, computed, onMounted } from 'vue';
@@ -98,7 +97,6 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import { signin, fetchSignType } from '/@/api/system/passport';
   import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
-  import TeamModal from './teamModal.vue';
   import { LoginResultModel } from '/@/api/system/model/userModel';
   import { Result } from '/#/axios';
   import { PageEnum } from '/@/enums/pageEnum';
@@ -120,8 +118,6 @@
   const BASE_ADDRESS = import.meta.env.VITE_BASE_ADDRESS;
   const formRef = ref();
   const loading = ref(false);
-  const userId = ref('');
-  const modelVisible = ref(false);
   const loginType = ref(LoginTypeEnum.PASSWORD);
   const enableSSO = ref(false);
   const enableLDAP = ref(false);
@@ -209,11 +205,6 @@
     } finally {
       loading.value = false;
     }
-  }
-
-  function handleTeamSuccess() {
-    modelVisible.value = false;
-    handleLogin();
   }
 
   function changeLoginType() {

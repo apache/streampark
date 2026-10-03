@@ -23,36 +23,18 @@ import org.apache.streampark.console.system.entity.Menu;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
-import java.util.Map;
 
 /** This interface is used to control the menu of the page */
 public interface MenuService extends IService<Menu> {
 
     /**
-     * Get the permissions of current userId.
-     *
-     * @param userId the user Id
-     * @param teamId team id. If it's null, will find permissions from all teams.
-     * @return permissions
-     */
-    List<String> listPermissions(Long userId, Long teamId);
-
-    /**
-     * * List menus based on user id and team id
+     * List menus for one of the two built-in user roles.
      *
      * @param userId user id
-     * @param teamId team id
+     * @param teamId ignored legacy parameter
      * @return List of Menu
      */
     List<Menu> listMenus(Long userId, Long teamId);
-
-    /**
-     * List menus map based on menu
-     *
-     * @param menu Menu
-     * @return Menus Map
-     */
-    Map<String, Object> listMenuMap(Menu menu);
 
     /**
      * List Menu Routers based on user id and team id

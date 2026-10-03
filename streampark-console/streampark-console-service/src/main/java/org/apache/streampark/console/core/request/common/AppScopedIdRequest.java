@@ -21,7 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Application id ({@code id}) scoped to a team ({@code teamId}) for {@code @Permission} checks.
+ * Application id ({@code id}) scoped to a team ({@code teamId}) carried by API requests.
  */
 @Getter
 @Setter

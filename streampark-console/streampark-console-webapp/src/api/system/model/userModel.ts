@@ -23,17 +23,11 @@ export interface LoginParams {
   loginType: string;
 }
 
-export interface RoleInfo {
-  roleName: string;
-  value: string;
-}
-
 /**
  * @description: Login interface return value
  */
 export interface LoginResultModel {
   expire?: string;
-  permissions: string[];
   roles: string[];
   token: string;
   user: GetUserInfoModel;
@@ -43,20 +37,14 @@ export interface LoginResultModel {
  * @description: Get user information return value
  */
 export interface GetUserInfoModel {
-  roles: RoleInfo[];
   userId: string | number;
   username: string;
   nickName: string;
   avatar: string;
   desc?: string;
   lastTeamId?: string;
+  userType: 'ADMIN' | 'EDITOR';
 }
-export interface TeamSetResponse {
-  permissions: string[];
-  roles: string[];
-  user: GetUserInfoModel;
-}
-
 // user list api response
 export interface UserListRecord {
   userId: string;
@@ -80,4 +68,9 @@ export interface UserListRecord {
   nickName: string;
   teamId: string;
   loginType: string;
+}
+
+export interface UserTeam {
+  id: string | number;
+  teamName: string;
 }

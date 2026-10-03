@@ -38,7 +38,9 @@ export interface UserInfo {
   avatar: string;
   desc?: string;
   homePath?: string;
-  roles: RoleInfo[];
+  roles?: RoleInfo[];
+  userType?: 'ADMIN' | 'EDITOR';
+  lastTeamId?: string;
 }
 
 export interface BeforeMiniState {

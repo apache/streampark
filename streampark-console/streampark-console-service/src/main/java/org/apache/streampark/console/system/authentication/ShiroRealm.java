@@ -36,9 +36,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Set;
-
-/** Implementation of ShiroRealm, including two modules: authentication and authorization */
+/** Authentication and fixed-role authorization for StreamPark users. */
 public class ShiroRealm extends AuthorizingRealm {
 
     @Autowired
@@ -52,21 +50,16 @@ public class ShiroRealm extends AuthorizingRealm {
         return token instanceof JWTToken;
     }
 
-    /**
-     * Authorization module to get user roles and permissions
-     *
-     * @param token token
-     * @return AuthorizationInfo permission information
-     */
+    /** Resolve the single built-in role stored in {@code t_user.user_type}. */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection token) {
         Long userId = JWTUtil.getUserId(token.toString());
-
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
-
-        // Get user permission set
-        Set<String> permissionSet = userService.listPermissions(userId, null);
-        simpleAuthorizationInfo.setStringPermissions(permissionSet);
+        User user = userService.getById(userId);
+        if (user != null && user.getUserType() != null) {
+            simpleAuthorizationInfo.addRole(user.getUserType().getRoleName());
+            simpleAuthorizationInfo.setStringPermissions(user.getUserType().getPermissions());
+        }
         return simpleAuthorizationInfo;
     }
 

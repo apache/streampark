@@ -20,11 +20,13 @@ package org.apache.streampark.console.system.assembler;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.core.assembler.DtoAssembler;
+import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.request.user.UserCreateRequest;
 import org.apache.streampark.console.system.request.user.UserListQueryRequest;
 import org.apache.streampark.console.system.request.user.UserPasswordUpdateRequest;
 import org.apache.streampark.console.system.request.user.UserUpdateRequest;
+import org.apache.streampark.console.system.response.team.TeamResponse;
 import org.apache.streampark.console.system.response.user.UserBriefResponse;
 import org.apache.streampark.console.system.response.user.UserResponse;
 import org.apache.streampark.console.system.response.user.UserSessionResponse;
@@ -82,6 +84,10 @@ public final class UserAssembler {
         return response;
     }
 
+    public static List<TeamResponse> toTeamList(List<Team> teams) {
+        return DtoAssembler.toList(teams, team -> DtoAssembler.toDto(team, TeamResponse.class));
+    }
+
     public static List<UserResponse> toResponseList(List<User> users) {
         return DtoAssembler.toList(users, UserAssembler::toResponse);
     }
@@ -99,6 +105,7 @@ public final class UserAssembler {
         response.setUsername(user.getUsername());
         response.setNickName(user.getNickName());
         response.setDescription(user.getDescription());
+        response.setUserType(user.getUserType());
         response.setLastTeamId(user.getLastTeamId());
         response.setId(user.getId());
         return response;
@@ -116,9 +123,9 @@ public final class UserAssembler {
         if (userObj instanceof User) {
             response.setUser(toBriefResponse((User) userObj));
         }
-        Object permissions = userInfo.get("permissions");
-        if (permissions instanceof Set) {
-            response.setPermissions((Set<String>) permissions);
+        Object roles = userInfo.get("roles");
+        if (roles instanceof Set) {
+            response.setRoles((Set<String>) roles);
         }
         return response;
     }

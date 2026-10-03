@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.annotation.OpenAPI;
-import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.FlinkApplicationAssembler;
 import org.apache.streampark.console.core.bean.ApiContractDocument;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
@@ -67,7 +66,6 @@ public class OpenAPIController {
             @OpenAPI.Param(name = "savepointPath", description = "savepoint or checkpoint path", required = false, type = String.class),
             @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = Boolean.class, defaultValue = "false"),
     })
-    @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/start")
     @RequiresPermissions("app:start")
     public RestResponseBody<Boolean> flinkStart(@Valid @FormOrJson FlinkAppStartRequest request) throws Exception {
@@ -84,7 +82,6 @@ public class OpenAPIController {
             @OpenAPI.Param(name = "savepointPath", description = "savepoint path", required = false, type = String.class),
             @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = Boolean.class, defaultValue = "false"),
     })
-    @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/cancel")
     @RequiresPermissions("app:cancel")
     public RestResponseBody<Void> flinkCancel(@Valid @FormOrJson FlinkAppCancelRequest request) throws Exception {

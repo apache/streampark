@@ -15,27 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.response.menu;
+use streampark;
 
-import org.apache.streampark.console.base.domain.router.RouterTree;
+-- Map legacy team-admin membership to the built-in ADMIN user type before dropping role tables.
+update `t_user` u
+    inner join `t_member` m on u.`user_id` = m.`user_id`
+set u.`user_type` = 1
+where m.`role_id` = 100002;
 
-import lombok.Getter;
-import lombok.Setter;
+delete from `t_menu`
+where `type` = '1'
+   or `path` in ('/system/menu', '/system/role', '/system/team', '/system/member');
 
-import java.io.Serializable;
-import java.util.List;
+update `t_menu`
+set `component` = 'system/token/View'
+where `path` = '/system/token';
 
-/** Response for {@code POST /menu/list}. */
-@Getter
-@Setter
-@SuppressWarnings("java:S1948")
-public class MenuListResponse implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    private List<String> ids;
-
-    private Integer total;
-
-    private RouterTree<?> rows;
-}
+drop table if exists `t_role_menu`;
+drop table if exists `t_member`;
+drop table if exists `t_role`;

@@ -34,6 +34,8 @@ import org.apache.streampark.console.core.response.alert.AlertConfigResponse;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +65,7 @@ public class AlertController {
     private final AlertService alertService;
 
     @PostMapping("/add")
+    @RequiresPermissions("setting:update")
     public RestResponseBody<Boolean> createAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
         boolean save = alertConfigService.save(AlertAssembler.toEntity(request));
         return RestResponseBody.success(save);
@@ -77,6 +80,7 @@ public class AlertController {
     }
 
     @PostMapping("/update")
+    @RequiresPermissions("setting:update")
     public RestResponseBody<Boolean> updateAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
         boolean update = alertConfigService.updateById(AlertAssembler.toEntity(request));
         return RestResponseBody.success(update);
@@ -102,12 +106,14 @@ public class AlertController {
     }
 
     @DeleteMapping("/delete")
+    @RequiresPermissions("setting:update")
     public RestResponseBody<Boolean> deleteAlertConfig(@NotNull(message = "{required}") @Valid IdRequest request) {
         boolean result = alertConfigService.removeById(request.getId());
         return RestResponseBody.success(result);
     }
 
     @PostMapping("/send")
+    @RequiresPermissions("setting:update")
     public RestResponseBody<Boolean> sendAlert(@Valid AlertSendRequest request) throws AlertException {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamPark alert job for test");

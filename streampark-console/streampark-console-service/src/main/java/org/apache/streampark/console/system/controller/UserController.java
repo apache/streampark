@@ -17,16 +17,13 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.web.FormOrJson;
-import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.assembler.UserAssembler;
-import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.request.user.UserCheckNameRequest;
 import org.apache.streampark.console.system.request.user.UserCreateRequest;
@@ -37,8 +34,8 @@ import org.apache.streampark.console.system.request.user.UserResetPasswordReques
 import org.apache.streampark.console.system.request.user.UserTeamIdRequest;
 import org.apache.streampark.console.system.request.user.UserTransferResourceRequest;
 import org.apache.streampark.console.system.request.user.UserUpdateRequest;
+import org.apache.streampark.console.system.response.team.TeamResponse;
 import org.apache.streampark.console.system.response.user.UserResponse;
-import org.apache.streampark.console.system.response.user.UserSessionResponse;
 import org.apache.streampark.console.system.response.user.UserUpdateResponse;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
@@ -72,6 +69,19 @@ public class UserController {
     @Autowired
     private TeamService teamService;
 
+    @PostMapping("teams")
+    @RequiresPermissions("app:view")
+    public RestResponseBody<List<TeamResponse>> teams() {
+        return RestResponseBody.success(UserAssembler.toTeamList(teamService.list()));
+    }
+
+    @PostMapping("set_team")
+    @RequiresPermissions("app:view")
+    public RestResponseBody<Void> setTeam(@Valid @FormOrJson UserTeamIdRequest request) {
+        userService.setLastTeam(request.getTeamId(), ServiceHelper.getUserId());
+        return RestResponseBody.success();
+    }
+
     @PostMapping("list")
     @RequiresPermissions(value = {"user:view", "app:view"}, logical = Logical.OR)
     public RestResponseBody<IPage<UserResponse>> userList(RestRequest restRequest, UserListQueryRequest query) {
@@ -90,7 +100,6 @@ public class UserController {
     }
 
     @PutMapping("update")
-    @Permission(user = "#request.userId")
     @RequiresPermissions("user:update")
     public RestResponseBody<UserUpdateResponse> updateUser(@Valid @FormOrJson UserUpdateRequest request) throws Exception {
         return RestResponseBody.success(
@@ -105,7 +114,6 @@ public class UserController {
     }
 
     @DeleteMapping("delete")
-    @Permission(user = "#request.userId")
     @RequiresPermissions("user:delete")
     public RestResponseBody<Void> deleteUser(@Valid @FormOrJson UserDeleteRequest request) throws Exception {
         this.userService.deleteUser(request.getUserId());
@@ -113,6 +121,7 @@ public class UserController {
     }
 
     @PostMapping("getNoTokenUser")
+    @RequiresPermissions("token:add")
     public RestResponseBody<List<UserResponse>> getNoTokenUser() {
         return RestResponseBody.success(UserAssembler.toResponseList(this.userService.listNoTokenUser()));
     }
@@ -124,7 +133,6 @@ public class UserController {
     }
 
     @PutMapping("password")
-    @Permission(user = "#request.userId")
     public RestResponseBody<Void> updatePassword(@Valid @FormOrJson UserPasswordUpdateRequest request) throws Exception {
         userService.updatePassword(UserAssembler.toEntity(request));
         return RestResponseBody.success();
@@ -135,23 +143,6 @@ public class UserController {
     public RestResponseBody<String> resetPassword(@Valid @FormOrJson UserResetPasswordRequest request) throws Exception {
         String newPass = this.userService.resetPassword(request.getUsername());
         return RestResponseBody.success(newPass);
-    }
-
-    @PostMapping("set_team")
-    public RestResponseBody<UserSessionResponse> setTeam(@Valid UserTeamIdRequest request) {
-        Team team = teamService.getById(request.getTeamId());
-        if (team == null) {
-            return RestResponseBody.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
-        }
-        User user = ServiceHelper.getLoginUser();
-        ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
-        userService.setLastTeam(request.getTeamId(), user.getUserId());
-
-        user.dataMasking();
-        user.setLastTeamId(request.getTeamId());
-
-        return RestResponseBody.success(UserAssembler.toSessionResponse(
-            userService.generateFrontendUserInfo(user, null)));
     }
 
     @PostMapping("appOwners")

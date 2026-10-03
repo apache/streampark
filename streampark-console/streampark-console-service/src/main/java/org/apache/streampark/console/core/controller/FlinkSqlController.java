@@ -22,7 +22,6 @@ import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.web.FormOrJson;
-import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.FlinkSqlAssembler;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.request.flink.FlinkAppIdRequest;
@@ -92,7 +91,6 @@ public class FlinkSqlController {
     }
 
     @PostMapping("list")
-    @Permission(app = "#query.appId", team = "#query.teamId")
     public RestResponseBody<IPage<FlinkSqlResponse>> list(@Valid FlinkSqlListQueryRequest query, RestRequest request) {
         IPage<FlinkSql> page = flinkSqlService.getPage(query.getAppId(), request);
         return RestResponseBody.success(FlinkSqlAssembler.toPageResponse(page));
@@ -100,7 +98,6 @@ public class FlinkSqlController {
 
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
-    @Permission(app = "#request.appId", team = "#request.teamId")
     public RestResponseBody<Boolean> delete(@Valid @FormOrJson FlinkSqlDeleteRequest request) {
         Boolean deleted = flinkSqlService.removeById(request.getId());
         return RestResponseBody.success(deleted);
@@ -109,7 +106,6 @@ public class FlinkSqlController {
     /** {@code data} is {@link FlinkSqlResponse} for one id, or {@link FlinkSqlResponse}{@code []} for two ids (legacy compare). */
     @SuppressWarnings("java:S1452")
     @PostMapping("get")
-    @Permission(app = "#request.appId", team = "#request.teamId")
     public RestResponseBody<?> get(@Valid FlinkSqlGetRequest request) throws InternalException {
         ApiAlertException.throwIfTrue(
             request.getAppId() == null || request.getTeamId() == null,
@@ -129,7 +125,6 @@ public class FlinkSqlController {
     }
 
     @PostMapping("history")
-    @Permission(app = "#request.id", team = "#request.teamId")
     public RestResponseBody<List<FlinkSqlResponse>> history(@Valid FlinkAppIdRequest request) {
         List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(request.getId());
         return RestResponseBody.success(FlinkSqlAssembler.toListResponse(sqlList));

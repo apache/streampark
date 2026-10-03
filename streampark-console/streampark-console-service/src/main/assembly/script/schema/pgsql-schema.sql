@@ -20,10 +20,7 @@
 -- ----------------------------
 
 drop table if exists "public"."t_user";
-drop table if exists "public"."t_member";
 drop table if exists "public"."t_setting";
-drop table if exists "public"."t_role";
-drop table if exists "public"."t_role_menu";
 drop table if exists "public"."t_menu";
 drop table if exists "public"."t_message";
 drop table if exists "public"."t_flink_sql";
@@ -49,9 +46,6 @@ drop table if exists "public"."t_yarn_queue";
 -- drop sequence if exists
 -- ----------------------------
 drop sequence if exists "public"."streampark_t_user_id_seq";
-drop sequence if exists "public"."streampark_t_member_id_seq";
-drop sequence if exists "public"."streampark_t_role_id_seq";
-drop sequence if exists "public"."streampark_t_role_menu_id_seq";
 drop sequence if exists "public"."streampark_t_menu_id_seq";
 drop sequence if exists "public"."streampark_t_message_id_seq";
 drop sequence if exists "public"."streampark_t_flink_sql_id_seq";
@@ -80,7 +74,6 @@ drop trigger if exists "streampark_t_app_build_pipe_modify_time_tri" on "public"
 drop trigger if exists "streampark_t_flink_app_modify_time_tri" on "public"."t_flink_app";
 drop trigger if exists "streampark_t_flink_project_modify_time_tri" on "public"."t_flink_project";
 drop trigger if exists "streampark_t_menu_modify_time_tri" on "public"."t_menu";
-drop trigger if exists "streampark_t_role_modify_time_tri" on "public"."t_role";
 drop trigger if exists "streampark_t_user_modify_time_tri" on "public"."t_user";
 drop trigger if exists "streampark_t_alert_config_modify_time_tri" on "public"."t_alert_config";
 
@@ -672,47 +665,6 @@ create index "un_team_dname_inx" on "public"."t_resource" using btree (
     );
 
 -- ----------------------------
--- table structure for t_role
--- ----------------------------
-create sequence "public"."streampark_t_role_id_seq"
-    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
-
-create table "public"."t_role" (
-  "role_id" int8 not null default nextval('streampark_t_role_id_seq'::regclass),
-  "role_name" varchar(64) collate "pg_catalog"."default" not null,
-  "create_time" timestamp(6),
-  "modify_time" timestamp(6),
-  "description" varchar(255) collate "pg_catalog"."default"
-)
-;
-comment on column "public"."t_role"."role_id" is 'role id';
-comment on column "public"."t_role"."role_name" is 'role name';
-comment on column "public"."t_role"."description" is 'role description';
-comment on column "public"."t_role"."create_time" is 'creation time';
-comment on column "public"."t_role"."modify_time" is 'modify time';
-alter table "public"."t_role" add constraint "t_role_pkey" primary key ("role_id");
-
-
--- ----------------------------
--- table structure for t_role_menu
--- ----------------------------
-create sequence "public"."streampark_t_role_menu_id_seq"
-    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
-
-create table "public"."t_role_menu" (
-  "id" int8 not null default nextval('streampark_t_role_menu_id_seq'::regclass),
-  "role_id" int8 not null,
-  "menu_id" int8 not null
-)
-;
-alter table "public"."t_role_menu" add constraint "t_role_menu_pkey" primary key ("id");
-create index "un_role_menu_inx" on "public"."t_role_menu" using btree (
-  "role_id" "pg_catalog"."int8_ops" asc nulls last,
-  "menu_id" "pg_catalog"."int8_ops" asc nulls last
-);
-
-
--- ----------------------------
 -- table structure for t_setting
 -- ----------------------------
 create table "public"."t_setting" (
@@ -758,7 +710,7 @@ comment on column "public"."t_user"."nick_name" is 'nick name';
 comment on column "public"."t_user"."salt" is 'salt';
 comment on column "public"."t_user"."password" is 'password';
 comment on column "public"."t_user"."email" is 'email';
-comment on column "public"."t_user"."user_type" is 'user type 1:admin 2:user';
+comment on column "public"."t_user"."user_type" is 'user role 1:admin 2:editor';
 comment on column "public"."t_user"."login_type" is 'login type 0:password 1:ldap 2:sso';
 comment on column "public"."t_user"."last_team_id" is 'last team id';
 comment on column "public"."t_user"."status" is 'status 0:locked 1:active';
@@ -771,32 +723,6 @@ comment on column "public"."t_user"."description" is 'description';
 alter table "public"."t_user" add constraint "t_user_pkey" primary key ("user_id");
 create index "un_username" on "public"."t_user" using btree (
   "username" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
-);
-
-
--- ----------------------------
--- table structure for t_member
--- ----------------------------
-create sequence "public"."streampark_t_member_id_seq"
-    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
-
-create table "public"."t_member" (
-  "id" int8 not null default nextval('streampark_t_member_id_seq'::regclass),
-  "team_id" int8,
-  "user_id" int8,
-  "role_id" int8,
-  "create_time" timestamp(6),
-  "modify_time" timestamp(6)
-)
-;
-comment on column "public"."t_member"."team_id" is 'team id';
-comment on column "public"."t_member"."user_id" is 'user id';
-comment on column "public"."t_member"."role_id" is 'role id';
-alter table "public"."t_member" add constraint "t_member_pkey" primary key ("id");
-create index "un_user_role_inx" on "public"."t_member" using btree (
-  "team_id" "pg_catalog"."int8_ops" asc nulls last,
-  "user_id" "pg_catalog"."int8_ops" asc nulls last,
-  "role_id" "pg_catalog"."int8_ops" asc nulls last
 );
 
 
@@ -861,5 +787,4 @@ create trigger "streampark_t_access_token_modify_time_tri" before update on "pub
 create trigger "streampark_t_flink_app_modify_time_tri" before update on "public"."t_flink_app" for each row execute procedure "public"."update_modify_time"();
 create trigger "streampark_t_flink_project_modify_time_tri" before update on "public"."t_flink_project" for each row execute procedure "public"."update_modify_time"();
 create trigger "streampark_t_menu_modify_time_tri" before update on "public"."t_menu" for each row execute procedure "public"."update_modify_time"();
-create trigger "streampark_t_role_modify_time_tri" before update on "public"."t_role" for each row execute procedure "public"."update_modify_time"();
 create trigger "streampark_t_user_modify_time_tri" before update on "public"."t_user" for each row execute procedure "public"."update_modify_time"();

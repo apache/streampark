@@ -167,7 +167,7 @@
   <PageWrapper contentFullHeight content-class="flex flex-col">
     <div class="bg-white py-16px px-24px">
       <span class="alarm-title">{{ t('setting.alarm.alertSetting') }}</span>
-      <div v-auth="'project:create'">
+      <div v-auth="'setting:update'">
         <a-button type="dashed" class="w-full mt-10px" @click="openAlertModal(true, {})">
           <PlusOutlined />
           {{ t('common.add') }}
@@ -206,6 +206,7 @@
               <template #actions>
                 <Tooltip :title="t('setting.alarm.tooltip.test')">
                   <a-button
+                    v-auth="'setting:update'"
                     @click="handleTestAlarm(item)"
                     shape="circle"
                     size="large"
@@ -228,6 +229,7 @@
                 </Tooltip>
                 <Tooltip :title="t('setting.alarm.tooltip.edit')">
                   <a-button
+                    v-auth="'setting:update'"
                     @click="handleEditAlertConf(item)"
                     shape="circle"
                     size="large"
@@ -238,6 +240,7 @@
                   </a-button>
                 </Tooltip>
                 <Popconfirm
+                  v-auth="'setting:update'"
                   :title="t('setting.alarm.tooltip.delete')"
                   :cancel-text="t('common.no')"
                   :ok-text="t('common.yes')"

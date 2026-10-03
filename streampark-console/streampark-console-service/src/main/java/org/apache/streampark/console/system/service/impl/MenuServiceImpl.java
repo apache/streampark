@@ -18,7 +18,6 @@
 package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.console.base.domain.router.RouterMeta;
-import org.apache.streampark.console.base.domain.router.RouterTree;
 import org.apache.streampark.console.base.domain.router.VueRouter;
 import org.apache.streampark.console.base.util.VueRouterUtils;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
@@ -28,46 +27,31 @@ import org.apache.streampark.console.system.mapper.MenuMapper;
 import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.UserService;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
-@Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
-    public static final String IDS = "ids";
-    public static final String ROWS = "rows";
-    public static final String TOTAL = "total";
+    private static final Set<String> REMOVED_PERMISSION_MENU_PATHS = new HashSet<>(Arrays.asList(
+        "/system/member", "/system/menu", "/system/role", "/system/team"));
+
+    private static final Set<String> ADMIN_MENU_PATHS = new HashSet<>(Arrays.asList(
+        "/setting/system", "/system", "/system/user", "/system/token"));
 
     @Autowired
     private UserService userService;
-
-    @Override
-    public List<String> listPermissions(Long userId, Long teamId) {
-        User user = Optional.ofNullable(userService.getById(userId))
-            .orElseThrow(
-                () -> new IllegalArgumentException(
-                    String.format("The userId [%s] not found", userId)));
-        // Admin has the permission for all menus.
-        if (UserTypeEnum.ADMIN == user.getUserType()) {
-            return this.list().stream().map(Menu::getPerms).collect(Collectors.toList());
-        }
-        return this.baseMapper.selectPermissions(userId, teamId);
-    }
 
     @Override
     public List<Menu> listMenus(Long userId, Long teamId) {
@@ -75,40 +59,13 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             .orElseThrow(
                 () -> new IllegalArgumentException(
                     String.format("The userId:[%s] not found", userId)));
-        // Admin has the permission for all menus.
-        if (UserTypeEnum.ADMIN == user.getUserType()) {
-            return this.lambdaQuery().eq(Menu::getType, "0")
-                .orderByAsc(Menu::getOrderNum).list();
+        List<Menu> menus = this.lambdaQuery().eq(Menu::getType, "0")
+            .orderByAsc(Menu::getOrderNum).list();
+        menus.removeIf(menu -> REMOVED_PERMISSION_MENU_PATHS.contains(menu.getPath()));
+        if (UserTypeEnum.ADMIN != user.getUserType()) {
+            menus.removeIf(menu -> ADMIN_MENU_PATHS.contains(menu.getPath()));
         }
-        return this.baseMapper.selectMenus(userId, teamId);
-    }
-
-    @Override
-    public Map<String, Object> listMenuMap(Menu menu) {
-        Map<String, Object> result = new HashMap<>(16);
-        try {
-            List<Menu> menus = this.lambdaQuery()
-                .eq(StringUtils.isNotBlank(menu.getMenuName()), Menu::getMenuName, menu.getMenuName())
-                .list();
-
-            List<RouterTree<Menu>> trees = new ArrayList<>();
-            List<String> ids = new ArrayList<>();
-
-            menus.forEach(
-                m -> {
-                    ids.add(m.getMenuId().toString());
-                    trees.add(new RouterTree<>(m));
-                });
-            result.put(IDS, ids);
-            result.put(TOTAL, menus.size());
-            RouterTree<Menu> routerTree = VueRouterUtils.buildRouterTree(trees);
-            result.put(ROWS, routerTree);
-        } catch (Exception e) {
-            log.error("Failed to query menu", e);
-            result.put(ROWS, null);
-            result.put(TOTAL, 0);
-        }
-        return result;
+        return menus;
     }
 
     @Override

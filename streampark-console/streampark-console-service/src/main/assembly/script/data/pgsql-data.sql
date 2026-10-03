@@ -74,7 +74,7 @@ insert into "public"."t_menu" values (130000, 0, 'menu.setting', '/setting', 'Pa
 insert into "public"."t_menu" values (110100, 110000, 'menu.userManagement', '/system/user', 'system/user/User', null, 'user', '0', '1', 1, now(), now());
 insert into "public"."t_menu" values (110200, 110000, 'menu.roleManagement', '/system/role', 'system/role/Role', null, 'smile', '0', '1', 2, now(), now());
 insert into "public"."t_menu" values (110300, 110000, 'menu.menuManagement', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', '1', 3, now(), now());
-insert into "public"."t_menu" values (110400, 110000, 'menu.tokenManagement', '/system/token', 'system/token/Token', null, 'lock', '0', '1', 1, now(), now());
+insert into "public"."t_menu" values (110400, 110000, 'menu.tokenManagement', '/system/token', 'system/token/View', null, 'lock', '0', '1', 1, now(), now());
 insert into "public"."t_menu" values (110500, 110000, 'menu.teamManagement', '/system/team', 'system/team/Team', null, 'team', '0', '1', 2, now(), now());
 insert into "public"."t_menu" values (110600, 110000, 'menu.memberManagement', '/system/member', 'system/member/Member', null, 'usergroup-add', '0', '1', 2, now(), now());
 insert into "public"."t_menu" values (120100, 120000, 'menu.project', '/flink/project', 'flink/project/View', null, 'github', '0', '1', 1, now(), now());
@@ -155,113 +155,12 @@ insert into "public"."t_menu" values (130602, 130600, 'edit yarn queue', null, n
 insert into "public"."t_menu" values (130603, 130600, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', '0', null, now(), now());
 
 -- ----------------------------
--- Records of t_role
--- ----------------------------
-insert into "public"."t_role" values (100001, 'developer', now(), now(), 'developer');
-insert into "public"."t_role" values (100002, 'team admin', now(), now(), 'Team Admin has all permissions inside the team.');
-
--- ----------------------------
--- Records of t_role_menu
--- ----------------------------
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120000);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120100);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120101);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120102);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120104);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120105);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120200);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120201);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120202);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120203);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120204);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120206);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120207);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120208);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120209);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120210);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120211);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120212);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120213);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120215);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120216);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120217);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120300);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120304);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120306);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120307);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120400);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120401);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120402);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120403);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 130000);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 130100);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 130101);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 110000);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 110600);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 110601);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 110602);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 110603);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 110604);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 110605);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120000);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120100);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120101);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120102);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120103);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120104);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120105);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120200);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120201);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120202);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120203);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120204);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120205);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120206);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120207);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120208);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120209);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120210);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120211);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120212);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120213);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120214);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120215);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120216);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120217);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120218);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120300);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120301);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120302);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120303);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120304);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120305);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120306);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120307);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120400);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120401);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120402);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120403);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130000);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130100);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130101);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130200);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130300);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130400);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130401);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130402);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130500);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130501);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130502);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130503);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130504);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130600);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130601);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130602);
-insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130603);
-
--- ----------------------------
 -- Records of t_setting
 -- ----------------------------
+delete from "public"."t_menu"
+where "type" = '1'
+   or "path" in ('/system/menu', '/system/role', '/system/team', '/system/member');
+
 insert into "public"."t_setting" values (1, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml full path', 1);
 insert into "public"."t_setting" values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven private server address', 1);
 insert into "public"."t_setting" values (3, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven private server authentication username', 1);
@@ -282,8 +181,3 @@ insert into "public"."t_setting" values (15, 'ingress.mode.default', null, 'Ingr
 -- Records of t_user
 -- ----------------------------
 insert into "public"."t_user" values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, 100000, '1', now(), now(), null, 0, null, null);
-
--- ----------------------------
--- Records of t_member
--- ----------------------------
-insert into "public"."t_member" values (100000, 100000, 100000, 100001, now(), now());

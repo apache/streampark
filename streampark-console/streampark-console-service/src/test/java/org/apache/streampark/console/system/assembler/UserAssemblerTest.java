@@ -21,11 +21,15 @@ import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.response.user.UserResponse;
+import org.apache.streampark.console.system.response.user.UserSessionResponse;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 class UserAssemblerTest {
@@ -38,7 +42,7 @@ class UserAssemblerTest {
         user.setPassword("secret");
         user.setSalt("salt");
         user.setEmail("admin@example.com");
-        user.setUserType(UserTypeEnum.USER);
+        user.setUserType(UserTypeEnum.EDITOR);
         user.setLoginType(LoginTypeEnum.PASSWORD);
 
         UserResponse response = UserAssembler.toResponse(user);
@@ -51,5 +55,22 @@ class UserAssemblerTest {
             .collect(Collectors.toSet());
         Assertions.assertFalse(fieldNames.contains("password"));
         Assertions.assertFalse(fieldNames.contains("salt"));
+    }
+
+    @Test
+    void shouldExposeOnlyTheFixedRoleInSessionResponse() {
+        User user = new User();
+        user.setUserId(1L);
+        user.setUsername("developer");
+        user.setUserType(UserTypeEnum.EDITOR);
+
+        Map<String, Object> session = new HashMap<>();
+        session.put("user", user);
+        session.put("roles", Collections.singleton("editor"));
+
+        UserSessionResponse response = UserAssembler.toSessionResponse(session);
+
+        Assertions.assertEquals(Collections.singleton("editor"), response.getRoles());
+        Assertions.assertEquals(UserTypeEnum.EDITOR, response.getUser().getUserType());
     }
 }
