@@ -92,7 +92,7 @@
       }
       Object.assign(params, searchRef.value);
       currentTablePage.value = params.pageNum;
-      // sessionStorage.setItem('appPageNo', params.pageNum);
+      // sessionStorage.setItem('sparkAppPageNo', params.pageNum);
       const res = await fetchSparkAppRecord(params);
 
       const timestamp = new Date().getTime();
@@ -232,12 +232,12 @@
 
   onMounted(() => {
     // If there is a page, jump to the page number of the record
-    const currentPage = sessionStorage.getItem('appPageNo');
+    const currentPage = sessionStorage.getItem('sparkAppPageNo');
     if (currentPage) {
       setPagination({
         current: Number(currentPage) || 1,
       });
-      sessionStorage.removeItem('appPageNo');
+      sessionStorage.removeItem('sparkAppPageNo');
     }
   });
 
