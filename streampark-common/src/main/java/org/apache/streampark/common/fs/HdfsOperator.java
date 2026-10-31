@@ -136,7 +136,8 @@ public final class HdfsOperator {
     }
 
     private static String toHdfsPath(String path) {
-        if (path.startsWith("hdfs://")) {
+        // Hadoop also represents HDFS paths without an authority as hdfs:/path.
+        if (path.startsWith("hdfs:/")) {
             return path;
         }
         return HdfsUtils.getDefaultFS().concat(path);
