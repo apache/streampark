@@ -170,7 +170,12 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
     @Override
     public void persistMetrics(FlinkApplication appParam) {
-        this.baseMapper.persistMetrics(appParam);
+        this.baseMapper.persistMetrics(
+            appParam,
+            FlinkAppStateEnum.CANCELLING.getValue(),
+            FlinkAppStateEnum.CANCELED.getValue(),
+            OptionStateEnum.CANCELLING.getValue(),
+            OptionStateEnum.SAVEPOINTING.getValue());
     }
 
     @Override

@@ -33,7 +33,12 @@ public interface FlinkApplicationMapper extends BaseMapper<FlinkApplication> {
 
     FlinkApplication selectApp(@Param("id") Long id);
 
-    void persistMetrics(@Param("app") FlinkApplication application);
+    void persistMetrics(
+                        @Param("app") FlinkApplication application,
+                        @Param("cancellingState") int cancellingState,
+                        @Param("canceledState") int canceledState,
+                        @Param("cancellingOptionState") int cancellingOptionState,
+                        @Param("savepointingOptionState") int savepointingOptionState);
 
     List<FlinkApplication> selectAppsByTeamId(@Param("teamId") Long teamId);
 

@@ -124,7 +124,22 @@
                 tracking=#{app.tracking},
             </if>
             <if test="app.optionState != null">
-                option_state=#{app.optionState},
+                <choose>
+                    <when test="@org.apache.streampark.console.core.enums.FlinkAppStateEnum@isEndState(app.state)">
+                        option_state=#{app.optionState},
+                    </when>
+                    <otherwise>
+                        option_state=case
+                            when state=#{cancellingState}
+                                and option_state in (
+                                    #{cancellingOptionState},
+                                    #{savepointingOptionState}
+                                )
+                            then option_state
+                            else #{app.optionState}
+                        end,
+                    </otherwise>
+                </choose>
             </if>
             <if test="app.startTime != null">
                 start_time=#{app.startTime},
@@ -165,9 +180,27 @@
                     </if>
                 </otherwise>
             </choose>
-            state=#{app.state}
+            <choose>
+                <when test="@org.apache.streampark.console.core.enums.FlinkAppStateEnum@isEndState(app.state)">
+                    state=#{app.state},
+                </when>
+                <otherwise>
+                    state=case
+                        when state=#{cancellingState}
+                            and option_state in (
+                                #{cancellingOptionState},
+                                #{savepointingOptionState}
+                            )
+                        then state
+                        else #{app.state}
+                    end,
+                </otherwise>
+            </choose>
         </set>
         where id=#{app.id}
+        <if test="@org.apache.streampark.console.core.enums.FlinkAppStateEnum@isEndState(app.state) == false">
+            and state != #{canceledState}
+        </if>
     </update>
 
     <select id="selectAppsByTeamId" resultType="org.apache.streampark.console.core.entity.FlinkApplication" parameterType="java.lang.Long">

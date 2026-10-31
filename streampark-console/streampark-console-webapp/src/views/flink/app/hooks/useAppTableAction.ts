@@ -104,7 +104,8 @@ export const useAppTableAction = (
         class: 'e2e-flinkapp-cancel-btn',
         tooltip: { title: t('flink.app.operation.cancel') },
         ifShow:
-          record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
+          [AppStateEnum.RUNNING, AppStateEnum.FAILING].includes(record.state) &&
+          record['optionState'] == OptionStateEnum.NONE,
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
