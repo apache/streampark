@@ -22,6 +22,7 @@ import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.SparkEnv;
+import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
@@ -56,6 +57,11 @@ public class ServiceHelper {
             return user.getUserId();
         }
         return null;
+    }
+
+    public static boolean isAdmin() {
+        User user = getLoginUser();
+        return user != null && user.getUserType() == UserTypeEnum.ADMIN;
     }
 
     public static String getFlinkSqlClientJar(FlinkEnv flinkEnv) {

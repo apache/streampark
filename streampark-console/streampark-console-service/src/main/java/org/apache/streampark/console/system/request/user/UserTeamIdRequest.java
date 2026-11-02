@@ -22,7 +22,7 @@ import org.apache.streampark.console.core.request.common.TeamIdRequest;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Request body for {@code POST /user/set_team} and {@code POST /user/appOwners}. */
+/** Request body for team selection and application owner queries. */
 @Getter
 @Setter
 public class UserTeamIdRequest extends TeamIdRequest {

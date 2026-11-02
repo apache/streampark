@@ -21,7 +21,6 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.web.FormOrJson;
-import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.SavepointAssembler;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkSavepoint;
@@ -57,7 +56,6 @@ public class SavepointController {
     private SavepointService savepointService;
 
     @PostMapping("history")
-    @Permission(app = "#query.appId", team = "#query.teamId")
     public RestResponseBody<IPage<SavepointResponse>> history(SavepointHistoryQueryRequest query, RestRequest request) {
         FlinkSavepoint sp = SavepointAssembler.toEntity(query);
         IPage<FlinkSavepoint> page = savepointService.getPage(sp, request);
@@ -66,7 +64,6 @@ public class SavepointController {
 
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
-    @Permission(app = "#request.appId", team = "#request.teamId")
     public RestResponseBody<Boolean> delete(@Valid @FormOrJson SavepointDeleteRequest request) throws InternalException {
         FlinkSavepoint savepoint = savepointService.getById(request.getId());
         FlinkApplication application = applicationManageService.getById(savepoint.getAppId());
@@ -75,7 +72,6 @@ public class SavepointController {
     }
 
     @PostMapping("trigger")
-    @Permission(app = "#request.appId", team = "#request.teamId")
     @RequiresPermissions("savepoint:trigger")
     public RestResponseBody<Boolean> trigger(@Valid @FormOrJson SavepointTriggerRequest request) {
         savepointService.trigger(request.getAppId(), request.getSavepointPath(), request.getNativeFormat());

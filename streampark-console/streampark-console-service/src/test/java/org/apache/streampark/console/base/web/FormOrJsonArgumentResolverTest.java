@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.web;
 
-import org.apache.streampark.console.system.request.team.TeamCreateRequest;
+import org.apache.streampark.console.system.request.user.UserCreateRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,37 +44,38 @@ class FormOrJsonArgumentResolverTest {
     void shouldBindFromJsonBody() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setContentType("application/json");
-        request.setContent("{\"teamName\":\"demo\",\"description\":\"test\"}".getBytes());
+        request.setContent("{\"username\":\"editor\",\"status\":\"1\",\"sex\":\"2\"}".getBytes());
 
         org.springframework.core.MethodParameter parameter =
             new org.springframework.core.MethodParameter(FormOrJsonArgumentResolverTest.class.getDeclaredMethod(
-                "sample", TeamCreateRequest.class), 0);
+                "sample", UserCreateRequest.class), 0);
 
         Object target = resolver.resolveArgument(
             parameter, null, new ServletWebRequest(request), null);
-        TeamCreateRequest dto = (TeamCreateRequest) target;
-        assertEquals("demo", dto.getTeamName());
+        UserCreateRequest dto = (UserCreateRequest) target;
+        assertEquals("editor", dto.getUsername());
     }
 
     @Test
     void shouldBindFromFormFields() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setContentType("application/x-www-form-urlencoded");
-        request.addParameter("teamName", "demo");
-        request.addParameter("description", "test");
+        request.addParameter("username", "editor");
+        request.addParameter("status", "1");
+        request.addParameter("sex", "2");
 
         org.springframework.core.MethodParameter parameter =
             new org.springframework.core.MethodParameter(FormOrJsonArgumentResolverTest.class.getDeclaredMethod(
-                "sample", TeamCreateRequest.class), 0);
+                "sample", UserCreateRequest.class), 0);
 
         Object target = resolver.resolveArgument(
             parameter, null, new ServletWebRequest(request), null);
-        TeamCreateRequest dto = (TeamCreateRequest) target;
-        assertEquals("demo", dto.getTeamName());
+        UserCreateRequest dto = (UserCreateRequest) target;
+        assertEquals("editor", dto.getUsername());
     }
 
     @SuppressWarnings({"java:S1144", "java:S1172"})
-    private void sample(@FormOrJson TeamCreateRequest request) {
+    private void sample(@FormOrJson UserCreateRequest request) {
         // referenced reflectively by resolveArgument tests
     }
 }

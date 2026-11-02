@@ -21,22 +21,40 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /** The user type. */
 @Getter
 public enum UserTypeEnum {
 
     /** The admin of StreamPark. */
-    ADMIN(1),
+    ADMIN(1, "admin", Collections.singleton("*")),
 
-    /** The user of StreamPark. */
-    USER(2);
+    /** A StreamPark developer who can create and operate jobs and development resources. */
+    EDITOR(2, "editor", new LinkedHashSet<>(Arrays.asList(
+        "app:*",
+        "backup:*",
+        "conf:*",
+        "externalLink:view",
+        "project:*",
+        "resource:*",
+        "savepoint:*",
+        "sql:*",
+        "variable:*")));
 
     @EnumValue
     private final int code;
 
-    UserTypeEnum(int code) {
+    private final String roleName;
+
+    private final Set<String> permissions;
+
+    UserTypeEnum(int code, String roleName, Set<String> permissions) {
         this.code = code;
+        this.roleName = roleName;
+        this.permissions = Collections.unmodifiableSet(permissions);
     }
 
     public static UserTypeEnum of(Integer code) {

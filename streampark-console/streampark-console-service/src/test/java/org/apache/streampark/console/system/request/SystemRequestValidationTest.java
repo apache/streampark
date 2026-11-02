@@ -17,8 +17,7 @@
 
 package org.apache.streampark.console.system.request;
 
-import org.apache.streampark.console.system.request.member.MemberCreateRequest;
-import org.apache.streampark.console.system.request.team.TeamCreateRequest;
+import org.apache.streampark.console.system.request.user.UserCreateRequest;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,14 +33,9 @@ class SystemRequestValidationTest {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
-    void teamCreateRequestShouldRequireTeamName() {
-        Set<ConstraintViolation<TeamCreateRequest>> violations = validator.validate(new TeamCreateRequest());
+    void userCreateRequestShouldRequireStatusAndSex() {
+        Set<ConstraintViolation<UserCreateRequest>> violations = validator.validate(new UserCreateRequest());
         Assertions.assertFalse(violations.isEmpty());
     }
 
-    @Test
-    void memberCreateRequestShouldRequireCoreFields() {
-        Set<ConstraintViolation<MemberCreateRequest>> violations = validator.validate(new MemberCreateRequest());
-        Assertions.assertTrue(violations.size() >= 3);
-    }
 }

@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.system.response.user;
 
+import org.apache.streampark.console.core.enums.UserTypeEnum;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,6 +40,8 @@ public class UserBriefResponse implements Serializable {
     private String nickName;
 
     private String description;
+
+    private UserTypeEnum userType;
 
     private Long lastTeamId;
 

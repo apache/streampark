@@ -1,126 +1,49 @@
-import type { RouteRecordRaw } from 'vue-router';
-
-import { useAppStore } from '/@/store/modules/app';
-import { usePermissionStore } from '/@/store/modules/permission';
 import { useUserStore } from '/@/store/modules/user';
-
-// import { useTabs } from './useTabs';
-
-import { router, resetRouter } from '/@/router';
-
-import projectSetting from '/@/settings/projectSetting';
-import { AuthUserName, PermissionModeEnum } from '/@/enums/appEnum';
 import { RoleEnum } from '/@/enums/roleEnum';
 
 import { isArray } from '/@/utils/is';
-import { useMultipleTabStore } from '/@/store/modules/multipleTab';
-import { intersection } from 'lodash-es';
-import { PageEnum } from '/@/enums/pageEnum';
-import { useRedo } from './usePage';
-import { menuMap } from '/@/router/constant';
 
-// User permissions related operations
+const ADMIN_ONLY_ACTIONS = new Set([
+  'cluster:create',
+  'cluster:update',
+  'externalLink:create',
+  'externalLink:delete',
+  'externalLink:update',
+  'setting:update',
+  'setting:view',
+  'token:add',
+  'token:delete',
+  'token:view',
+  'user:add',
+  'user:delete',
+  'user:reset',
+  'user:types',
+  'user:update',
+  'yarnQueue:create',
+  'yarnQueue:delete',
+  'yarnQueue:update',
+]);
+
+// Fixed role checks for actions that are visible in the UI.
 export function usePermission() {
   const userStore = useUserStore();
-  const appStore = useAppStore();
-  const permissionStore = usePermissionStore();
-  // const { closeAll } = useTabs(router);
-
-  /**
-   * Change permission mode
-   */
-  async function togglePermissionMode() {
-    appStore.setProjectConfig({
-      permissionMode:
-        projectSetting.permissionMode === PermissionModeEnum.BACK
-          ? PermissionModeEnum.ROUTE_MAPPING
-          : PermissionModeEnum.BACK,
-    });
-    location.reload();
-  }
-
-  /**
-   * Reset and regain authority resource information
-   * @param id
-   */
-  async function resume(nextPath?: string) {
-    const tabStore = useMultipleTabStore();
-    tabStore.clearCacheTabs();
-
-    const redo = useRedo(router);
-
-    resetRouter();
-    const [routes, hasAuth] = await permissionStore.buildRoutesAction(nextPath);
-    routes.forEach((route) => {
-      router.addRoute(route as unknown as RouteRecordRaw);
-    });
-    permissionStore.setLastBuildMenuTime();
-    const currentPath = router.currentRoute.value?.path;
-    if (Object.keys(menuMap).includes(currentPath)) {
-      router.replace(menuMap[currentPath]);
-    } else {
-      if (!hasAuth) {
-        router.push({ path: PageEnum.BASE_HOME });
-      } else {
-        await redo();
-      }
-    }
-
-    // closeAll();
-  }
 
   /**
    * Determine whether there is permission
    */
   function hasPermission(value?: RoleEnum | RoleEnum[] | string | string[], def = true): boolean {
     // Visible by default
-    if (!value || userStore.getUserInfo?.username === AuthUserName.ADMIN) {
+    if (!value || userStore.getRoleList?.includes(RoleEnum.ADMIN)) {
       return def;
     }
 
-    const permMode = projectSetting.permissionMode;
-
-    if ([PermissionModeEnum.ROUTE_MAPPING, PermissionModeEnum.ROLE].includes(permMode)) {
-      if (!isArray(value)) {
-        return userStore.getRoleList?.includes(value as RoleEnum);
-      }
-      return (intersection(value, userStore.getRoleList) as RoleEnum[]).length > 0;
+    const actions = isArray(value) ? value : [value];
+    if (userStore.getRoleList?.includes(RoleEnum.EDITOR)) {
+      return actions.some((action) => !ADMIN_ONLY_ACTIONS.has(action as string));
     }
 
-    if (PermissionModeEnum.BACK === permMode) {
-      const allCodeList = userStore.getPermissions as string[];
-      if (!isArray(value)) {
-        return allCodeList.includes(value);
-      }
-      return (intersection(value, allCodeList) as string[]).length > 0;
-    }
-    return true;
+    return false;
   }
 
-  /**
-   * Change roles
-   * @param roles
-   */
-  async function changeRole(roles: RoleEnum | RoleEnum[]): Promise<void> {
-    if (projectSetting.permissionMode !== PermissionModeEnum.ROUTE_MAPPING) {
-      throw new Error(
-        'Please switch PermissionModeEnum to ROUTE_MAPPING mode in the configuration to operate!',
-      );
-    }
-
-    if (!isArray(roles)) {
-      roles = [roles];
-    }
-    userStore.setRoleList(roles);
-    await resume();
-  }
-
-  /**
-   * refresh menu data
-   */
-  async function refreshMenu(nextPath?: string) {
-    resume(nextPath);
-  }
-
-  return { changeRole, hasPermission, togglePermissionMode, refreshMenu };
+  return { hasPermission };
 }

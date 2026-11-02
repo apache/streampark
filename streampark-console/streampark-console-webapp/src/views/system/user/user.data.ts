@@ -37,7 +37,7 @@ export const enum GenderEnum {
 // user type
 export const enum UserTypeEnum {
   ADMIN = 'ADMIN',
-  USER = 'USER',
+  EDITOR = 'EDITOR',
 }
 
 export const columns: BasicColumn[] = [
@@ -150,8 +150,8 @@ export const formSchema = (formType: string): FormSchema[] => {
       componentProps: {
         disabled: isView,
         options: [
-          { label: t('ADMIN'), value: UserTypeEnum.ADMIN },
-          { label: t('USER'), value: UserTypeEnum.USER },
+          { label: 'Admin', value: UserTypeEnum.ADMIN },
+          { label: 'Editor', value: UserTypeEnum.EDITOR },
         ],
       },
       rules: [{ required: true }],

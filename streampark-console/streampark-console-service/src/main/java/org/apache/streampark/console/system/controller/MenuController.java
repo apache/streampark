@@ -20,14 +20,9 @@ package org.apache.streampark.console.system.controller;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.domain.router.VueRouter;
 import org.apache.streampark.console.core.util.ServiceHelper;
-import org.apache.streampark.console.system.assembler.MenuAssembler;
 import org.apache.streampark.console.system.entity.Menu;
-import org.apache.streampark.console.system.request.menu.MenuListQueryRequest;
 import org.apache.streampark.console.system.request.menu.MenuRouterRequest;
-import org.apache.streampark.console.system.response.menu.MenuListResponse;
 import org.apache.streampark.console.system.service.MenuService;
-
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,12 +46,5 @@ public class MenuController {
     public RestResponseBody<List<VueRouter<Menu>>> getUserRouters(MenuRouterRequest request) {
         List<VueRouter<Menu>> routers = this.menuService.listRouters(ServiceHelper.getUserId(), request.getTeamId());
         return RestResponseBody.success(routers);
-    }
-
-    @PostMapping("list")
-    @RequiresPermissions("menu:view")
-    public RestResponseBody<MenuListResponse> menuList(MenuListQueryRequest query) {
-        return RestResponseBody.success(
-            MenuAssembler.toListResponse(this.menuService.listMenuMap(MenuAssembler.toEntity(query))));
     }
 }

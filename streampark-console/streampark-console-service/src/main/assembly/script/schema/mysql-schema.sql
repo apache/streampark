@@ -340,33 +340,6 @@ create table `t_variable` (
 
 
 -- ----------------------------
--- Table structure for t_role
--- ----------------------------
-drop table if exists `t_role`;
-create table `t_role` (
-  `role_id` bigint not null auto_increment comment 'user id',
-  `role_name` varchar(64) collate utf8mb4_general_ci not null comment 'role name',
-  `create_time` datetime default null comment 'create time',
-  `modify_time` datetime default null comment 'modify time',
-  `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
-  primary key (`role_id`) using btree
-) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-
--- ----------------------------
--- Table structure for t_role_menu
--- ----------------------------
-drop table if exists `t_role_menu`;
-create table `t_role_menu` (
-  `id` bigint not null auto_increment,
-  `role_id` bigint not null,
-  `menu_id` bigint not null,
-  primary key (`id`) using btree,
-  unique key `un_role_menu_inx` (`role_id`,`menu_id`) using btree
-) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-
--- ----------------------------
 -- Table structure for t_setting
 -- ----------------------------
 drop table if exists `t_setting`;
@@ -392,7 +365,7 @@ create table `t_user` (
   `salt` varchar(26) collate utf8mb4_general_ci default null comment 'salt',
   `password` varchar(64) collate utf8mb4_general_ci default null comment 'password',
   `email` varchar(64) collate utf8mb4_general_ci default null comment 'email',
-  `user_type` int  not null comment 'user type 1:admin 2:user',
+  `user_type` int  not null comment 'user role 1:admin 2:editor',
   `login_type` tinyint default 0 comment 'login type 0:password 1:ldap 2:sso',
   `last_team_id` bigint default null comment 'last team id',
   `status` char(1) collate utf8mb4_general_ci not null comment 'status 0:locked 1:active',
@@ -404,22 +377,6 @@ create table `t_user` (
   `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
   primary key (`user_id`) using btree,
   unique key `un_username` (`username`) using btree
-) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-
--- ----------------------------
--- Table structure for t_member
--- ----------------------------
-drop table if exists `t_member`;
-create table `t_member` (
-  `id` bigint not null auto_increment,
-  `team_id` bigint not null comment 'team id',
-  `user_id` bigint not null comment 'user id',
-  `role_id` bigint not null comment 'role id',
-  `create_time` datetime default null comment 'create time',
-  `modify_time` datetime default null comment 'modify time',
-  primary key (`id`) using btree,
-  unique key `un_user_team_role_inx` (`user_id`,`team_id`,`role_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 

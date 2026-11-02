@@ -19,19 +19,10 @@ import { ERROR_LOG_ROUTE, PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { filter } from '/@/utils/helper/treeHelper';
 
 import { getMenuRouter } from '/@/api/system/menu';
-import { getPermCode } from '/@/api/system/user';
-
 import { useMessage } from '/@/hooks/web/useMessage';
 import { PageEnum } from '/@/enums/pageEnum';
-import { fetchUserTeam } from '/@/api/system/member';
-// import { Persistent } from '/@/utils/cache/persistent';
-import { USER_INFO_KEY } from '/@/enums/cacheEnum';
-import { UserInfo } from '/#/store';
-import { getAuthCache } from '/@/utils/auth';
 
 interface PermissionState {
-  // Permission code list
-  permCodeList: string[] | number[];
   // Whether the route has been dynamically added
   isDynamicAddedRoute: boolean;
   // To trigger a menu update
@@ -45,8 +36,6 @@ interface PermissionState {
 export const usePermissionStore = defineStore({
   id: 'app-permission',
   state: (): PermissionState => ({
-    // List of permission codes
-    permCodeList: [],
     // Whether the route has been dynamically added
     isDynamicAddedRoute: false,
     // To trigger a menu update
@@ -57,9 +46,6 @@ export const usePermissionStore = defineStore({
     frontMenuList: [],
   }),
   getters: {
-    getPermCodeList(): string[] | number[] {
-      return this.permCodeList;
-    },
     getBackMenuList(): Menu[] {
       return this.backMenuList;
     },
@@ -74,10 +60,6 @@ export const usePermissionStore = defineStore({
     },
   },
   actions: {
-    setPermCodeList(codeList: string[]) {
-      this.permCodeList = codeList;
-    },
-
     setBackMenuList(list: Menu[]) {
       this.backMenuList = list;
       list?.length > 0 && this.setLastBuildMenuTime();
@@ -96,28 +78,15 @@ export const usePermissionStore = defineStore({
     },
     resetState(): void {
       this.isDynamicAddedRoute = false;
-      this.permCodeList = [];
       this.backMenuList = [];
       this.lastBuildMenuTime = 0;
     },
-    async changePermissionCode() {
-      const codeList = await getPermCode();
-      this.setPermCodeList(codeList);
-    },
-
     // Build routing
     async buildRoutesAction(nextPath = ''): Promise<[AppRouteRecordRaw[], boolean]> {
       const { t } = useI18n();
       const userStore = useUserStore();
       const appStore = useAppStoreWithOut();
-      // get teamList
-      const { userId } = getAuthCache(USER_INFO_KEY) as UserInfo;
       let hasAuth = false;
-      // Get the team list when building a route to ensure data consistency
-      if (userId) {
-        const teamList = await fetchUserTeam({ userId });
-        userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
-      }
       let routes: AppRouteRecordRaw[] = [];
       const roleList = toRaw(userStore.getRoleList) || [];
       const { permissionMode = projectSetting.permissionMode } = appStore.getProjectConfig;

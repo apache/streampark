@@ -26,11 +26,8 @@ import org.apache.streampark.console.system.service.result.UserUpdateResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-import javax.annotation.Nullable;
-
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface UserService extends IService<User> {
 
@@ -89,43 +86,11 @@ public interface UserService extends IService<User> {
     String resetPassword(String username) throws Exception;
 
     /**
-     * Get the permissions of current userId.
-     *
-     * @param userId the user Id
-     * @param teamId team id. If it's null, will find permissions from all teams.
-     * @return permissions
-     */
-    Set<String> listPermissions(Long userId, @Nullable Long teamId);
-
-    /**
      * List all users without tokens
      *
      * @return List of User
      */
     List<User> listNoTokenUser();
-
-    /**
-     * Populate the LastTeam field in User
-     *
-     * @param teamId team id
-     * @param userId user id
-     */
-    void setLastTeam(Long teamId, Long userId);
-
-    /**
-     * Clean the LastTeam field in User
-     *
-     * @param userId user id
-     * @param teamId team id
-     */
-    void clearLastTeam(Long userId, Long teamId);
-
-    /**
-     * Clean the LastTeam field in User
-     *
-     * @param teamId team id
-     */
-    void clearLastTeam(Long teamId);
 
     /**
      * List all Users by team id
@@ -159,6 +124,9 @@ public interface UserService extends IService<User> {
      * @return login session result with optional loginCode for legacy wire format
      */
     UserLoginResult getLoginUserInfo(User user) throws Exception;
+
+    /** Select an existing team namespace for the current user. */
+    void setLastTeam(Long teamId, Long userId);
 
     void deleteUser(Long userId);
 }

@@ -39,5 +39,5 @@ public class UserSessionResponse implements Serializable {
 
     private UserBriefResponse user;
 
-    private Set<String> permissions;
+    private Set<String> roles;
 }

@@ -6,14 +6,12 @@ import { PageEnum } from '/@/enums/pageEnum';
 import {
   APP_TEAMID_KEY_,
   EXPIRE_KEY,
-  PERMISSION_KEY,
   ROLES_KEY,
   TOKEN_KEY,
   USER_INFO_KEY,
 } from '/@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '/@/utils/auth';
 import { signout } from '/@/api/system/passport';
-import { fetchSetUserTeam } from '/@/api/system/user';
 
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
@@ -21,24 +19,17 @@ import { router } from '/@/router';
 import { usePermissionStore } from '/@/store/modules/permission';
 import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
-import { h, unref } from 'vue';
+import { h } from 'vue';
 import { getUserTeamId } from '/@/utils';
-import { usePermission } from '/@/hooks/web/usePermission';
 
-interface TeamListType {
-  label: string;
-  value: string;
-}
 interface UserState {
   userInfo: Nullable<UserInfo>;
   token?: string;
   expire?: string;
   roleList: RoleEnum[];
-  permissions: string[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
   teamId: string;
-  teamList: Array<TeamListType>;
 }
 
 export const useUserStore = defineStore({
@@ -51,15 +42,12 @@ export const useUserStore = defineStore({
     expire: undefined,
     // roleList
     roleList: [],
-    permissions: [],
     // Whether the login expired
     sessionTimeout: false,
     // Last fetch time
     lastUpdateTime: 0,
     // user Team
     teamId: getUserTeamId(),
-    // Maintain teamlist data
-    teamList: [],
   }),
   getters: {
     getUserInfo(): UserInfo {
@@ -80,16 +68,8 @@ export const useUserStore = defineStore({
     getLastUpdateTime(): number {
       return this.lastUpdateTime;
     },
-    getPermissions(): string[] {
-      return this.permissions?.length > 0
-        ? this.permissions
-        : getAuthCache<string[]>(PERMISSION_KEY);
-    },
     getTeamId(): string | undefined {
       return this.teamId;
-    },
-    getTeamList(): TeamListType[] {
-      return this.teamList;
     },
   },
   actions: {
@@ -119,41 +99,13 @@ export const useUserStore = defineStore({
       this.roleList = [];
       this.sessionTimeout = false;
     },
-    setPermissions(permissions: string[] = []) {
-      this.permissions = permissions;
-      setAuthCache(PERMISSION_KEY, permissions);
-    },
     setData(data: Recordable) {
-      const { token, expire, user, permissions, roles = [] } = data;
+      const { token, expire, user, roles = [] } = data;
 
       this.setToken(token);
       this.setExpire(expire);
       this.setUserInfo(user);
       this.setRoleList(roles);
-      this.setPermissions(permissions);
-    },
-    // set team
-    async setTeamId(data: { teamId: string; userId?: string | number }): Promise<boolean> {
-      try {
-        const { refreshMenu } = usePermission();
-        // The userId passed in is the binding operation at login
-        const { permissions, roles = [], user } = await fetchSetUserTeam(data);
-        this.setUserInfo(user as UserInfo);
-        this.setRoleList(roles as RoleEnum[]);
-        this.setPermissions(permissions);
-
-        // If it returns success, it will be stored in the local cache
-        this.teamId = data.teamId;
-        sessionStorage.setItem(APP_TEAMID_KEY_, data.teamId);
-        localStorage.setItem(APP_TEAMID_KEY_, data.teamId);
-        await refreshMenu(unref(router.currentRoute)?.path);
-        return Promise.resolve(true);
-      } catch (error) {
-        return Promise.reject(error);
-      }
-    },
-    setTeamList(teamList: Array<TeamListType>) {
-      this.teamList = teamList;
     },
     async afterLoginAction(goHome?: boolean): Promise<boolean> {
       if (!this.getToken) return false;

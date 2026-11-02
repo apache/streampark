@@ -21,9 +21,5 @@ import org.apache.streampark.console.system.entity.Team;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-import java.util.List;
-
 public interface TeamMapper extends BaseMapper<Team> {
-
-    List<Team> selectTeamsByUserId(Long userId);
 }

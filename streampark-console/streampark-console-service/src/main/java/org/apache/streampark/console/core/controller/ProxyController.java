@@ -22,15 +22,11 @@ import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
-import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ProxyService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
-import org.apache.streampark.console.system.entity.Member;
-import org.apache.streampark.console.system.entity.User;
-import org.apache.streampark.console.system.service.MemberService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -63,9 +59,6 @@ public class ProxyController {
     @Autowired
     private ApplicationLogService logService;
 
-    @Autowired
-    private MemberService memberService;
-
     @GetMapping("{type}/{id}/assets/**")
     public void proxyFlinkAssets(HttpServletRequest request, HttpServletResponse response,
                                  @PathVariable("type") String type, @PathVariable("id") Long id) throws Exception {
@@ -81,16 +74,15 @@ public class ProxyController {
 
     private void proxy(String type, HttpServletRequest request, HttpServletResponse response,
                        Long id) throws Exception {
+        ApiAlertException.throwIfNull(ServiceHelper.getLoginUser(), "Permission denied, please login first.");
         ApplicationLog log;
         switch (type) {
             case "flink":
                 FlinkApplication flinkApplication = flinkApplicationManageService.getApp(id);
-                checkProxyApp(flinkApplication.getTeamId());
                 proxyService.proxyFlink(request, response, flinkApplication);
                 return;
             case "spark":
                 SparkApplication sparkApplication = sparkApplicationManageService.getApp(id);
-                checkProxyApp(sparkApplication.getTeamId());
                 proxyService.proxySpark(request, response, sparkApplication);
                 return;
             case "flink_cluster":
@@ -111,26 +103,11 @@ public class ProxyController {
         }
     }
 
-    private void checkProxyApp(Long teamId) {
-        User user = ServiceHelper.getLoginUser();
-        ApiAlertException.throwIfNull(user, "Permission denied, please login first.");
-
-        if (user.getUserType() != UserTypeEnum.ADMIN) {
-            Member member = memberService.getByTeamIdUserName(teamId, user.getUsername());
-            ApiAlertException.throwIfNull(member,
-                "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
-        }
-    }
-
     private void checkProxyAppLog(ApplicationLog log) {
         ApiAlertException.throwIfNull(log, "Invalid operation, The application log not found.");
-        if (log.getJobType() == EngineTypeEnum.FLINK.getCode()) {
-            FlinkApplication app = flinkApplicationManageService.getById(log.getAppId());
-            checkProxyApp(app.getTeamId());
-        }
-        if (log.getJobType() == EngineTypeEnum.SPARK.getCode()) {
-            SparkApplication app = sparkApplicationManageService.getById(log.getAppId());
-            checkProxyApp(app.getTeamId());
-        }
+        ApiAlertException.throwIfFalse(
+            log.getJobType() == EngineTypeEnum.FLINK.getCode()
+                || log.getJobType() == EngineTypeEnum.SPARK.getCode(),
+            "Invalid operation, unknown application log type.");
     }
 }

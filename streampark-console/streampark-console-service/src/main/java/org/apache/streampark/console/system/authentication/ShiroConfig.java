@@ -54,9 +54,7 @@ public class ShiroConfig {
 
         filterChainDefinitionMap.put("/passport/**", "anon");
         filterChainDefinitionMap.put("/systemName", "anon");
-        filterChainDefinitionMap.put("/member/teams", "anon");
         filterChainDefinitionMap.put("/user/check/**", "anon");
-        filterChainDefinitionMap.put("/user/initTeam", "anon");
         filterChainDefinitionMap.put("/websocket/**", "anon");
         filterChainDefinitionMap.put("/metrics/**", "anon");
 

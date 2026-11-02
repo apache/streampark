@@ -17,10 +17,4 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.system.mapper.TeamMapper">
-    <select id="selectTeamsByUserId" resultType="org.apache.streampark.console.system.entity.Team" parameterType="org.apache.streampark.console.system.entity.Team">
-        select t.* from t_team t
-        join t_member m
-        on t.id = m.team_id
-        where m.user_id = #{userId}
-    </select>
 </mapper>

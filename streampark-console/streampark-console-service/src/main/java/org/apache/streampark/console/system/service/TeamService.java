@@ -17,66 +17,16 @@
 
 package org.apache.streampark.console.system.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.system.entity.Team;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 public interface TeamService extends IService<Team> {
 
     /**
-     * Retrieves a page of {@link Team} objects based on the provided parameters.
+     * Get the internal default workspace used by legacy team_id columns.
      *
-     * @param team The {@link Team} object containing the search criteria.
-     * @param request The {@link RestRequest} object used for pagination and sorting.
-     * @return An {@link IPage} containing the retrieved {@link Team} objects.
+     * @return default workspace
      */
-    IPage<Team> getPage(Team team, RestRequest request);
-
-    /**
-     * Get the Team by team name
-     *
-     * @param teamName team name
-     * @return Team
-     */
-    Team getByName(String teamName);
-
-    /**
-     * Create a Team instance
-     *
-     * @param team Team
-     */
-    void createTeam(Team team);
-
-    /**
-     * Remove the Team by team id
-     *
-     * @param teamId team id
-     */
-    void removeById(Long teamId);
-
-    /**
-     * Update Team information carried by the incoming Team
-     *
-     * @param team Team
-     */
-    void updateTeam(Team team);
-
-    /**
-     * List All team by user id
-     *
-     * @param userId user id
-     * @return List of Team
-     */
-    List<Team> listByUserId(Long userId);
-
-    /**
-     * get system default team
-     * @return
-     */
-
     Team getSysDefaultTeam();
 }

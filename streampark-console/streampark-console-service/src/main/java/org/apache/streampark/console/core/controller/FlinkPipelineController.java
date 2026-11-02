@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.web.FormOrJson;
-import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.FlinkPipelineAssembler;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
@@ -52,7 +51,6 @@ public class FlinkPipelineController {
     @Autowired
     private FlinkApplicationBuildPipelineService appBuildPipeService;
 
-    @Permission(app = "#request.appId")
     @PostMapping("build")
     @RequiresPermissions("app:create")
     public RestResponseBody<Boolean> buildApplication(@Valid @FormOrJson FlinkPipelineBuildRequest request) throws Exception {
@@ -67,7 +65,6 @@ public class FlinkPipelineController {
      * @return pipeline and docker resolved snapshot details
      */
     @PostMapping("/detail")
-    @Permission(app = "#request.appId")
     @RequiresPermissions("app:view")
     public RestResponseBody<FlinkPipelineDetailResponse> getBuildProgressDetail(@Valid FlinkPipelineDetailRequest request) {
         Long appId = request.getAppId();

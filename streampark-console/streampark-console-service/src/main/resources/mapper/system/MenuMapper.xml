@@ -32,35 +32,4 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="selectPermissions" resultType="string">
-        select distinct m.perms
-        from t_role r
-        left join t_member ur on (r.role_id = ur.role_id)
-        left join t_role_menu rm on (rm.role_id = r.role_id)
-        left join t_menu m on (m.menu_id = rm.menu_id)
-        where ur.user_id = #{userId}
-        and (#{teamId} is null or ur.team_id = #{teamId})
-        and m.perms is not null
-        and m.perms &lt;&gt; ''
-    </select>
-
-    <select id="selectMenus" resultMap="menu">
-        select m.*
-        from t_menu m inner join t_role_menu rm
-        on m.menu_id = rm.menu_id
-        inner join t_member mr
-        on rm.role_id = mr.role_id
-        where m.type &lt;&gt; 1
-        and mr.user_id = #{userId}
-        and mr.team_id = #{teamId}
-        order by m.order_num
-    </select>
-
-    <select id="selectUserIdsByMenuId" parameterType="string" resultType="string">
-        select user_id
-        from t_member
-        where role_id in
-        (select rm.role_id from t_role_menu rm where rm.menu_id = #{menuId})
-    </select>
-
 </mapper>

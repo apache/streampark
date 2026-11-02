@@ -21,7 +21,7 @@ import org.apache.streampark.console.core.bean.ApiContractDocument;
 import org.apache.streampark.console.core.bean.ApiContractDocument.ApiEndpointDescriptor;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
 import org.apache.streampark.console.core.request.common.IdRequest;
-import org.apache.streampark.console.system.request.team.TeamCreateRequest;
+import org.apache.streampark.console.system.request.user.UserCreateRequest;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,16 +37,16 @@ class ApiTypeScriptGeneratorTest {
     void shouldGenerateInterfacesFromContractDocument() {
         ApiContractDocument document = new ApiContractDocument();
         ApiEndpointDescriptor endpoint = new ApiEndpointDescriptor();
-        endpoint.setController("TeamController");
-        endpoint.setHandler("addTeam");
-        endpoint.setPath("/team/post");
+        endpoint.setController("UserController");
+        endpoint.setHandler("addUser");
+        endpoint.setPath("/user/post");
         endpoint.setHttpMethod("POST");
-        endpoint.setRequestType("TeamCreateRequest");
+        endpoint.setRequestType("UserCreateRequest");
         endpoint.setResponseDataType("Void");
         document.setEndpoints(Collections.singletonList(endpoint));
 
         Map<String, List<OpenAPISchema.Schema>> dtoSchemas = new LinkedHashMap<>();
-        dtoSchemas.put("TeamCreateRequest", RequestDtoSchemaBuilder.build(TeamCreateRequest.class, null,
+        dtoSchemas.put("UserCreateRequest", RequestDtoSchemaBuilder.build(UserCreateRequest.class, null,
             RequestDtoSchemaBuilder.defaultTypeNames()));
         dtoSchemas.put("IdRequest", RequestDtoSchemaBuilder.build(IdRequest.class, null,
             RequestDtoSchemaBuilder.defaultTypeNames()));
@@ -54,7 +54,7 @@ class ApiTypeScriptGeneratorTest {
 
         String typescript = ApiTypeScriptGenerator.generate(document);
 
-        Assertions.assertTrue(typescript.contains("export interface TeamCreateRequest"));
+        Assertions.assertTrue(typescript.contains("export interface UserCreateRequest"));
         Assertions.assertTrue(typescript.contains("export interface RestResponseBody"));
         Assertions.assertTrue(typescript.contains("export const apiEndpoints"));
     }

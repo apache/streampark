@@ -25,19 +25,15 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
+import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
-import org.apache.streampark.console.system.entity.Member;
-import org.apache.streampark.console.system.entity.Role;
-import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
-import org.apache.streampark.console.system.service.MemberService;
-import org.apache.streampark.console.system.service.MenuService;
-import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 import org.apache.streampark.console.system.service.result.UserLoginResult;
@@ -55,27 +51,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nullable;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
-
-    @Autowired
-    private MemberService memberService;
-
-    @Autowired
-    private MenuService menuService;
 
     @Autowired
     private FlinkApplicationManageService applicationManageService;
@@ -88,9 +74,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private TeamService teamService;
-
-    @Autowired
-    private RoleService roleService;
 
     @Override
     public User getByUsername(String username) {
@@ -115,23 +98,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void createUser(User user) {
+        if (user.getUserType() == null) {
+            user.setUserType(UserTypeEnum.EDITOR);
+        }
+        user.setLastTeamId(teamService.getSysDefaultTeam().getId());
         if (StringUtils.isNoneBlank(user.getPassword())) {
             String salt = ShaHashUtils.getRandomSalt();
             String password = ShaHashUtils.encrypt(salt, user.getPassword());
             user.setSalt(salt);
-            // default team
-            user.setLastTeamId(teamService.getSysDefaultTeam().getId());
             user.setPassword(password);
         }
         save(user);
-        // set team member
-        Member member = new Member();
-        member.setUserName(user.getUsername());
-        member.setTeamId(teamService.getSysDefaultTeam().getId());
-        Role role = roleService.getSysDefaultRole();
-        member.setRoleId(role.getRoleId());
-        member.setRoleName(role.getRoleName());
-        memberService.createMember(member);
     }
 
     @Override
@@ -159,6 +136,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void updatePassword(User userParam) {
+        User currentUser = ServiceHelper.getLoginUser();
+        ApiAlertException.throwIfTrue(
+            currentUser.getUserType() != UserTypeEnum.ADMIN
+                && !currentUser.getUserId().equals(userParam.getUserId()),
+            "Permission denied, you can only change your own password.");
+
         User user = getById(userParam.getUserId());
         ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
         ApiAlertException.throwIfFalse(
@@ -190,12 +173,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public Set<String> listPermissions(Long userId, @Nullable Long teamId) {
-        List<String> userPermissions = this.menuService.listPermissions(userId, teamId);
-        return new HashSet<>(userPermissions);
-    }
-
-    @Override
     public List<User> listNoTokenUser() {
         List<User> users = this.baseMapper.selectNoTokenUsers();
         if (!users.isEmpty()) {
@@ -205,31 +182,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void setLastTeam(Long teamId, Long userId) {
-        User user = getById(userId);
-        AssertUtils.notNull(user);
-        user.setLastTeamId(teamId);
-        this.baseMapper.updateById(user);
-    }
-
-    @Override
-    public void clearLastTeam(Long userId, Long teamId) {
-        User user = getById(userId);
-        AssertUtils.notNull(user);
-        if (!teamId.equals(user.getLastTeamId())) {
-            return;
-        }
-        this.lambdaUpdate()
-            .eq(User::getUserId, userId)
-            .set(User::getLastTeamId, null)
-            .update();
-    }
-
-    @Override
-    public void clearLastTeam(Long teamId) {
-        this.lambdaUpdate().eq(User::getLastTeamId, teamId)
-            .set(User::getLastTeamId, null)
-            .update();
+        ApiAlertException.throwIfNull(userId, "Current login user is null.");
+        ApiAlertException.throwIfNull(teamService.getById(teamId), "TeamId is invalid, set team failed.");
+        User update = new User();
+        update.setUserId(userId);
+        update.setLastTeamId(teamId);
+        ApiAlertException.throwIfFalse(baseMapper.updateById(update) == 1, "User not found, set team failed.");
     }
 
     @Override
@@ -273,12 +233,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional(rollbackFor = Exception.class)
     public void deleteUser(Long userId) {
         removeById(userId);
-        this.memberService.removeByUserId(userId);
     }
 
     /**
-     * generate user info, contains: 1.token, 2.vue router, 3.role, 4.permission, 5.personalized
-     * config info of frontend
+     * Generate frontend user information with a fixed role.
      *
      * @param user user
      * @return UserInfo
@@ -298,15 +256,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userInfo.put("user", user);
 
         if (user.getLastTeamId() == null) {
-            List<Team> teams = this.teamService.listByUserId(user.getUserId());
-            if (!teams.isEmpty()) {
-                user.setLastTeamId(teams.get(0).getId());
-            }
+            user.setLastTeamId(teamService.getSysDefaultTeam().getId());
         }
 
-        // 3) permissions
-        Set<String> permissions = this.listPermissions(user.getUserId(), user.getLastTeamId());
-        userInfo.put("permissions", permissions);
+        // 3) one fixed role; roles are not editable permission collections
+        userInfo.put("roles", Collections.singleton(user.getUserType().getRoleName()));
 
         return userInfo;
     }
