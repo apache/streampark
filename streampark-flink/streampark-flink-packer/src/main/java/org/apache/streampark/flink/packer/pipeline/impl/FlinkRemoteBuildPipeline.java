@@ -20,7 +20,7 @@ package org.apache.streampark.flink.packer.pipeline.impl;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
-import org.apache.streampark.flink.packer.maven.Artifact;
+import org.apache.streampark.flink.packer.maven.FlinkSqlDependencySupport;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.FlinkRemotePerJobBuildRequest;
@@ -99,12 +99,7 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
                         return paths;
                     }
                     if (request.flinkJobType() == FlinkJobType.FLINK_SQL) {
-                        List<File> snakeyaml =
-                            MavenTool.resolveArtifacts(
-                                Collections.singleton(new Artifact("org.yaml", "snakeyaml", "2.0")));
-                        return snakeyaml.stream()
-                            .map(File::getAbsolutePath)
-                            .collect(Collectors.toList());
+                        return new java.util.ArrayList<>(FlinkSqlDependencySupport.resolveRuntimeJars());
                     }
                     return Collections.<String>emptyList();
                 });

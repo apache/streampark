@@ -71,8 +71,6 @@ public final class YarnApplicationClient extends AbstractYarnClient {
         providedLibs.add(hdfsWorkspace.appJars());
 
         if (submitRequest.jobType() == FlinkJobType.FLINK_SQL) {
-            providedLibs.add(
-                WORKSPACE.shims + "/flink-" + submitRequest.flinkVersion().majorVersion());
             String jobLib = WORKSPACE.workspace + "/" + submitRequest.id() + "/lib";
             try {
                 if (HdfsUtils.exists(jobLib)) {

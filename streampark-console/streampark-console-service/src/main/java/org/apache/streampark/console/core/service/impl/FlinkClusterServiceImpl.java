@@ -424,7 +424,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             flinkCluster.getId(),
             getKubernetesDeploySpec(flinkCluster, "shutdown"));
         Future<ShutdownResponse> future = executorService.submit(() -> FlinkClient.shutdown(stopRequest));
-        return future.get(60, TimeUnit.SECONDS);
+        return future.get(clusterOperationTimeout(flinkCluster), TimeUnit.SECONDS);
     }
 
     private DeployResponse deployInternal(FlinkCluster flinkCluster) throws InterruptedException, ExecutionException, TimeoutException {
@@ -437,7 +437,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             getKubernetesDeploySpec(flinkCluster, "start"));
         log.info("Deploy cluster request {}", deployRequest);
         Future<DeployResponse> future = executorService.submit(() -> FlinkClient.deploy(deployRequest));
-        return future.get(60, TimeUnit.SECONDS);
+        return future.get(clusterOperationTimeout(flinkCluster), TimeUnit.SECONDS);
+    }
+
+    private long clusterOperationTimeout(FlinkCluster flinkCluster) {
+        return flinkCluster.getFlinkDeployModeEnum() == FlinkDeployMode.KUBERNETES_NATIVE_SESSION
+            ? 300L
+            : 60L;
     }
 
     private void checkActiveIfNeeded(FlinkCluster flinkCluster) {

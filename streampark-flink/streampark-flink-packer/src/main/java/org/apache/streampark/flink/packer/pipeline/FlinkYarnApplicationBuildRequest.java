@@ -17,10 +17,12 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+import org.apache.streampark.common.core.FlinkVersion;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
-public class FlinkYarnApplicationBuildRequest implements BuildParam {
+public class FlinkYarnApplicationBuildRequest implements FlinkBuildParam {
 
     private final String appName;
     private final String mainClass;
@@ -28,6 +30,8 @@ public class FlinkYarnApplicationBuildRequest implements BuildParam {
     private final String yarnProvidedPath;
     private final FlinkJobType flinkJobType;
     private final DependencyInfo dependencyInfo;
+    private final FlinkVersion flinkVersion;
+    private final String customFlinkUserJar;
 
     public FlinkYarnApplicationBuildRequest(
                                             String appName,
@@ -35,13 +39,17 @@ public class FlinkYarnApplicationBuildRequest implements BuildParam {
                                             String localWorkspace,
                                             String yarnProvidedPath,
                                             FlinkJobType flinkJobType,
-                                            DependencyInfo dependencyInfo) {
+                                            DependencyInfo dependencyInfo,
+                                            FlinkVersion flinkVersion,
+                                            String customFlinkUserJar) {
         this.appName = appName;
         this.mainClass = mainClass;
         this.localWorkspace = localWorkspace;
         this.yarnProvidedPath = yarnProvidedPath;
         this.flinkJobType = flinkJobType;
         this.dependencyInfo = dependencyInfo;
+        this.flinkVersion = flinkVersion;
+        this.customFlinkUserJar = customFlinkUserJar;
     }
 
     @Override
@@ -56,6 +64,26 @@ public class FlinkYarnApplicationBuildRequest implements BuildParam {
 
     public String localWorkspace() {
         return localWorkspace;
+    }
+
+    @Override
+    public String workspace() {
+        return localWorkspace;
+    }
+
+    @Override
+    public FlinkDeployMode deployMode() {
+        return FlinkDeployMode.YARN_APPLICATION;
+    }
+
+    @Override
+    public FlinkVersion flinkVersion() {
+        return flinkVersion;
+    }
+
+    @Override
+    public String customFlinkUserJar() {
+        return customFlinkUserJar;
     }
 
     public String yarnProvidedPath() {

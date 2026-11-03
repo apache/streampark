@@ -22,6 +22,7 @@ import org.apache.streampark.common.core.FlinkVersion;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
+import org.apache.streampark.flink.packer.maven.FlinkSqlDependencySupport;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -51,7 +52,10 @@ public interface FlinkBuildParam extends BuildParam {
                     + "/flink-"
                     + flinkVersion().majorVersion());
         }
-        return dependencyInfo().merge(libs);
+        DependencyInfo dependencies = dependencyInfo().merge(libs);
+        return flinkJobType() == FlinkJobType.FLINK_SQL
+            ? FlinkSqlDependencySupport.withRuntimeDependencies(dependencies)
+            : dependencies;
     }
 
     default String getShadedJarPath(String rootWorkspace) {

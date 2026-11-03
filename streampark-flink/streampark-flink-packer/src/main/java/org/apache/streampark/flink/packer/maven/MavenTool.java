@@ -57,7 +57,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -167,7 +169,12 @@ public final class MavenTool extends LoggerSupport {
         }
         logInfo("start shaded fat-jar: " + String.join(",", jarLibs));
         ShadeRequest shadeRequest = new ShadeRequest();
-        shadeRequest.setJars(jarSet);
+        // The shader keeps the first duplicate class. Target shims must override the
+        // baseline classes embedded in the SQL client and the shared shim artifact.
+        shadeRequest.setJars(jarSet.stream()
+            .sorted(Comparator.comparingInt(MavenTool::shimPriority)
+                .thenComparing(File::getAbsolutePath))
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
         shadeRequest.setUberJar(uberJar);
         List<ResourceTransformer> transformer = new ArrayList<>();
         transformer.add(new ServicesResourceTransformer());
@@ -184,6 +191,16 @@ public final class MavenTool extends LoggerSupport {
         shader.shade(shadeRequest);
         logInfo("finish build fat-jar: " + uberJar.getAbsolutePath());
         return uberJar;
+    }
+
+    private static int shimPriority(File jar) {
+        if (jar.getName().startsWith("streampark-flink-shims_flink-")) {
+            return 0;
+        }
+        if (jar.getName().startsWith("streampark-flink-shims-base-")) {
+            return 1;
+        }
+        return 2;
     }
 
     /**
@@ -307,10 +324,7 @@ public final class MavenTool extends LoggerSupport {
             boolean isFilteredState =
                 name.startsWith("META-INF/") && name.endsWith(".SF")
                     || name.endsWith(".DSA")
-                    || name.endsWith(".RSA")
-                    || name.startsWith("org/yaml/")
-                    || name.startsWith("META-INF/versions/")
-                        && name.contains("/org/yaml/");
+                    || name.endsWith(".RSA");
             if (isFilteredState) {
                 INSTANCE.logInfo("shade ignore file: " + name);
                 return true;

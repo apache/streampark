@@ -53,14 +53,12 @@ public class FlinkHadoopDockerfileTemplate extends FlinkDockerfileTemplateTrait 
         this.flinkExtraLibPaths = flinkExtraLibPaths;
         this.hadoopConfDirPath = hadoopConfDirPath;
         this.hiveConfDirPath = hiveConfDirPath;
-        this.hadoopConfDir =
-            workspace()
-                .relativize(Paths.get(hadoopConfDirPath == null ? "" : hadoopConfDirPath))
-                .toString();
-        this.hiveConfDir =
-            workspace()
-                .relativize(Paths.get(hiveConfDirPath == null ? "" : hiveConfDirPath))
-                .toString();
+        this.hadoopConfDir = hadoopConfDirPath == null || hadoopConfDirPath.isEmpty()
+            ? ""
+            : workspace().relativize(Paths.get(hadoopConfDirPath).toAbsolutePath()).toString();
+        this.hiveConfDir = hiveConfDirPath == null || hiveConfDirPath.isEmpty()
+            ? ""
+            : workspace().relativize(Paths.get(hiveConfDirPath).toAbsolutePath()).toString();
     }
 
     @Override

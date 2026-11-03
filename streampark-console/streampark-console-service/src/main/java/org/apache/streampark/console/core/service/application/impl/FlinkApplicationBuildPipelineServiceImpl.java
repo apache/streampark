@@ -372,7 +372,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
                     localWorkspace = app.getLocalAppHome();
                 }
                 FlinkYarnApplicationBuildRequest yarnAppRequest = buildFlinkYarnApplicationBuildRequest(app, mainClass,
-                    localWorkspace, yarnProvidedPath);
+                    localWorkspace, yarnProvidedPath, flinkEnv, flinkUserJar);
                 log.info("Submit params to building pipeline : {}", yarnAppRequest);
                 return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
             case YARN_PER_JOB:
@@ -404,14 +404,18 @@ public class FlinkApplicationBuildPipelineServiceImpl
                                                                                    @Nonnull FlinkApplication app,
                                                                                    String mainClass,
                                                                                    String localWorkspace,
-                                                                                   String yarnProvidedPath) {
+                                                                                   String yarnProvidedPath,
+                                                                                   FlinkEnv flinkEnv,
+                                                                                   String flinkUserJar) {
         return new FlinkYarnApplicationBuildRequest(
             app.getJobName(),
             mainClass,
-            localWorkspace,
+            app.isFlinkSqlJob() ? app.getLocalAppHome() : localWorkspace,
             yarnProvidedPath,
             app.getJobTypeEnum(),
-            getMergedDependencyInfo(app));
+            getMergedDependencyInfo(app),
+            FlinkEnvUtils.version(flinkEnv),
+            flinkUserJar);
     }
 
     @Nonnull

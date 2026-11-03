@@ -18,10 +18,22 @@
 package org.apache.streampark.flink.packer.pipeline.impl;
 
 import org.apache.streampark.common.enums.FlinkJobType;
+import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.fs.HdfsOperator;
+import org.apache.streampark.common.fs.LfsOperator;
+import org.apache.streampark.flink.packer.maven.DependencyInfo;
+import org.apache.streampark.flink.packer.maven.FlinkSqlDependencySupport;
+import org.apache.streampark.flink.packer.maven.MavenTool;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.FlinkYarnApplicationBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
-import org.apache.streampark.flink.packer.pipeline.SimpleBuildResponse;
+import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
+import org.apache.streampark.flink.packer.pipeline.YarnJarUploader;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Building pipeline for flink yarn application mode */
 public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
@@ -43,16 +55,36 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
     }
 
     @Override
-    public SimpleBuildResponse buildProcess() {
-        boolean sqlMode =
-            request.flinkJobType() == FlinkJobType.FLINK_SQL
-                || request.flinkJobType() == FlinkJobType.PYFLINK;
-        runYarnSqlBuildSteps(
-            request.localWorkspace(),
-            request.yarnProvidedPath(),
-            sqlMode,
-            request.dependencyInfo());
-        return new SimpleBuildResponse();
+    public ShadedBuildResponse buildProcess() {
+        if (request.flinkJobType() != FlinkJobType.FLINK_SQL) {
+            runYarnSqlBuildSteps(
+                request.localWorkspace(),
+                request.yarnProvidedPath(),
+                request.flinkJobType() == FlinkJobType.PYFLINK,
+                request.dependencyInfo());
+            return new ShadedBuildResponse(request.workspace(), null);
+        }
+
+        execStep(1, () -> {
+            LfsOperator.mkCleanDirs(request.workspace());
+            HdfsOperator.mkCleanDirs(request.yarnProvidedPath());
+            return null;
+        });
+        File shadedJar = execStep(2, () -> MavenTool.buildFatJar(
+            request.mainClass(), request.providedLibs(), request.getShadedJarPath(request.workspace())));
+        execStep(3, () -> {
+            DependencyInfo dependencies =
+                FlinkSqlDependencySupport.withRuntimeDependencies(request.dependencyInfo());
+            Set<String> jars = MavenTool.resolveArtifacts(dependencies.mavenArts()).stream()
+                .map(File::getAbsolutePath).collect(Collectors.toCollection(HashSet::new));
+            jars.addAll(dependencies.extJarLibs());
+            for (String jar : jars) {
+                YarnJarUploader.uploadJarToHdfsOrLfs(FsOperator.lfs(), jar, request.workspace() + "/lib");
+                YarnJarUploader.uploadJarToHdfsOrLfs(FsOperator.hdfs(), jar, request.yarnProvidedPath());
+            }
+            return null;
+        });
+        return new ShadedBuildResponse(request.workspace(), shadedJar.getAbsolutePath());
     }
 
     public static FlinkYarnApplicationBuildPipeline of(FlinkYarnApplicationBuildRequest request) {
