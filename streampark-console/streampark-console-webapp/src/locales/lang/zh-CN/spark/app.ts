@@ -102,6 +102,8 @@ export default {
   startTime: '启动时间',
   endTime: '结束时间',
   hadoopUser: 'Hadoop User',
+  lineageEnable: '数据血缘',
+  lineageEnableTip: '上报该作业的血缘到 Gravitino；仅在系统设置中配置了 Gravitino 地址后生效',
   success: '提交成功',
   appidCheck: 'appId 不能为空！',
   release: {

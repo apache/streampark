@@ -32,6 +32,9 @@ export default {
     ingressSetting: {
       name: 'Kubernetes Ingress 配置',
     },
+    lineageSetting: {
+      name: 'Gravitino 数据血缘配置',
+    },
   },
   update: {
     success: '设置更新成功！',
@@ -97,6 +100,24 @@ export default {
     ssl: {
       label: '开启 SSL',
       desc: '是否在发送告警邮箱中启用 SSL',
+    },
+  },
+  lineage: {
+    address: {
+      label: 'Gravitino 地址',
+      desc: '接收数据血缘事件的 Gravitino 服务地址，例如 http://host:8090',
+    },
+    token: {
+      label: 'Gravitino 认证 Token',
+      desc: '透传给 Gravitino 的 Bearer token，Gravitino 开启 oauth 鉴权后必填',
+    },
+    namespace: {
+      label: 'Gravitino 血缘命名空间',
+      desc: 'StreamPark 上报血缘事件使用的 OpenLineage job/dataset 命名空间',
+    },
+    nativeListenerEnable: {
+      label: '启用 Flink 官方血缘监听器',
+      desc: '是否同时注入官方 openlineage-flink 监听器配置；仅在已配置 Gravitino 地址时生效',
     },
   },
 };

@@ -63,6 +63,7 @@ export interface SparkApplication {
   k8sServiceAccount?: number;
   k8sNamespace?: string;
   hadoopUser?: string;
+  lineageEnable?: boolean;
   restartSize?: number;
   restartCount?: number;
   state?: AppStateEnum;

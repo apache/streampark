@@ -137,6 +137,9 @@ public class FlinkApplication extends BaseEntity implements ApplicationEntitySup
      */
     private Boolean k8sHadoopIntegration;
 
+    /** Whether to report OpenLineage data lineage for this application to Gravitino. */
+    private Boolean lineageEnable;
+
     private Integer state;
     /**
      * task release status

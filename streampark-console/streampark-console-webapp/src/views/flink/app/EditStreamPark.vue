@@ -108,6 +108,7 @@
         tags: app.tags,
         args: app.args || '',
         description: app.description,
+        lineageEnable: app.lineageEnable ?? false,
         dynamicProperties: app.dynamicProperties,
         resolveOrder: app.resolveOrder,
         versionId: app.versionId || null,

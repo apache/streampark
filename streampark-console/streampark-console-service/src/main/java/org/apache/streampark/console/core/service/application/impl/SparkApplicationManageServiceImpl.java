@@ -333,6 +333,7 @@ public class SparkApplicationManageServiceImpl
         newApp.setK8sHadoopIntegration(oldApp.getK8sHadoopIntegration());
 
         newApp.setHadoopUser(oldApp.getHadoopUser());
+        newApp.setLineageEnable(oldApp.getLineageEnable());
         newApp.setRestartSize(oldApp.getRestartSize());
         newApp.setState(SparkAppStateEnum.ADDED.getValue());
         newApp.setOptions(oldApp.getOptions());
@@ -441,6 +442,7 @@ public class SparkApplicationManageServiceImpl
         application.setAlertId(appParam.getAlertId());
         application.setRestartSize(appParam.getRestartSize());
         application.setTags(appParam.getTags());
+        application.setLineageEnable(appParam.getLineageEnable());
 
         switch (appParam.getDeployModeEnum()) {
             case YARN_CLUSTER:

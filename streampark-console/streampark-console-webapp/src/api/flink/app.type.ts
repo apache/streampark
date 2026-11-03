@@ -139,6 +139,7 @@ export interface AppListRecord {
   };
   streamParkJob: boolean;
   hadoopUser: string;
+  lineageEnable?: boolean;
 }
 
 interface AppControl {

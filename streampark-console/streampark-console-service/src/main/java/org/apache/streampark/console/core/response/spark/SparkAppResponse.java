@@ -91,6 +91,8 @@ public class SparkAppResponse implements Serializable {
 
     private String hadoopUser;
 
+    private Boolean lineageEnable;
+
     private Integer restartSize;
 
     private Integer restartCount;

@@ -252,7 +252,8 @@ create table "public"."t_flink_app" (
   "ingress_template" text collate "pg_catalog"."default",
   "default_mode_ingress" text collate "pg_catalog"."default",
   "tags" varchar(500) collate "pg_catalog"."default",
-  "hadoop_user" varchar(63) collate "pg_catalog"."default"
+  "hadoop_user" varchar(63) collate "pg_catalog"."default",
+  "lineage_enable" boolean default false
 )
 ;
 alter table "public"."t_flink_app" add constraint "t_flink_app_pkey" primary key ("id");

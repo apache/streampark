@@ -32,6 +32,9 @@ export default {
     ingressSetting: {
       name: 'Ingress Setting',
     },
+    lineageSetting: {
+      name: 'Gravitino Lineage Setting',
+    },
   },
   update: {
     success: 'Setting updated successfully',
@@ -97,6 +100,24 @@ export default {
     ssl: {
       label: 'SSL enable',
       desc: 'Whether to enable SSL in the mailbox that sends the alert',
+    },
+  },
+  lineage: {
+    address: {
+      label: 'Gravitino Address',
+      desc: 'Base URL of the Gravitino server lineage events are reported to, e.g. http://host:8090',
+    },
+    token: {
+      label: 'Gravitino Auth Token',
+      desc: 'Bearer token forwarded to Gravitino, required once Gravitino oauth authentication is enabled',
+    },
+    namespace: {
+      label: 'Gravitino Lineage Namespace',
+      desc: 'OpenLineage job/dataset namespace StreamPark reports under',
+    },
+    nativeListenerEnable: {
+      label: 'Enable Flink Native Lineage Listener',
+      desc: 'Whether to also inject the official openlineage-flink listener config; only takes effect once Gravitino Address is set',
     },
   },
 };

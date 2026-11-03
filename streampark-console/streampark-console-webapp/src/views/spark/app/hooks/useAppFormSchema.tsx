@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { computed, onMounted, ref, unref, type Ref } from 'vue';
+import { computed, h, onMounted, ref, unref, type Ref } from 'vue';
 import type { FormSchema } from '/@/components/Form';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { AppExistsStateEnum, JobTypeEnum, DeployMode } from '/@/enums/sparkEnum';
@@ -237,6 +237,14 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         ifShow: ({ values }) =>
           values?.deployMode == DeployMode.YARN_CLIENT ||
           values?.deployMode == DeployMode.YARN_CLUSTER,
+      },
+      {
+        field: 'lineageEnable',
+        label: t('spark.app.lineageEnable'),
+        component: 'Switch',
+        defaultValue: false,
+        componentProps: { checkedChildren: 'ON', unCheckedChildren: 'OFF' },
+        afterItem: () => h('span', { class: 'pop-tip' }, t('spark.app.lineageEnableTip')),
       },
       {
         field: 'yarnQueue',
