@@ -825,7 +825,14 @@ public class FlinkApplicationActionServiceImpl
         }
 
         if (FlinkDeployMode.isKubernetesApplicationMode(application.getDeployMode())) {
-            properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH);
+            try {
+                properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
+            } catch (Exception e) {
+                log.warn(
+                        "Failed to set archive directory for Kubernetes application mode. "
+                                + "HADOOP_HOME may not be set: {}",
+                        e.getMessage());
+            }
         }
 
         if (application.getAllowNonRestored()) {
