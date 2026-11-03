@@ -66,9 +66,9 @@ public final class DeflaterUtils {
         try {
             compressedBytes = Base64.getDecoder().decode(compressedText);
         } catch (IllegalArgumentException e) {
+            LOG.warn("Failed to decode base64 string: {}", e.getMessage());
             return null;
         }
-
         Inflater inflater = new Inflater();
         inflater.setInput(compressedBytes);
         byte[] buffer = new byte[BUFFER_SIZE];
