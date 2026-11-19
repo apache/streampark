@@ -130,6 +130,31 @@ public final class YarnUtils {
         return getRMWebAppURL(false);
     }
 
+    /**
+     * Resolve the base URL for ResourceManager REST API access.
+     *
+     * <p>Unlike {@link #getRMWebAppURL()}, this always targets the ResourceManager's own web app
+     * address (yarn.resourcemanager.webapp.address) instead of preferring yarn.web-proxy.address.
+     * That is because the web proxy only serves /proxy/... paths and does not expose the RM-only
+     * REST endpoints such as ws/v1/cluster/apps/...
+     */
+    public static String getRMWebAppRestURL() {
+        Configuration conf = HadoopUtils.hadoopConf();
+        boolean useHttps = YarnConfiguration.useHttps(conf);
+        String addressKey =
+            useHttps ? YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS : YarnConfiguration.RM_WEBAPP_ADDRESS;
+        int defaultPort =
+            useHttps
+                ? YarnConfiguration.DEFAULT_RM_WEBAPP_HTTPS_PORT
+                : YarnConfiguration.DEFAULT_RM_WEBAPP_PORT;
+        String protocol = useHttps ? Constants.HTTPS_SCHEMA : Constants.HTTP_SCHEMA;
+        java.net.InetSocketAddress inetSocketAddress =
+            conf.getSocketAddr(
+                addressKey, "0.0.0.0:" + defaultPort, defaultPort);
+        java.net.InetSocketAddress address = NetUtils.getConnectAddress(inetSocketAddress);
+        return protocol + address.getHostName() + ":" + address.getPort();
+    }
+
     public static String getRMWebAppURL(boolean getLatest) {
         if (rmHttpURL == null || getLatest) {
             synchronized (YarnUtils.class) {
@@ -260,14 +285,22 @@ public final class YarnUtils {
                 throw new IOException("yarnUtils restRequest error, url: " + url + ", detail: " + e, e);
             }
         }
+        // RM-only REST endpoints (e.g. ws/v1/cluster/apps/...) are served by the ResourceManager
+        // itself, not the web proxy. The web proxy only exposes /proxy/... paths.
+        java.util.function.BooleanSupplier isRmRest = () -> url.startsWith("ws/v1");
         try {
-            return request(getRMWebAppURL() + "/" + url, timeout);
+            String baseUrl = isRmRest.getAsBoolean() ? getRMWebAppRestURL() : getRMWebAppURL();
+            return request(baseUrl + "/" + url, timeout);
         } catch (Exception first) {
             Optional<String> retried =
                 Utils.retry(
                     5,
                     Duration.ofSeconds(5),
-                    () -> request(getRMWebAppURL(true) + "/" + url, timeout));
+                    () -> {
+                        String retryBaseUrl =
+                            isRmRest.getAsBoolean() ? getRMWebAppRestURL() : getRMWebAppURL(true);
+                        return request(retryBaseUrl + "/" + url, timeout);
+                    });
             if (retried.isPresent()) {
                 return retried.get();
             }
