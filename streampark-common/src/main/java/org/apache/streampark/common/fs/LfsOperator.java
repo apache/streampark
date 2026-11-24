@@ -26,6 +26,16 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.channels.Channels;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Local File System (aka LFS) Operator */
 public final class LfsOperator {
@@ -205,6 +215,66 @@ public final class LfsOperator {
             throw new IllegalStateException(
                 "[StreamPark] Failed to compute SHA-256 for: " + path, e);
         }
+    }
+
+    /** Opens a regular local file without following symbolic links. */
+    public static InputStream open(String path) throws IOException {
+        Path file = safePath(path);
+        if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Not a regular file: " + path);
+        }
+        return Channels.newInputStream(
+            Files.newByteChannel(file, StandardOpenOption.READ, LinkOption.NOFOLLOW_LINKS));
+    }
+
+    /** Lists direct children of a local directory without following symbolic links. */
+    public static List<String> list(String path) throws IOException {
+        Path directory = safePath(path);
+        if (!Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Not a directory: " + path);
+        }
+        List<String> entries = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
+            for (Path entry : stream) {
+                entries.add(entry.toString());
+            }
+        }
+        return entries;
+    }
+
+    public static boolean isFile(String path) {
+        try {
+            return Files.isRegularFile(safePath(path), LinkOption.NOFOLLOW_LINKS);
+        } catch (IOException | RuntimeException e) {
+            return false;
+        }
+    }
+
+    public static boolean isDirectory(String path) {
+        try {
+            return Files.isDirectory(safePath(path), LinkOption.NOFOLLOW_LINKS);
+        } catch (IOException | RuntimeException e) {
+            return false;
+        }
+    }
+
+    public static String canonicalPath(String path) throws IOException {
+        return safePath(path).toRealPath().toString();
+    }
+
+    private static Path safePath(String path) throws IOException {
+        if (path == null || path.isEmpty()) {
+            throw new IOException("Path must not be empty");
+        }
+        Path absolute = Paths.get(path).toAbsolutePath().normalize();
+        Path current = absolute.getRoot();
+        for (Path segment : absolute) {
+            current = current.resolve(segment);
+            if (Files.isSymbolicLink(current)) {
+                throw new IOException("Symbolic links are not allowed: " + path);
+            }
+        }
+        return absolute;
     }
 
     /** Force delete directory and recreate it. */

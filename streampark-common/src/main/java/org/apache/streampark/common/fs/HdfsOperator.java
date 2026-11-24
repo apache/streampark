@@ -17,9 +17,16 @@
 
 package org.apache.streampark.common.fs;
 
+import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.HdfsUtils;
 
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.Path;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Hadoop File System (aka HDFS) Operator */
 public final class HdfsOperator {
@@ -135,10 +142,84 @@ public final class HdfsOperator {
         }
     }
 
+    public static InputStream open(String path) throws IOException {
+        canonicalPath(path);
+        Path hdfsPath = toPath(path);
+        FileStatus status = HadoopUtils.hdfs().getFileStatus(hdfsPath);
+        if (!status.isFile() || status.isSymlink()) {
+            throw new IOException("Not a regular HDFS file: " + path);
+        }
+        return HadoopUtils.hdfs().open(hdfsPath);
+    }
+
+    public static List<String> list(String path) throws IOException {
+        canonicalPath(path);
+        Path hdfsPath = toPath(path);
+        FileStatus status = HadoopUtils.hdfs().getFileStatus(hdfsPath);
+        if (!status.isDirectory()) {
+            throw new IOException("Not an HDFS directory: " + path);
+        }
+        List<String> entries = new ArrayList<>();
+        for (FileStatus child : HadoopUtils.hdfs().listStatus(hdfsPath)) {
+            entries.add(child.getPath().toString());
+        }
+        return entries;
+    }
+
+    public static boolean isFile(String path) throws IOException {
+        try {
+            canonicalPath(path);
+        } catch (java.io.FileNotFoundException e) {
+            return false;
+        }
+        FileStatus status = status(path);
+        return status != null && status.isFile() && !status.isSymlink();
+    }
+
+    public static boolean isDirectory(String path) throws IOException {
+        try {
+            canonicalPath(path);
+        } catch (java.io.FileNotFoundException e) {
+            return false;
+        }
+        FileStatus status = status(path);
+        return status != null && status.isDirectory();
+    }
+
+    private static FileStatus status(String path) throws IOException {
+        try {
+            return HadoopUtils.hdfs().getFileStatus(toPath(path));
+        } catch (java.io.FileNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static String canonicalPath(String path) throws IOException {
+        Path expected = toPath(path);
+        FileStatus linkStatus = HadoopUtils.hdfs().getFileLinkStatus(expected);
+        if (linkStatus.isSymlink()) {
+            throw new IOException("Symbolic links are not allowed: " + path);
+        }
+        FileStatus status = HadoopUtils.hdfs().getFileStatus(expected);
+        if (status.isSymlink()) {
+            throw new IOException("Symbolic links are not allowed: " + path);
+        }
+        Path qualified = HadoopUtils.hdfs().makeQualified(expected);
+        Path resolved = HadoopUtils.hdfs().resolvePath(expected);
+        if (!qualified.equals(resolved)) {
+            throw new IOException("Non-canonical HDFS path: " + path);
+        }
+        return qualified.toString();
+    }
+
     private static String toHdfsPath(String path) {
         if (path.startsWith("hdfs://")) {
             return path;
         }
         return HdfsUtils.getDefaultFS().concat(path);
+    }
+
+    private static Path toPath(String path) {
+        return new Path(toHdfsPath(path));
     }
 }

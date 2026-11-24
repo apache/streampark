@@ -113,6 +113,12 @@ export default {
   detail: {
     detailTitle: 'Job Details',
     flinkWebUi: 'Flink Web UI',
+    artifactDependencies: 'Download Dependencies',
+    artifactDownloading: 'Downloading',
+    artifactDownloadWait: 'Large ZIP files may take a while.',
+    artifactDownloadErrorTitle: 'Download failed',
+    artifactDownloadFailed:
+      'Could not download the job artifact. Try again, or rebuild the job if its artifacts are missing.',
     compareConfig: 'Compare Config',
     compareFlinkSql: 'Compare Flink SQL',
     candidate: 'Candidate',

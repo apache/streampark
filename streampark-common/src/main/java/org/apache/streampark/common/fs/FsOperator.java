@@ -19,6 +19,10 @@ package org.apache.streampark.common.fs;
 
 import org.apache.streampark.common.enums.StorageType;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 /** File system operator factory and shared operations. */
 public abstract class FsOperator {
 
@@ -69,6 +73,31 @@ public abstract class FsOperator {
         public String fileSha256(String path) {
             return LfsOperator.fileSha256(path);
         }
+
+        @Override
+        public InputStream open(String path) throws IOException {
+            return LfsOperator.open(path);
+        }
+
+        @Override
+        public List<String> list(String path) throws IOException {
+            return LfsOperator.list(path);
+        }
+
+        @Override
+        public boolean isFile(String path) {
+            return LfsOperator.isFile(path);
+        }
+
+        @Override
+        public boolean isDirectory(String path) {
+            return LfsOperator.isDirectory(path);
+        }
+
+        @Override
+        public String canonicalPath(String path) throws IOException {
+            return LfsOperator.canonicalPath(path);
+        }
     };
 
     /** Scala-friendly HDFS operator singleton. */
@@ -117,6 +146,31 @@ public abstract class FsOperator {
         @Override
         public String fileSha256(String path) {
             return HdfsOperator.fileSha256(path);
+        }
+
+        @Override
+        public InputStream open(String path) throws IOException {
+            return HdfsOperator.open(path);
+        }
+
+        @Override
+        public List<String> list(String path) throws IOException {
+            return HdfsOperator.list(path);
+        }
+
+        @Override
+        public boolean isFile(String path) throws IOException {
+            return HdfsOperator.isFile(path);
+        }
+
+        @Override
+        public boolean isDirectory(String path) throws IOException {
+            return HdfsOperator.isDirectory(path);
+        }
+
+        @Override
+        public String canonicalPath(String path) throws IOException {
+            return HdfsOperator.canonicalPath(path);
         }
     };
 
@@ -185,5 +239,30 @@ public abstract class FsOperator {
      */
     public String fileSha256(String path) {
         throw new UnsupportedOperationException("SHA-256 is not supported by this file system");
+    }
+
+    /** Opens a regular file for reading without following local symbolic links. */
+    public InputStream open(String path) throws IOException {
+        throw new UnsupportedOperationException("Opening files is not supported by this file system");
+    }
+
+    /** Lists direct children of a directory. */
+    public List<String> list(String path) throws IOException {
+        throw new UnsupportedOperationException("Listing files is not supported by this file system");
+    }
+
+    /** Returns whether the path is a regular file. */
+    public boolean isFile(String path) throws IOException {
+        throw new UnsupportedOperationException("File checks are not supported by this file system");
+    }
+
+    /** Returns whether the path is a directory. */
+    public boolean isDirectory(String path) throws IOException {
+        throw new UnsupportedOperationException("Directory checks are not supported by this file system");
+    }
+
+    /** Resolves a path after rejecting symbolic links and non-canonical HDFS paths. */
+    public String canonicalPath(String path) throws IOException {
+        throw new UnsupportedOperationException("Path resolution is not supported by this file system");
     }
 }

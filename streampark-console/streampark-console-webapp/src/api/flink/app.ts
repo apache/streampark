@@ -47,6 +47,7 @@ enum APP_API {
   OPTION_LOG = '/flink/app/opt_log',
   DELETE_LOG = '/flink/app/delete/opt_log',
   CHECK_SAVEPOINT_PATH = '/flink/app/check/savepoint_path',
+  DOWNLOAD_ARTIFACT = '/flink/app/downloadArtifact',
 }
 
 /**
@@ -228,4 +229,20 @@ export function fetchName(data: { config: string }) {
 
 export function fetchCheckStart(data): Promise<AxiosResponse<number>> {
   return defHttp.post({ url: APP_API.CHECK_START, data }, { isReturnNativeResponse: true });
+}
+
+/**
+ * Download the latest successfully built application artifact.
+ */
+export function fetchDownloadArtifact(id: string): Promise<AxiosResponse<Blob>> {
+  return defHttp.post(
+    {
+      url: APP_API.DOWNLOAD_ARTIFACT,
+      data: { id },
+      responseType: 'blob',
+      timeout: 1000 * 60 * 10,
+      validateStatus: (status) => (status >= 200 && status < 300) || status === 500,
+    },
+    { isReturnNativeResponse: true, errorMessageMode: 'none' },
+  );
 }

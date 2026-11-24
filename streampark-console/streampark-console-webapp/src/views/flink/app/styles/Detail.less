@@ -49,6 +49,39 @@
   cursor: pointer;
 }
 
+.swal2-popup.artifact-download-wait {
+  padding: 0 20px 30px;
+
+  .swal2-loader {
+    width: 62px;
+    height: 62px;
+    margin: 34px auto 0;
+    border-width: 4px;
+    border-color: #7066e0 #e5e1fd #e5e1fd;
+  }
+
+  .swal2-actions {
+    display: none !important;
+  }
+
+  .swal2-title {
+    padding-top: 20px;
+    font-size: 28px;
+  }
+
+  .swal2-html-container {
+    margin: 12px 0 0;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .artifact-download-wait .swal2-loader {
+    animation: none;
+  }
+}
+
 .detail-pad {
   margin: 16px 16px 0 16px;
   .ant-table-wrapper {
