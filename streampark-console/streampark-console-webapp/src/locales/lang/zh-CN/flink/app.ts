@@ -104,6 +104,11 @@ export default {
   detail: {
     detailTitle: '作业详情',
     flinkWebUi: 'Flink Web UI',
+    artifactDependencies: '下载依赖',
+    artifactDownloading: 'Downloading',
+    artifactDownloadWait: '大文件可能需要一些时间，请稍候。',
+    artifactDownloadErrorTitle: '下载失败',
+    artifactDownloadFailed: '下载作业产物失败，请重试。如果产物已丢失，请先重新构建作业。',
     compareConfig: '比较配置',
     compareFlinkSql: '比较 Flink SQL',
     candidate: '侯选',

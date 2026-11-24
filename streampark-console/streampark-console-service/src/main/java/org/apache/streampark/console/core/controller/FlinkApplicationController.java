@@ -17,18 +17,22 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.annotation.AppChangeEvent;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.AppLogAssembler;
 import org.apache.streampark.console.core.assembler.FlinkApplicationAssembler;
+import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
+import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.request.app.AppBackupDeleteRequest;
 import org.apache.streampark.console.core.request.app.AppBackupQueryRequest;
 import org.apache.streampark.console.core.request.app.AppOptLogDeleteRequest;
@@ -55,8 +59,13 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.util.FlinkApplicationArtifactExporter;
+import org.apache.streampark.flink.packer.pipeline.BuildResult;
+import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
+import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -68,6 +77,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import java.io.File;
@@ -75,6 +85,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Validated
@@ -84,6 +95,9 @@ public class FlinkApplicationController {
 
     @Autowired
     private FlinkApplicationManageService applicationManageService;
+
+    @Autowired
+    private FlinkApplicationBuildPipelineService appBuildPipeService;
 
     @Autowired
     private FlinkApplicationActionService applicationActionService;
@@ -106,7 +120,52 @@ public class FlinkApplicationController {
     public RestResponseBody<FlinkAppResponse> get(@Valid FlinkAppIdRequest request) {
         FlinkApplication application = applicationManageService.getApp(request.getId());
         FlinkAppResponse response = FlinkApplicationAssembler.toResponse(application);
+        if (response != null) {
+            PipelineStatusEnum status = appBuildPipeService.getCurrentBuildPipeline(request.getId())
+                .map(ApplicationBuildPipeline::getPipelineStatus)
+                .orElse(PipelineStatusEnum.UNKNOWN);
+            response.setBuildStatus(status.getCode());
+        }
         return RestResponseBody.success(response);
+    }
+
+    @PostMapping("downloadArtifact")
+    @Permission(app = "#request.id")
+    @RequiresPermissions("app:detail")
+    public void downloadArtifact(
+                                 @Valid FlinkAppIdRequest request,
+                                 HttpServletResponse response) throws Exception {
+        FlinkApplication application = applicationManageService.getApp(request.getId());
+        ApiAlertException.throwIfNull(application, "The application does not exist.");
+        ApiAlertException.throwIfTrue(
+            Integer.valueOf(ReleaseStateEnum.RELEASING.get()).equals(application.getRelease()),
+            "The job is being released.");
+        ApiAlertException.throwIfTrue(
+            Boolean.TRUE.equals(application.getBuild()),
+            "The job has changes that require a new build.");
+        ApplicationBuildPipeline pipeline = appBuildPipeService.getCurrentBuildPipeline(request.getId())
+            .orElseThrow(() -> new ApiAlertException("No downloadable job artifact is available."));
+        ApiAlertException.throwIfFalse(
+            request.getId().equals(pipeline.getAppId()),
+            "The build artifact does not belong to this job.");
+        ApiAlertException.throwIfFalse(
+            application.getId() != null && application.getId().equals(pipeline.getAppId()),
+            "The build artifact does not belong to this job.");
+        FlinkDeployMode deployMode = application.getDeployModeEnum();
+        ApiAlertException.throwIfNull(deployMode, "No downloadable job artifact is available.");
+        ApiAlertException.throwIfFalse(
+            expectedPipelineType(deployMode) == pipeline.getPipeType(),
+            "The build artifact does not belong to this job.");
+        PipelineStatusEnum status = pipeline.getPipelineStatus();
+        if (status == PipelineStatusEnum.PENDING || status == PipelineStatusEnum.RUNNING) {
+            throw new ApiAlertException("The job is still being built.");
+        }
+        ApiAlertException.throwIfFalse(
+            status == PipelineStatusEnum.SUCCESS,
+            "No successful job artifact is available.");
+        BuildResult result = pipeline.getBuildResult();
+        FlinkApplicationArtifactExporter.write(
+            application, result, resourceService, response, () -> verifyArtifactBuild(application, pipeline));
     }
 
     @Permission(team = "#request.teamId")
@@ -314,5 +373,41 @@ public class FlinkApplicationController {
     public RestResponseBody<String> k8sStartLog(FlinkAppK8sLogRequest request) throws Exception {
         String resp = applicationInfoService.k8sStartLog(request.getId(), request.getOffset(), request.getLimit());
         return RestResponseBody.success(resp);
+    }
+
+    private void verifyArtifactBuild(FlinkApplication application, ApplicationBuildPipeline pipeline) {
+        FlinkApplication current = applicationManageService.getApp(application.getId());
+        ApplicationBuildPipeline currentPipeline = appBuildPipeService.getCurrentBuildPipeline(application.getId())
+            .orElseThrow(() -> new ApiAlertException("The job changed while preparing the download. Please retry."));
+        ApiAlertException.throwIfFalse(
+            current != null
+                && !Boolean.TRUE.equals(current.getBuild())
+                && !Integer.valueOf(ReleaseStateEnum.RELEASING.get()).equals(current.getRelease())
+                && Objects.equals(application.getTeamId(), current.getTeamId())
+                && application.getDeployModeEnum() == current.getDeployModeEnum()
+                && Objects.equals(pipeline.getAppId(), currentPipeline.getAppId())
+                && currentPipeline.getPipelineStatus() == PipelineStatusEnum.SUCCESS
+                && pipeline.getPipeType() == currentPipeline.getPipeType()
+                && Objects.equals(pipeline.getModifyTime(), currentPipeline.getModifyTime())
+                && Objects.equals(pipeline.getStepStatusTimestampJson(), currentPipeline.getStepStatusTimestampJson())
+                && Objects.equals(pipeline.getBuildResultJson(), currentPipeline.getBuildResultJson()),
+            "The job changed while preparing the download. Please retry.");
+    }
+
+    private static PipelineTypeEnum expectedPipelineType(FlinkDeployMode deployMode) {
+        switch (deployMode) {
+            case YARN_APPLICATION:
+                return PipelineTypeEnum.FLINK_YARN_APPLICATION;
+            case YARN_PER_JOB:
+            case YARN_SESSION:
+            case REMOTE:
+                return PipelineTypeEnum.FLINK_STANDALONE;
+            case KUBERNETES_NATIVE_SESSION:
+                return PipelineTypeEnum.FLINK_NATIVE_K8S_SESSION;
+            case KUBERNETES_NATIVE_APPLICATION:
+                return PipelineTypeEnum.FLINK_NATIVE_K8S_APPLICATION;
+            default:
+                throw new ApiAlertException("No downloadable job artifact is available.");
+        }
     }
 }

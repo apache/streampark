@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script setup lang="ts" name="ApplicationDetail">
-  import { DeployMode } from '/@/enums/flinkEnum';
+  import { DeployMode, PipelineStepEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchAppExternalLink } from '/@/api/setting/externalLink';
   import { ExternalLink } from '/@/api/setting/types/externalLink.type';
@@ -24,8 +24,8 @@
   import { Description, useDescription } from '/@/components/Description';
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
-  import { fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app';
-  import { onUnmounted, reactive, h, ref, onMounted } from 'vue';
+  import { fetchDownloadArtifact, fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app';
+  import { computed, onUnmounted, reactive, h, ref, onMounted } from 'vue';
   import { useIntervalFn } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app.type';
   import { Tooltip, Divider, Space } from 'ant-design-vue';
@@ -40,6 +40,8 @@
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
   import { LinkBadge } from '/@/components/LinkBadge';
+  import { downloadByData } from '/@/utils/file/download';
+  import Swal from 'sweetalert2';
 
   defineOptions({
     name: 'ApplicationDetail',
@@ -175,12 +177,105 @@
     externalLinks.value = links.data;
   }
 
+  const downloadingArtifact = ref(false);
+  const artifactBuildUnavailable = computed(
+    () =>
+      app.build === true ||
+      app.release === ReleaseStateEnum.RELEASING ||
+      app.buildStatus !== PipelineStepEnum.SUCCESS,
+  );
+  let artifactDownloadPopup: HTMLElement | null = null;
+  let artifactDownloadRequest = 0;
+
+  async function handleArtifactDownload() {
+    const id = app.id;
+    if (!id || artifactBuildUnavailable.value || downloadingArtifact.value) return;
+
+    const requestId = ++artifactDownloadRequest;
+    downloadingArtifact.value = true;
+    try {
+      await new Promise<void>((resolve) => {
+        void Swal.fire({
+          width: 450,
+          titleText: t('flink.app.detail.artifactDownloading'),
+          text: t('flink.app.detail.artifactDownloadWait'),
+          customClass: { popup: 'artifact-download-wait' },
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          heightAuto: false,
+          didOpen(popup) {
+            if (requestId !== artifactDownloadRequest) {
+              if (Swal.getPopup() === popup) Swal.close();
+              resolve();
+              return;
+            }
+            artifactDownloadPopup = popup;
+            if (Swal.getPopup() === popup) {
+              Swal.showLoading();
+              const loader = popup.querySelector('.swal2-loader');
+              if (loader) popup.prepend(loader);
+            }
+            resolve();
+          },
+        });
+      });
+      if (requestId !== artifactDownloadRequest) return;
+
+      const response = await fetchDownloadArtifact(String(id));
+      const contentType = String(
+        response.headers?.['content-type'] || response.data?.type || '',
+      ).toLowerCase();
+      if (
+        response.status < 200 ||
+        response.status >= 300 ||
+        !contentType.startsWith('application/zip') ||
+        response.data.size === 0
+      ) {
+        throw new Error('The artifact response is not a ZIP archive.');
+      }
+      downloadByData(response.data, `app-${id}-dependencies.zip`, 'application/zip');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) return;
+      if (
+        requestId !== artifactDownloadRequest ||
+        !artifactDownloadPopup ||
+        Swal.getPopup() !== artifactDownloadPopup
+      ) {
+        return;
+      }
+      Swal.close();
+      artifactDownloadPopup = null;
+      void Swal.fire({
+        width: 450,
+        icon: 'error',
+        titleText: t('flink.app.detail.artifactDownloadErrorTitle'),
+        text: t('flink.app.detail.artifactDownloadFailed'),
+        confirmButtonText: t('common.okText'),
+        heightAuto: false,
+      });
+    } finally {
+      if (requestId !== artifactDownloadRequest) return;
+      if (artifactDownloadPopup && Swal.getPopup() === artifactDownloadPopup) {
+        Swal.close();
+      }
+      artifactDownloadPopup = null;
+      downloadingArtifact.value = false;
+    }
+  }
+
   onMounted(() => {
     getExternalLinks();
   });
 
   onUnmounted(() => {
     pause();
+    artifactDownloadRequest += 1;
+    if (artifactDownloadPopup && Swal.getPopup() === artifactDownloadPopup) {
+      Swal.close();
+    }
+    artifactDownloadPopup = null;
   });
 </script>
 <template>
@@ -210,6 +305,18 @@
         >
           <Icon icon="ant-design:cloud-outlined" />
           {{ t('flink.app.detail.flinkWebUi') }}
+        </a-button>
+        <a-button
+          v-if="app.id"
+          v-auth="'app:detail'"
+          type="primary"
+          :disabled="artifactBuildUnavailable"
+          :loading="downloadingArtifact"
+          @click="handleArtifactDownload"
+          class="float-right -mt-8px mr-20px"
+        >
+          <Icon icon="ant-design:download-outlined" />
+          {{ t('flink.app.detail.artifactDependencies') }}
         </a-button>
       </div>
       <Description @register="registerDescription" />

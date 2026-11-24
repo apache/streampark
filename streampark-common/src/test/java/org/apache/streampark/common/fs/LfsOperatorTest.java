@@ -21,10 +21,13 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,6 +39,8 @@ import java.util.stream.Collectors;
 import static org.apache.streampark.common.fs.LfsOperatorTestSupport.DirWithFiles;
 import static org.apache.streampark.common.fs.LfsOperatorTestSupport.genRandomDir;
 import static org.apache.streampark.common.fs.LfsOperatorTestSupport.genRandomFile;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -412,6 +417,38 @@ class LfsOperatorTest {
                 Files.write(file, content);
 
                 assertEquals(DigestUtils.sha256Hex(content), LfsOperator.fileSha256(file.toString()));
+            });
+    }
+
+    @Test
+    void readAndListWithoutFollowingSymbolicLinks() throws Exception {
+        withTempDir(
+            outputDir -> {
+                Path realOutputDir = Paths.get(outputDir).toRealPath();
+                Path workspace = Files.createDirectories(realOutputDir.resolve("workspace"));
+                Path file = Files.writeString(workspace.resolve("artifact.jar"), "artifact");
+                assertThat(LfsOperator.isFile(file.toString())).isTrue();
+                try (InputStream input = LfsOperator.open(file.toString())) {
+                    assertThat(new String(input.readAllBytes(), StandardCharsets.UTF_8)).isEqualTo("artifact");
+                }
+                assertThat(LfsOperator.list(workspace.toString())).hasSize(1);
+                assertThat(LfsOperator.canonicalPath(workspace.toString()))
+                    .isEqualTo(workspace.toRealPath().toString());
+
+                Path outside = Files.writeString(realOutputDir.resolve("outside.jar"), "outside");
+                Path link = workspace.resolve("link.jar");
+                Path linkedDirectory = realOutputDir.resolve("linked-directory");
+                try {
+                    Files.createSymbolicLink(link, outside);
+                    Files.createSymbolicLink(linkedDirectory, workspace);
+                } catch (UnsupportedOperationException | IOException e) {
+                    Assumptions.assumeTrue(false, "symbolic links are unavailable");
+                }
+                assertThat(LfsOperator.isFile(link.toString())).isFalse();
+                assertThatThrownBy(() -> LfsOperator.open(link.toString())).isInstanceOf(IOException.class);
+                assertThatThrownBy(() -> LfsOperator.canonicalPath(link.toString())).isInstanceOf(IOException.class);
+                assertThatThrownBy(() -> LfsOperator.canonicalPath(linkedDirectory.resolve("artifact.jar").toString()))
+                    .isInstanceOf(IOException.class);
             });
     }
 }

@@ -18,11 +18,14 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.handler.GlobalExceptionHandler;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
+import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
@@ -51,6 +54,9 @@ class FlinkApplicationControllerMvcTest {
 
     @MockBean
     private FlinkApplicationManageService applicationManageService;
+
+    @MockBean
+    private FlinkApplicationBuildPipelineService appBuildPipeService;
 
     @MockBean
     private FlinkApplicationActionService applicationActionService;
@@ -89,5 +95,24 @@ class FlinkApplicationControllerMvcTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("success"))
             .andExpect(jsonPath("$.data").value(AppExistsStateEnum.IN_DB.get()));
+    }
+
+    @Test
+    void downloadArtifactRejectsDirtyApp() throws Exception {
+        FlinkApplication application = new FlinkApplication();
+        application.setId(42L);
+        application.setRelease(ReleaseStateEnum.DONE.get());
+        application.setBuild(true);
+        when(applicationManageService.getApp(42L)).thenReturn(application);
+
+        mockMvc.perform(
+            post("/flink/app/downloadArtifact")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("id", "42")
+                .param("teamId", "100000"))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.status").value("error"))
+            .andExpect(jsonPath("$.code").value(501))
+            .andExpect(jsonPath("$.message").value("The job has changes that require a new build."));
     }
 }
