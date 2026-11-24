@@ -21,6 +21,7 @@ import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.service.ResourceService;
@@ -29,6 +30,7 @@ import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.SimpleBuildResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StreamUtils;
 
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,6 +54,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /** Creates a bounded ZIP view of a successful Flink application build. */
+@Slf4j
 public final class FlinkApplicationArtifactExporter {
 
     private static final String ZIP_SUFFIX = "-dependencies.zip";
@@ -86,23 +90,11 @@ public final class FlinkApplicationArtifactExporter {
                       FsOperator localFs,
                       FsOperator remoteFs) throws IOException {
         String archiveName = "app-" + application.getId() + ZIP_SUFFIX;
-        Path archive = Files.createTempFile("streampark-artifact-", ".zip");
-        Throwable failure = null;
+        Path archive = createStagingFile();
         try {
-            try {
-                createArchive(
-                    application,
-                    result,
-                    resourceService,
-                    archive,
-                    archiveName.substring(0, archiveName.length() - 4),
-                    localFs,
-                    remoteFs);
-            } catch (ApiAlertException e) {
-                throw e;
-            } catch (IOException e) {
-                throw new ApiAlertException("The job artifact could not be read.", e);
-            }
+            prepareArchive(
+                application, result, resourceService, archive,
+                archiveName.substring(0, archiveName.length() - 4), localFs, remoteFs);
             validateBuild.run();
             response.setContentType("application/zip");
             response.setHeader(
@@ -114,18 +106,43 @@ public final class FlinkApplicationArtifactExporter {
                 OutputStream output = response.getOutputStream()) {
                 StreamUtils.copy(input, output);
             }
-        } catch (IOException | RuntimeException e) {
-            failure = e;
-            throw e;
         } finally {
-            try {
-                Files.deleteIfExists(archive);
-            } catch (IOException cleanupFailure) {
-                if (failure == null) {
-                    throw cleanupFailure;
-                }
-                failure.addSuppressed(cleanupFailure);
-            }
+            removeStagedArchive(archive, application.getId());
+        }
+    }
+
+    private static Path createStagingFile() throws IOException {
+        String appHome = WebUtils.getAppHome();
+        if (appHome == null || appHome.isBlank()) {
+            throw new IOException("The Console home directory is not configured.");
+        }
+        Path directory = Files.createDirectories(Path.of(appHome).toRealPath().resolve("artifact-downloads"));
+        if (!Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("The artifact staging directory must not be a symbolic link.");
+        }
+        return Files.createTempFile(directory, "streampark-artifact-", ".zip");
+    }
+
+    private static void removeStagedArchive(Path archive, Long appId) {
+        try {
+            Files.deleteIfExists(archive);
+        } catch (IOException e) {
+            log.warn("Could not remove the staged archive for job {}.", appId, e);
+        }
+    }
+
+    private static void prepareArchive(
+                                       FlinkApplication application,
+                                       BuildResult result,
+                                       ResourceService resourceService,
+                                       Path archive,
+                                       String archiveRoot,
+                                       FsOperator localFs,
+                                       FsOperator remoteFs) {
+        try {
+            createArchive(application, result, resourceService, archive, archiveRoot, localFs, remoteFs);
+        } catch (IOException e) {
+            throw new ApiAlertException("The job artifact could not be read.", e);
         }
     }
 
@@ -162,8 +179,6 @@ public final class FlinkApplicationArtifactExporter {
         }
         try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(archive))) {
             zip.setLevel(Deflater.NO_COMPRESSION);
-            zip.putNextEntry(new ZipEntry(archiveRoot + "/"));
-            zip.closeEntry();
             for (Source source : sources) {
                 writeSource(zip, archiveRoot, source);
             }

@@ -70,8 +70,8 @@ import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -90,29 +90,25 @@ import java.util.Objects;
 @Slf4j
 @Validated
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("flink/app")
 public class FlinkApplicationController {
 
-    @Autowired
-    private FlinkApplicationManageService applicationManageService;
+    private static final String FOREIGN_BUILD = "The build artifact does not belong to this job.";
 
-    @Autowired
-    private FlinkApplicationBuildPipelineService appBuildPipeService;
+    private final FlinkApplicationManageService applicationManageService;
 
-    @Autowired
-    private FlinkApplicationActionService applicationActionService;
+    private final FlinkApplicationBuildPipelineService appBuildPipeService;
 
-    @Autowired
-    private FlinkApplicationInfoService applicationInfoService;
+    private final FlinkApplicationActionService applicationActionService;
 
-    @Autowired
-    private FlinkApplicationBackupService backUpService;
+    private final FlinkApplicationInfoService applicationInfoService;
 
-    @Autowired
-    private ApplicationLogService applicationLogService;
+    private final FlinkApplicationBackupService backUpService;
 
-    @Autowired
-    private ResourceService resourceService;
+    private final ApplicationLogService applicationLogService;
+
+    private final ResourceService resourceService;
 
     @PostMapping("get")
     @Permission(app = "#request.id")
@@ -146,16 +142,13 @@ public class FlinkApplicationController {
         ApplicationBuildPipeline pipeline = appBuildPipeService.getCurrentBuildPipeline(request.getId())
             .orElseThrow(() -> new ApiAlertException("No downloadable job artifact is available."));
         ApiAlertException.throwIfFalse(
-            request.getId().equals(pipeline.getAppId()),
-            "The build artifact does not belong to this job.");
-        ApiAlertException.throwIfFalse(
-            application.getId() != null && application.getId().equals(pipeline.getAppId()),
-            "The build artifact does not belong to this job.");
+            request.getId().equals(pipeline.getAppId()) && request.getId().equals(application.getId()),
+            FOREIGN_BUILD);
         FlinkDeployMode deployMode = application.getDeployModeEnum();
         ApiAlertException.throwIfNull(deployMode, "No downloadable job artifact is available.");
         ApiAlertException.throwIfFalse(
             expectedPipelineType(deployMode) == pipeline.getPipeType(),
-            "The build artifact does not belong to this job.");
+            FOREIGN_BUILD);
         PipelineStatusEnum status = pipeline.getPipelineStatus();
         if (status == PipelineStatusEnum.PENDING || status == PipelineStatusEnum.RUNNING) {
             throw new ApiAlertException("The job is still being built.");

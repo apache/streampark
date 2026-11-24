@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.common.configuration.option.CoreOptions;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.console.base.handler.GlobalExceptionHandler;
@@ -29,7 +30,11 @@ import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.application.ApplicationLogService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.Member;
@@ -63,16 +68,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -98,6 +104,8 @@ class FlinkArtifactPermissionMvcTest {
     private final StaticApplicationContext context = new StaticApplicationContext();
 
     private ApplicationContext previousContext;
+    private String previousAppHome;
+    private Path consoleHome;
     private ApplicationBuildPipeline pipeline;
     private MockMvc mvc;
     private String principal;
@@ -106,6 +114,9 @@ class FlinkArtifactPermissionMvcTest {
     @BeforeEach
     void setUp() throws Exception {
         Path home = temporary.toRealPath();
+        previousAppHome = System.getProperty(CoreOptions.APP_HOME.key());
+        consoleHome = Files.createDirectory(home.resolve("console"));
+        System.setProperty(CoreOptions.APP_HOME.key(), consoleHome.toString());
         Files.write(home.resolve("job.jar"), "job".getBytes(StandardCharsets.UTF_8));
         Files.createDirectory(home.resolve("lib"));
         Files.write(home.resolve("lib/connector.jar"), "connector".getBytes(StandardCharsets.UTF_8));
@@ -149,10 +160,14 @@ class FlinkArtifactPermissionMvcTest {
             .setBuildResult(new ShadedBuildResponse(home.toString(), home.resolve("job.jar").toString()));
         when(builds.getCurrentBuildPipeline(101L)).thenReturn(Optional.of(pipeline));
 
-        FlinkApplicationController controller = new FlinkApplicationController();
-        ReflectionTestUtils.setField(controller, "applicationManageService", applications);
-        ReflectionTestUtils.setField(controller, "appBuildPipeService", builds);
-        ReflectionTestUtils.setField(controller, "resourceService", resources);
+        FlinkApplicationController controller = new FlinkApplicationController(
+            applications,
+            builds,
+            mock(FlinkApplicationActionService.class),
+            mock(FlinkApplicationInfoService.class),
+            mock(FlinkApplicationBackupService.class),
+            mock(ApplicationLogService.class),
+            resources);
         PermissionAspect permission = new PermissionAspect();
         ReflectionTestUtils.setField(permission, "applicationManageService", applications);
         ReflectionTestUtils.setField(permission, "memberService", members);
@@ -168,6 +183,11 @@ class FlinkArtifactPermissionMvcTest {
 
     @AfterEach
     void tearDown() {
+        if (previousAppHome == null) {
+            System.clearProperty(CoreOptions.APP_HOME.key());
+        } else {
+            System.setProperty(CoreOptions.APP_HOME.key(), previousAppHome);
+        }
         ThreadContext.unbindSubject();
         ThreadContext.unbindSecurityManager();
         if (securityManager != null) {
@@ -186,22 +206,20 @@ class FlinkArtifactPermissionMvcTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/zip"))
             .andReturn();
-        List<String> names = new ArrayList<>();
+        Path archive = Files.write(
+            temporary.resolve("app-101-dependencies.zip"), result.getResponse().getContentAsByteArray());
         try (
-            ZipInputStream zip =
-                new ZipInputStream(new ByteArrayInputStream(result.getResponse().getContentAsByteArray()))) {
-            ZipEntry entry;
-            while ((entry = zip.getNextEntry()) != null) {
-                names.add(entry.getName());
-                if (entry.getName().endsWith("job.jar")) {
-                    assertThat(new String(zip.readAllBytes(), StandardCharsets.UTF_8)).isEqualTo("job");
-                } else if (entry.getName().endsWith("connector.jar")) {
-                    assertThat(new String(zip.readAllBytes(), StandardCharsets.UTF_8)).isEqualTo("connector");
-                }
-            }
+            FileSystem zip = FileSystems.newFileSystem(URI.create("jar:" + archive.toUri()), Map.of());
+            Stream<Path> roots = Files.list(zip.getPath("/"));
+            Stream<Path> entries = Files.walk(zip.getPath("/app-101-dependencies"))) {
+            assertThat(roots.map(Path::toString)).containsExactly("/app-101-dependencies");
+            assertThat(entries.filter(Files::isRegularFile).map(Path::toString))
+                .containsExactlyInAnyOrder(
+                    "/app-101-dependencies/job.jar", "/app-101-dependencies/lib/connector.jar");
+            assertThat(Files.readString(zip.getPath("/app-101-dependencies/job.jar"))).isEqualTo("job");
+            assertThat(Files.readString(zip.getPath("/app-101-dependencies/lib/connector.jar"))).isEqualTo("connector");
         }
-        assertThat(names).containsExactly("app-101-dependencies/", "app-101-dependencies/job.jar",
-            "app-101-dependencies/lib/connector.jar");
+        assertThat(consoleHome.resolve("artifact-downloads")).isEmptyDirectory();
     }
 
     @Test
@@ -294,6 +312,7 @@ class FlinkArtifactPermissionMvcTest {
             .andExpect(jsonPath("$.code").value(501))
             .andReturn();
         assertThat(result.getResponse().getHeader("Content-Disposition")).isNull();
+        assertThat(consoleHome.resolve("artifact-downloads")).isEmptyDirectory();
     }
 
     @Test

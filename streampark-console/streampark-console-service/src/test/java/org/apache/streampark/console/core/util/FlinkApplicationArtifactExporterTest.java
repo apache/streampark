@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.util;
 
+import org.apache.streampark.common.configuration.option.CoreOptions;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.fs.FsOperator;
@@ -29,7 +30,9 @@ import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.SimpleBuildResponse;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -62,6 +65,23 @@ class FlinkApplicationArtifactExporterTest {
     @TempDir
     Path temporaryDirectory;
 
+    private String previousAppHome;
+
+    @BeforeEach
+    void setConsoleHome() {
+        previousAppHome = System.getProperty(CoreOptions.APP_HOME.key());
+        System.setProperty(CoreOptions.APP_HOME.key(), temporaryDirectory.toString());
+    }
+
+    @AfterEach
+    void restoreConsoleHome() {
+        if (previousAppHome == null) {
+            System.clearProperty(CoreOptions.APP_HOME.key());
+        } else {
+            System.setProperty(CoreOptions.APP_HOME.key(), previousAppHome);
+        }
+    }
+
     @Test
     void shouldWriteArchiveWithDependencies() throws Exception {
         Path workspace = createWorkspace();
@@ -79,7 +99,6 @@ class FlinkApplicationArtifactExporterTest {
             }
             assertThat(names)
                 .containsExactly(
-                    "app-42-dependencies/",
                     "app-42-dependencies/main.jar",
                     "app-42-dependencies/lib/dep.jar");
             assertThat(
@@ -109,10 +128,12 @@ class FlinkApplicationArtifactExporterTest {
         FlinkApplication application = application(workspace);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        ShadedBuildResponse result = new ShadedBuildResponse(workspace.toString(), "main.jar");
+
         assertThatThrownBy(
             () -> FlinkApplicationArtifactExporter.write(
                 application,
-                new ShadedBuildResponse(workspace.toString(), "main.jar"),
+                result,
                 null,
                 response,
                 () -> {
@@ -138,10 +159,12 @@ class FlinkApplicationArtifactExporterTest {
         FlinkApplication application = application(workspace);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        ShadedBuildResponse result = new ShadedBuildResponse(workspace.toString(), "main.jar");
+
         assertThatThrownBy(
             () -> FlinkApplicationArtifactExporter.write(
                 application,
-                new ShadedBuildResponse(workspace.toString(), "main.jar"),
+                result,
                 null,
                 response,
                 () -> {
@@ -160,10 +183,12 @@ class FlinkApplicationArtifactExporterTest {
         FlinkApplication application = application(workspace);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        ShadedBuildResponse result = new ShadedBuildResponse(workspace.toString(), "main.jar");
+
         assertThatThrownBy(
             () -> FlinkApplicationArtifactExporter.write(
                 application,
-                new ShadedBuildResponse(workspace.toString(), "main.jar"),
+                result,
                 null,
                 response,
                 () -> {
@@ -180,10 +205,12 @@ class FlinkApplicationArtifactExporterTest {
         FlinkApplication application = application(workspace);
         Path archive = temporaryDirectory.resolve("failed.zip");
 
+        ShadedBuildResponse result = new ShadedBuildResponse(workspace.toString(), "main.jar", false);
+
         assertThatThrownBy(
             () -> FlinkApplicationArtifactExporter.createArchive(
                 application,
-                new ShadedBuildResponse(workspace.toString(), "main.jar", false),
+                result,
                 null,
                 archive,
                 "app-42-dependencies"))
@@ -207,7 +234,7 @@ class FlinkApplicationArtifactExporterTest {
 
         try (ZipFile zip = new ZipFile(archive.toFile())) {
             assertThat(Collections.list(zip.entries()).stream().map(ZipEntry::getName))
-                .containsExactly("app-42-dependencies/", "app-42-dependencies/main.jar");
+                .containsExactly("app-42-dependencies/main.jar");
         }
     }
 
@@ -256,7 +283,7 @@ class FlinkApplicationArtifactExporterTest {
             "app-42-dependencies");
 
         assertThat(zipNames(archive))
-            .containsExactly("app-42-dependencies/", "app-42-dependencies/main.jar");
+            .containsExactly("app-42-dependencies/main.jar");
 
         Path lib = Files.createDirectory(workspace.resolve("lib"));
         Files.writeString(lib.resolve("unrelated.jar"), "not part of the session build");
@@ -268,7 +295,7 @@ class FlinkApplicationArtifactExporterTest {
             "app-42-dependencies");
 
         assertThat(zipNames(archive))
-            .containsExactly("app-42-dependencies/", "app-42-dependencies/main.jar");
+            .containsExactly("app-42-dependencies/main.jar");
     }
 
     @Test
@@ -290,7 +317,6 @@ class FlinkApplicationArtifactExporterTest {
 
         assertThat(zipNames(archive))
             .containsExactly(
-                "app-42-dependencies/",
                 "app-42-dependencies/module.jar",
                 "app-42-dependencies/lib/dep.jar");
     }
@@ -312,7 +338,7 @@ class FlinkApplicationArtifactExporterTest {
             "app-42-dependencies");
 
         assertThat(zipNames(archive))
-            .containsExactly("app-42-dependencies/", "app-42-dependencies/module.jar");
+            .containsExactly("app-42-dependencies/module.jar");
     }
 
     @Test
@@ -334,7 +360,6 @@ class FlinkApplicationArtifactExporterTest {
 
         assertThat(zipNames(archive))
             .containsExactly(
-                "app-42-dependencies/",
                 "app-42-dependencies/main.jar",
                 "app-42-dependencies/lib/dep.jar");
     }
@@ -371,7 +396,6 @@ class FlinkApplicationArtifactExporterTest {
 
         assertThat(zipNames(archive))
             .containsExactly(
-                "app-43-dependencies/",
                 "app-43-dependencies/main.jar",
                 "app-43-dependencies/lib/dep.jar",
                 "app-43-dependencies/lib/main.jar");
@@ -384,12 +408,15 @@ class FlinkApplicationArtifactExporterTest {
         Files.writeString(outside.resolve("main.jar"), "outside");
         FlinkApplication application = application(appRoot);
 
+        ShadedBuildResponse result = new ShadedBuildResponse(outside.toString(), "main.jar");
+        Path archive = temporaryDirectory.resolve("outside.zip");
+
         assertThatThrownBy(
             () -> FlinkApplicationArtifactExporter.createArchive(
                 application,
-                new ShadedBuildResponse(outside.toString(), "main.jar"),
+                result,
                 null,
-                temporaryDirectory.resolve("outside.zip"),
+                archive,
                 "app-42-dependencies"))
                     .isInstanceOf(ApiAlertException.class);
     }
@@ -404,10 +431,12 @@ class FlinkApplicationArtifactExporterTest {
         FlinkApplication application = application(workspace);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        ShadedBuildResponse result = new ShadedBuildResponse(workspace.toString(), "main.jar");
+
         assertThatThrownBy(
             () -> FlinkApplicationArtifactExporter.write(
                 application,
-                new ShadedBuildResponse(workspace.toString(), "main.jar"),
+                result,
                 null,
                 response,
                 () -> {
@@ -447,7 +476,7 @@ class FlinkApplicationArtifactExporterTest {
             fs);
 
         assertThat(zipNames(archive))
-            .containsExactly("app-42-dependencies/", "app-42-dependencies/lib/dep.jar");
+            .containsExactly("app-42-dependencies/lib/dep.jar");
     }
 
     @Test
@@ -480,7 +509,6 @@ class FlinkApplicationArtifactExporterTest {
 
         assertThat(zipNames(archive))
             .containsExactly(
-                "app-42-dependencies/",
                 "app-42-dependencies/sample.jar",
                 "app-42-dependencies/lib/dep.jar");
     }
@@ -521,7 +549,6 @@ class FlinkApplicationArtifactExporterTest {
 
         assertThat(zipNames(archive))
             .containsExactly(
-                "app-42-dependencies/",
                 "app-42-dependencies/physical.jar",
                 "app-42-dependencies/lib/dep.jar");
     }
@@ -573,12 +600,15 @@ class FlinkApplicationArtifactExporterTest {
         when(resourceService.findByResourceName(7L, "display.jar")).thenReturn(resource);
         FlinkApplication application = apacheResourceApplication(workspace);
 
+        ShadedBuildResponse result = new ShadedBuildResponse(workspace.toString(), resultPath.toString());
+        Path archive = temporaryDirectory.resolve("resource-path.zip");
+
         assertThatThrownBy(
             () -> FlinkApplicationArtifactExporter.createArchive(
                 application,
-                new ShadedBuildResponse(workspace.toString(), resultPath.toString()),
+                result,
                 resourceService,
-                temporaryDirectory.resolve("resource-path.zip"),
+                archive,
                 "app-42-dependencies"))
                     .isInstanceOf(ApiAlertException.class);
     }
@@ -598,12 +628,15 @@ class FlinkApplicationArtifactExporterTest {
         when(resourceService.findByResourceName(7L, "display.jar")).thenReturn(resource);
         FlinkApplication application = apacheResourceApplication(workspace);
 
+        ShadedBuildResponse result = new ShadedBuildResponse(workspace.toString(), resourcePath.toString());
+        Path archive = temporaryDirectory.resolve("foreign-resource.zip");
+
         assertThatThrownBy(
             () -> FlinkApplicationArtifactExporter.createArchive(
                 application,
-                new ShadedBuildResponse(workspace.toString(), resourcePath.toString()),
+                result,
                 resourceService,
-                temporaryDirectory.resolve("foreign-resource.zip"),
+                archive,
                 "app-42-dependencies"))
                     .isInstanceOf(ApiAlertException.class);
     }
@@ -621,10 +654,12 @@ class FlinkApplicationArtifactExporterTest {
         FlinkApplication application = apacheResourceApplication(workspace);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        ShadedBuildResponse result = new ShadedBuildResponse(workspace.toString(), outside.toString());
+
         assertThatThrownBy(
             () -> FlinkApplicationArtifactExporter.write(
                 application,
-                new ShadedBuildResponse(workspace.toString(), outside.toString()),
+                result,
                 resourceService,
                 response,
                 () -> {
