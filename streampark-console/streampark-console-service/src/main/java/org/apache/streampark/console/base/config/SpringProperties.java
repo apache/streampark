@@ -29,8 +29,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -42,6 +44,9 @@ import java.util.Properties;
  * values, while each framework retains its own explicit precedence rules.
  */
 public final class SpringProperties {
+
+    private static final String BLOCK_BORDER =
+        "********************************************************************";
 
     /** Returns Spring Boot defaults combined with the external StreamPark configuration file. */
     public static Properties get() {
@@ -66,8 +71,9 @@ public final class SpringProperties {
     private static void dataSourceConfig(Properties userConfig, Properties springConfig) {
         String dialect = userConfig.getProperty("datasource.dialect", "");
         if (StringUtils.isBlank(dialect)) {
-            throw new ExceptionInInitializerError(
-                "datasource.dialect is required, please check config.yaml");
+            throw failFast(
+                new ExceptionInInitializerError(
+                    "datasource.dialect is required, please check config.yaml"));
         }
         switch (dialect.toLowerCase()) {
             case "mysql":
@@ -79,9 +85,10 @@ public final class SpringProperties {
                         Class.forName("com.mysql.jdbc.Driver");
                         springConfig.put("spring.datasource.driver-class-name", "com.mysql.jdbc.Driver");
                     } catch (ClassNotFoundException e1) {
-                        throw new ExceptionInInitializerError(
-                            "datasource.dialect is mysql, \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" classes not found, Please ensure that the MySQL Connector/J can be found under $streampark/lib,\n"
-                                + "Notice: The MySQL Connector/J is incompatible with the Apache 2.0 license, You need to download and put it into $streampark/lib");
+                        throw failFast(
+                            new ExceptionInInitializerError(
+                                "datasource.dialect is mysql, \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" classes not found, Please ensure that the MySQL Connector/J can be found under $streampark/lib,\n"
+                                    + "Notice: The MySQL Connector/J is incompatible with the Apache 2.0 license, You need to download and put it into $streampark/lib"));
                     }
                 }
                 break;
@@ -122,7 +129,9 @@ public final class SpringProperties {
                 springConfig.put("spring.h2.console.settings.trace", true);
                 break;
             default:
-                throw new UnsupportedOperationException("Unsupported datasource dialect: " + dialect);
+                throw failFast(
+                    new UnsupportedOperationException(
+                        "Unsupported datasource dialect: " + dialect));
         }
     }
 
@@ -146,19 +155,71 @@ public final class SpringProperties {
     private static Configuration getUserConfig() {
         String appHome = WebUtils.getAppHome();
         if (StringUtils.isBlank(appHome)) {
-            throw new ExceptionInInitializerError(
-                String.format(
-                    "[StreamPark] The system initialization check failed. If started local for development and debugging,"
-                        + " please ensure the -D%s parameter is clearly specified,"
-                        + " more detail: https://streampark.apache.org/docs/development/development/",
-                    CoreOptions.APP_HOME.key()));
+            throw failFast(
+                new ExceptionInInitializerError(
+                    String.format(
+                        "[StreamPark] The system initialization check failed. If started local for development and debugging,"
+                            + " please ensure the -D%s parameter is clearly specified,"
+                            + " more detail: https://streampark.apache.org/docs/development/development/",
+                        CoreOptions.APP_HOME.key())));
         }
         File file = new File(appHome, "conf/config.yaml");
         if (file.exists() && file.isFile()) {
             return ConfigurationParser.parse(Path.of(file.getAbsolutePath()));
         } else {
-            throw new ExceptionInInitializerError(file.getAbsolutePath() + " not found, please check.");
+            throw failFast(
+                new ExceptionInInitializerError(
+                    file.getAbsolutePath() + " not found, please check."));
         }
+    }
+
+    /**
+     * Prints a framed error block to stderr for a fatal startup error.
+     *
+     * <p>Every caller runs inside {@link #get()}, which is invoked from {@code
+     * StreamParkConsoleBootstrap#main} before the Spring logging system is initialized:
+     * regular loggers cannot be used yet, so an error that is only logged would be silently
+     * lost. Throwing alone is not enough either, because the standard startup script starts
+     * the console with nohup and redirects both stdout and stderr to logs/streampark.out, so
+     * an operator watching the terminal sees nothing when the exception is thrown. The framed
+     * block makes the failure and its cause visible wherever stderr lands: on the foreground
+     * console, or at the very top of logs/streampark.out ahead of the raw stack trace on a
+     * background start.
+     */
+    private static void printStartupFailure(String message) {
+        List<String> lines = new ArrayList<>();
+        lines.add(BLOCK_BORDER);
+        lines.add("* [StreamPark startup failure]");
+        lines.add("*");
+        for (String line : message.split("\n")) {
+            lines.add("*   " + line);
+        }
+        lines.add("*");
+        lines.add("*   The console cannot start until this problem is fixed.");
+        lines.add("*   The full stack trace follows this message.");
+        lines.add(BLOCK_BORDER);
+        // NOSONAR is required on the next line: no logger exists at this point because the
+        // logging system initializes later, inside SpringApplicationBuilder.run(), so stderr
+        // is the only channel that reaches the foreground console and logs/streampark.out.
+        System.err.println(String.join(System.lineSeparator(), lines)); // NOSONAR
+    }
+
+    /**
+     * Prints the framed startup failure block for the given error and rethrows it, so every
+     * fatal configuration error is visible before the application exits.
+     */
+    private static Error failFast(Error error) {
+        printStartupFailure(String.valueOf(error.getMessage()));
+        throw error;
+    }
+
+    /**
+     * Prints the framed startup failure block for the given error and rethrows it, so every
+     * fatal configuration error is visible before the application exits.
+     */
+    private static RuntimeException failFast(RuntimeException error) {
+        printStartupFailure(String.valueOf(error.getMessage()));
+        throw error;
     }
 
     private static Properties getSpringConfig() {
